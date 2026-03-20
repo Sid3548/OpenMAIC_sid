@@ -22,10 +22,21 @@ import {
   getASRSupportedLanguages,
 } from '@/lib/audio/constants';
 import type { TTSProviderId, ASRProviderId } from '@/lib/audio/types';
-import { Volume2, Mic, MicOff, Loader2, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
+import {
+  Volume2,
+  Mic,
+  MicOff,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  Eye,
+  EyeOff,
+  RefreshCw,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import azureVoicesData from '@/lib/audio/azure.json';
 import { createLogger } from '@/lib/logger';
+import { getEffectiveTTSApiKey } from '@/lib/utils/model-config';
 import {
   ensureVoicesLoaded,
   isBrowserTTSAbortError,
@@ -158,6 +169,9 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
   const [ttsTestMessage, setTTSTestMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [asrResult, setASRResult] = useState('');
+  const [dynamicVoices, setDynamicVoices] = useState<{ id: string; name: string }[] | null>(null);
+  const [fetchingVoices, setFetchingVoices] = useState(false);
+  const [fetchVoicesError, setFetchVoicesError] = useState(false);
   const [asrTestStatus, setASRTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>(
     'idle',
   );
@@ -184,6 +198,8 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     if (ttsProviderId !== 'azure-tts') {
       setSelectedLocale('all');
     }
+    setDynamicVoices(null);
+    setFetchVoicesError(false);
   }
 
   const stopTTSPreview = useCallback((resetState = true) => {
@@ -287,6 +303,40 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     setASRTestMessage('');
     setASRResult('');
   }
+
+  // Fetch available voices from provider API
+  const canFetchVoices =
+    ttsProviderId !== 'browser-native-tts' && ttsProviderId !== 'azure-tts';
+
+  const handleFetchVoices = async () => {
+    setFetchingVoices(true);
+    setFetchVoicesError(false);
+    try {
+      const body: Record<string, string> = { providerId: ttsProviderId };
+      const apiKeyValue = ttsProvidersConfig[ttsProviderId]?.apiKey;
+      if (apiKeyValue?.trim()) body.apiKey = apiKeyValue;
+      const baseUrlValue = ttsProvidersConfig[ttsProviderId]?.baseUrl;
+      if (baseUrlValue?.trim()) body.baseUrl = baseUrlValue;
+
+      const res = await fetch('/api/tts/voices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.voices) && data.voices.length > 0) {
+        setDynamicVoices(data.voices);
+        const currentExists = data.voices.some((v: { id: string }) => v.id === ttsVoice);
+        if (!currentExists) handleTTSVoiceChange(data.voices[0].id);
+      } else {
+        setFetchVoicesError(true);
+      }
+    } catch {
+      setFetchVoicesError(true);
+    } finally {
+      setFetchingVoices(false);
+    }
+  };
 
   // Test TTS
   const handleTestTTS = async () => {
@@ -784,7 +834,38 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
             )}
 
             <div className="space-y-2">
-              <Label className="text-sm">{t('settings.ttsVoice')}</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">{t('settings.ttsVoice')}</Label>
+                {canFetchVoices && (
+                  <button
+                    type="button"
+                    onClick={handleFetchVoices}
+                    disabled={fetchingVoices || !getEffectiveTTSApiKey(ttsProviderId)}
+                    title={t('settings.fetchVoices')}
+                    className={cn(
+                      'flex items-center gap-1 text-xs transition-colors disabled:opacity-40',
+                      fetchVoicesError
+                        ? 'text-red-500 hover:text-red-600'
+                        : dynamicVoices
+                          ? 'text-green-600 hover:text-green-700 dark:text-green-500'
+                          : 'text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {fetchingVoices ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3 w-3" />
+                    )}
+                    {fetchingVoices
+                      ? t('settings.fetchingVoices')
+                      : fetchVoicesError
+                        ? t('settings.fetchVoicesFailed')
+                        : dynamicVoices
+                          ? t('settings.voicesFetched')
+                          : t('settings.fetchVoices')}
+                  </button>
+                )}
+              </div>
               <Select value={ttsVoice} onValueChange={handleTTSVoiceChange}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -793,12 +874,10 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                   {(() => {
                     // For Azure TTS, use JSON data
                     if (ttsProviderId === 'azure-tts') {
-                      // Filter voices by selected locale
                       const filteredVoices =
                         selectedLocale === 'all'
                           ? azureVoices
                           : azureVoices.filter((voice) => voice.Locale === selectedLocale);
-
                       return filteredVoices.map((voice) => (
                         <SelectItem key={voice.ShortName} value={voice.ShortName}>
                           {voice.LocalName} ({voice.DisplayName})
@@ -806,12 +885,15 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                       ));
                     }
 
-                    // For other providers, use static voices
-                    const allVoices = getTTSVoices(ttsProviderId);
+                    // Use fetched voices if available, otherwise fall back to static list
+                    const allVoices = dynamicVoices ?? getTTSVoices(ttsProviderId);
                     return allVoices.map((voice) => (
                       <SelectItem key={voice.id} value={voice.id}>
                         {voice.name}
-                        {voice.description && ` - ${t(`settings.${voice.description}`)}`}
+                        {'description' in voice &&
+                          typeof voice.description === 'string' &&
+                          voice.description &&
+                          ` - ${t(`settings.${voice.description}`)}`}
                       </SelectItem>
                     ));
                   })()}
