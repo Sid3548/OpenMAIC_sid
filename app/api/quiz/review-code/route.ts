@@ -3,6 +3,7 @@ import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { buildCodeReviewPrompt } from '@/lib/quiz/prompts';
 import { callQuizLLM } from '@/lib/quiz/llm';
 import type { CodeReviewResult } from '@/lib/quiz/types';
+import { parseFirstJsonObject } from '@/lib/server/json-parser';
 
 function normalizeReviewResult(input: Partial<CodeReviewResult>): CodeReviewResult {
   const score = Number.isFinite(input.score) ? Math.round(Number(input.score)) : 0;
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
       buildCodeReviewPrompt(body),
       'quiz-review-code',
     );
-    const parsed = JSON.parse(result.text.trim().match(/\{[\s\S]*\}/)?.[0] || '{}') as Partial<CodeReviewResult>;
+    const parsed = parseFirstJsonObject<Partial<CodeReviewResult>>(result.text);
     return apiSuccess(normalizeReviewResult(parsed));
   } catch (error) {
     return apiError(
