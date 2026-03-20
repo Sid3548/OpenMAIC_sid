@@ -168,7 +168,12 @@ async function generateOpenAITTS(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: response.statusText }));
-    throw new Error(`OpenAI TTS API error: ${error.error?.message || response.statusText}`);
+    const msg = error.error?.message || response.statusText;
+    const hint =
+      response.status === 403 || (typeof msg === 'string' && msg.includes('does not have access'))
+        ? ` — check that your OpenAI project has TTS models enabled (platform.openai.com → Project → Model access)`
+        : '';
+    throw new Error(`OpenAI TTS API error: ${msg}${hint}`);
   }
 
   const arrayBuffer = await response.arrayBuffer();
