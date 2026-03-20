@@ -87,14 +87,22 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
           }),
         );
         setCodeReviews(reviews);
-        const weakAreas = session.problems.map((problem) => problem.topic);
+        const passed = reviews.filter((r) => r.review.verdict === 'pass').length;
+        const total = session.problems.length;
+        const percentage = total ? Math.round((passed / total) * 100) : 0;
+        const weakAreas = session.problems
+          .filter((p) => {
+            const r = reviews.find((rv) => rv.id === p.id);
+            return !r || r.review.verdict === 'fail' || (r.review.score ?? 10) < 5;
+          })
+          .map((p) => p.topic);
         saveQuizHistoryItem({
           id: crypto.randomUUID(),
           track: session.track,
           title: session.title,
-          score: reviews.length,
-          total: session.problems.length,
-          percentage: 100,
+          score: passed,
+          total,
+          percentage,
           weakAreas,
           createdAt: Date.now(),
           metadata: { language: session.language, difficulty: session.difficulty },
@@ -183,7 +191,12 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
       ) : null}
 
       {submitted && session.track === 'coding-examination' ? (
-        <QuizResults title="Coding Examination" score={codeReviews.length} total={session.problems.length} debrief={debrief}>
+        <QuizResults
+          title="Coding Examination"
+          score={codeReviews.filter((r) => r.review.verdict === 'pass').length}
+          total={session.problems.length}
+          debrief={debrief}
+        >
           <CodeReviewPanel reviews={codeReviews} />
         </QuizResults>
       ) : null}
