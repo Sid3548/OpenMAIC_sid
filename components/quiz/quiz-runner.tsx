@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { CodeReviewResult, CodingQuizSession, PlacementQuizSession } from '@/lib/quiz/types';
 import { QuizTimer } from './quiz-timer';
-import { scorePlacementQuiz, estimatePercentile } from '@/lib/quiz/scoring';
+import { scoreCodingQuiz, scorePlacementQuiz, estimatePercentile } from '@/lib/quiz/scoring';
 import { saveQuizHistoryItem } from '@/lib/quiz/storage';
 import { CodeProblemCard } from './code-problem-card';
 import { QuizResults } from './quiz-results';
@@ -39,6 +39,11 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
     if (session.track !== 'placement-aptitude') return null;
     return scorePlacementQuiz(session.questions, placementAnswers);
   }, [placementAnswers, session]);
+
+  const codingScore = useMemo(() => {
+    if (session.track !== 'coding-examination') return null;
+    return scoreCodingQuiz(session.problems, codeReviews);
+  }, [codeReviews, session]);
 
   const handleSubmit = async () => {
     if (submitted) return;
@@ -87,21 +92,26 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
           }),
         );
         setCodeReviews(reviews);
-        const weakAreas = session.problems.map((problem) => problem.topic);
+        const codingScore = scoreCodingQuiz(session.problems, reviews);
         saveQuizHistoryItem({
           id: crypto.randomUUID(),
           track: session.track,
           title: session.title,
-          score: reviews.length,
+          score: codingScore.score,
           total: session.problems.length,
-          percentage: 100,
-          weakAreas,
+          percentage: codingScore.percentage,
+          weakAreas: codingScore.weakAreas,
           createdAt: Date.now(),
           metadata: { language: session.language, difficulty: session.difficulty },
         });
         setDebrief({
-          summary: 'AI review completed. Focus on writing cleaner edge-case handling, stronger complexity explanations, and a more systematic optimal approach.',
-          percentileEstimate: 'Interview-style qualitative review',
+          summary:
+            codingScore.averageReviewScore >= 80
+              ? 'Strong coding round. Keep refining communication and edge-case explanation quality.'
+              : codingScore.averageReviewScore >= 60
+                ? 'Mixed performance. You showed some correct direction, but several solutions were incomplete or not interview-ready.'
+                : 'Needs work. Several submissions were incomplete, incorrect, or too skeletal to earn credit.',
+          percentileEstimate: `Average review score: ${codingScore.averageReviewScore}/100`,
         });
       }
       setSubmitted(true);
@@ -182,8 +192,8 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
         </QuizResults>
       ) : null}
 
-      {submitted && session.track === 'coding-examination' ? (
-        <QuizResults title="Coding Examination" score={codeReviews.length} total={session.problems.length} debrief={debrief}>
+      {submitted && session.track === 'coding-examination' && codingScore ? (
+        <QuizResults title="Coding Examination" score={codingScore.score} total={session.problems.length} debrief={debrief}>
           <CodeReviewPanel reviews={codeReviews} />
         </QuizResults>
       ) : null}
