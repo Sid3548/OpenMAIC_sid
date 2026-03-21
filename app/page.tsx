@@ -489,7 +489,7 @@ export default function LandingPage() {
         <div className="landing-payment-note">
           <span style={{ fontSize: 20 }}>🔒</span>
           <div>
-            <strong>Secure payments via Stripe.</strong> Cancel anytime. No credit card required
+            <strong>Secure payments via Razorpay.</strong> Cancel anytime. No credit card required
             for the self-hosted version. Credits roll over within the same billing month.
           </div>
         </div>
