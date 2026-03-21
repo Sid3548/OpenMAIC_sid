@@ -8,14 +8,20 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // ── Pricing table (USD per unit) ────────────────────────────────────────────
-// Sources: provider docs as of 2025. Update as pricing changes.
+// Sources: provider docs as of 2026. Update as pricing changes.
 export const PROVIDER_PRICING = {
   // LLM — per 1M tokens
+  'google:gemini-2.5-pro':          { input: 1.25,   output: 10.00 }, // Best quality — recommended
+  'google:gemini-2.5-flash':        { input: 0.15,   output: 0.60  }, // Fast + cheap
+  'google:gemini-2.5-flash-lite':   { input: 0.075,  output: 0.30  }, // Ultra-cheap
   'google:gemini-2.0-flash':        { input: 0.075,  output: 0.30  },
   'google:gemini-2.5-flash-preview':{ input: 0.15,   output: 0.60  },
   'google:gemini-1.5-pro':          { input: 1.25,   output: 5.00  },
   'openai:gpt-4o':                  { input: 2.50,   output: 10.00 },
   'openai:gpt-4o-mini':             { input: 0.15,   output: 0.60  },
+  'anthropic:claude-sonnet-4-6':    { input: 3.00,   output: 15.00 }, // Claude latest
+  'anthropic:claude-sonnet-4-5':    { input: 3.00,   output: 15.00 },
+  'anthropic:claude-haiku-4-5':     { input: 0.80,   output: 4.00  },
   'anthropic:claude-3-5-haiku':     { input: 0.80,   output: 4.00  },
   'anthropic:claude-3-5-sonnet':    { input: 3.00,   output: 15.00 },
   'deepseek:deepseek-chat':         { input: 0.014,  output: 0.28  },
