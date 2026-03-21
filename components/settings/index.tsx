@@ -26,6 +26,7 @@ import {
   Search,
   Volume2,
   Mic,
+  DollarSign,
 } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useSettingsStore } from '@/lib/store/settings';
@@ -55,6 +56,7 @@ import { WebSearchSettings } from './web-search-settings';
 import { WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
 import type { WebSearchProviderId } from '@/lib/web-search/types';
 import { GeneralSettings } from './general-settings';
+import { CostMonitor } from './cost-monitor';
 import { ModelEditDialog } from './model-edit-dialog';
 import { AddProviderDialog, type NewProviderData } from './add-provider-dialog';
 import type { SettingsSection, EditingModel } from '@/lib/types/settings';
@@ -750,6 +752,19 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
             </button>
 
             <button
+              onClick={() => setActiveSection('cost-monitor')}
+              className={cn(
+                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                activeSection === 'cost-monitor'
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'hover:bg-muted',
+              )}
+            >
+              <DollarSign className="h-4 w-4 shrink-0" />
+              <span className="truncate">Cost Monitor</span>
+            </button>
+
+            <button
               onClick={() => setActiveSection('general')}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
@@ -982,6 +997,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               )}
               {activeSection === 'tts' && <TTSSettings selectedProviderId={ttsProviderId} />}
               {activeSection === 'asr' && <ASRSettings selectedProviderId={asrProviderId} />}
+              {activeSection === 'cost-monitor' && <CostMonitor />}
             </div>
 
             {/* Footer */}
