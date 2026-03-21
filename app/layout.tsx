@@ -32,7 +32,7 @@ const dmMono = DM_Mono({
   display: 'swap',
 });
 
-const siteUrl = 'https://openmaic.sid.dev';
+const siteUrl = 'https://openclassroom.online';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
