@@ -1,1188 +1,552 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
-import {
-  ArrowUp,
-  Check,
-  ChevronDown,
-  Clock,
-  Copy,
-  ImagePlus,
-  Pencil,
-  Trash2,
-  Settings,
-  Sun,
-  Moon,
-  Monitor,
-  BotOff,
-  ChevronUp,
-} from 'lucide-react';
-import { useI18n } from '@/lib/hooks/use-i18n';
-import { detectPreferredLocale, isSupportedLocale } from '@/lib/utils/language';
-import { createLogger } from '@/lib/logger';
-import { Button } from '@/components/ui/button';
-import { Textarea as UITextarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { SettingsDialog } from '@/components/settings';
-import { GenerationToolbar } from '@/components/generation/generation-toolbar';
-import { AgentBar } from '@/components/agent/agent-bar';
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useTheme } from '@/lib/hooks/use-theme';
-import { nanoid } from 'nanoid';
-import { storePdfBlob } from '@/lib/utils/image-storage';
-import type { UserRequirements } from '@/lib/types/generation';
-import { useSettingsStore } from '@/lib/store/settings';
-import { useUserProfileStore, AVATAR_OPTIONS } from '@/lib/store/user-profile';
-import {
-  StageListItem,
-  listStages,
-  deleteStageData,
-  getFirstSlideByStages,
-} from '@/lib/utils/stage-storage';
-import { ThumbnailSlide } from '@/components/slide-renderer/components/ThumbnailSlide';
-import type { Slide } from '@/lib/types/slides';
-import { useMediaGenerationStore } from '@/lib/store/media-generation';
-import { toast } from 'sonner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useDraftCache } from '@/lib/hooks/use-draft-cache';
-import { SpeechButton } from '@/components/audio/speech-button';
+import { Sun, Moon } from 'lucide-react';
 
-const log = createLogger('Home');
-
-const WEB_SEARCH_STORAGE_KEY = 'webSearchEnabled';
-const LANGUAGE_STORAGE_KEY = 'generationLanguage';
-const RECENT_OPEN_STORAGE_KEY = 'recentClassroomsOpen';
-
-interface FormState {
-  pdfFile: File | null;
-  requirement: string;
-  language: 'zh-CN' | 'en-US' | 'hi-IN';
-  webSearch: boolean;
-}
-
-const initialFormState: FormState = {
-  pdfFile: null,
-  requirement: '',
-  language: 'zh-CN',
-  webSearch: false,
-};
-
-function HomePage() {
-  const { t, locale, setLocale } = useI18n();
-  const { theme, setTheme } = useTheme();
-  const router = useRouter();
-  const [form, setForm] = useState<FormState>(initialFormState);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsSection, setSettingsSection] = useState<
-    import('@/lib/types/settings').SettingsSection | undefined
-  >(undefined);
-
-  // Draft cache for requirement text
-  const { cachedValue: cachedRequirement, updateCache: updateRequirementCache } =
-    useDraftCache<string>({ key: 'requirementDraft' });
-
-  // Model setup state
-  const currentModelId = useSettingsStore((s) => s.modelId);
-  const [storeHydrated, setStoreHydrated] = useState(false);
-  const [recentOpen, setRecentOpen] = useState(true);
-
-  // Hydrate client-only state after mount (avoids SSR mismatch)
-  /* eslint-disable react-hooks/set-state-in-effect -- Hydration from localStorage must happen in effect */
-  useEffect(() => {
-    setStoreHydrated(true);
-    try {
-      const saved = localStorage.getItem(RECENT_OPEN_STORAGE_KEY);
-      if (saved !== null) setRecentOpen(saved !== 'false');
-    } catch {
-      /* localStorage unavailable */
-    }
-    try {
-      const savedWebSearch = localStorage.getItem(WEB_SEARCH_STORAGE_KEY);
-      const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-      const updates: Partial<FormState> = {};
-      if (savedWebSearch === 'true') updates.webSearch = true;
-      if (isSupportedLocale(savedLanguage)) {
-        updates.language = savedLanguage;
-      } else {
-        updates.language = detectPreferredLocale(navigator.language);
-      }
-      if (Object.keys(updates).length > 0) {
-        setForm((prev) => ({ ...prev, ...updates }));
-      }
-    } catch {
-      /* localStorage unavailable */
-    }
-  }, []);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  // Restore requirement draft from cache (derived state pattern — no effect needed)
-  const [prevCachedRequirement, setPrevCachedRequirement] = useState(cachedRequirement);
-  if (cachedRequirement !== prevCachedRequirement) {
-    setPrevCachedRequirement(cachedRequirement);
-    if (cachedRequirement) {
-      setForm((prev) => ({ ...prev, requirement: cachedRequirement }));
-    }
+// Razorpay global type (loaded via CDN script)
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: new (options: Record<string, any>) => { open(): void };
   }
-
-  const needsSetup = storeHydrated && !currentModelId;
-  const [languageOpen, setLanguageOpen] = useState(false);
-  const [themeOpen, setThemeOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [classrooms, setClassrooms] = useState<StageListItem[]>([]);
-  const [thumbnails, setThumbnails] = useState<Record<string, Slide>>({});
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    if (!languageOpen && !themeOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
-        setLanguageOpen(false);
-        setThemeOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [languageOpen, themeOpen]);
-
-  const loadClassrooms = async () => {
-    try {
-      const list = await listStages();
-      setClassrooms(list);
-      // Load first slide thumbnails
-      if (list.length > 0) {
-        const slides = await getFirstSlideByStages(list.map((c) => c.id));
-        setThumbnails(slides);
-      }
-    } catch (err) {
-      log.error('Failed to load classrooms:', err);
-    }
-  };
-
-  useEffect(() => {
-    // Clear stale media store to prevent cross-course thumbnail contamination.
-    // The store may hold tasks from a previously visited classroom whose elementIds
-    // (gen_img_1, etc.) collide with other courses' placeholders.
-    useMediaGenerationStore.getState().revokeObjectUrls();
-    useMediaGenerationStore.setState({ tasks: {} });
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Store hydration on mount
-    loadClassrooms();
-  }, []);
-
-  const handleDelete = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPendingDeleteId(id);
-  };
-
-  const confirmDelete = async (id: string) => {
-    setPendingDeleteId(null);
-    try {
-      await deleteStageData(id);
-      await loadClassrooms();
-    } catch (err) {
-      log.error('Failed to delete classroom:', err);
-      toast.error('Failed to delete classroom');
-    }
-  };
-
-  const updateForm = <K extends keyof FormState>(field: K, value: FormState[K]) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    try {
-      if (field === 'webSearch') localStorage.setItem(WEB_SEARCH_STORAGE_KEY, String(value));
-      if (field === 'language') localStorage.setItem(LANGUAGE_STORAGE_KEY, String(value));
-      if (field === 'requirement') updateRequirementCache(value as string);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const showSetupToast = (icon: React.ReactNode, title: string, desc: string) => {
-    toast.custom(
-      (id) => (
-        <div
-          className="w-[356px] rounded-xl border border-amber-200/60 dark:border-amber-800/40 bg-gradient-to-r from-amber-50 via-white to-amber-50 dark:from-amber-950/60 dark:via-slate-900 dark:to-amber-950/60 shadow-lg shadow-amber-500/8 dark:shadow-amber-900/20 p-4 flex items-start gap-3 cursor-pointer"
-          onClick={() => {
-            toast.dismiss(id);
-            setSettingsOpen(true);
-          }}
-        >
-          <div className="shrink-0 mt-0.5 size-9 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center ring-1 ring-amber-200/50 dark:ring-amber-800/30">
-            {icon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 leading-tight">
-              {title}
-            </p>
-            <p className="text-xs text-amber-700/80 dark:text-amber-400/70 mt-0.5 leading-relaxed">
-              {desc}
-            </p>
-          </div>
-          <div className="shrink-0 mt-1 text-[10px] font-medium text-amber-500 dark:text-amber-500/70 tracking-wide">
-            <Settings className="size-3.5 animate-[spin_3s_linear_infinite]" />
-          </div>
-        </div>
-      ),
-      { duration: 4000 },
-    );
-  };
-
-  const handleGenerate = async () => {
-    // Validate setup before proceeding
-    if (!currentModelId) {
-      showSetupToast(
-        <BotOff className="size-4.5 text-amber-600 dark:text-amber-400" />,
-        t('settings.modelNotConfigured'),
-        t('settings.setupNeeded'),
-      );
-      setSettingsOpen(true);
-      return;
-    }
-
-    if (!form.requirement.trim()) {
-      setError(t('upload.requirementRequired'));
-      return;
-    }
-
-    setError(null);
-
-    try {
-      const userProfile = useUserProfileStore.getState();
-      const requirements: UserRequirements = {
-        requirement: form.requirement,
-        language: form.language,
-        userNickname: userProfile.nickname || undefined,
-        userBio: userProfile.bio || undefined,
-        webSearch: form.webSearch || undefined,
-      };
-
-      let pdfStorageKey: string | undefined;
-      let pdfFileName: string | undefined;
-      let pdfProviderId: string | undefined;
-      let pdfProviderConfig: { apiKey?: string; baseUrl?: string } | undefined;
-
-      if (form.pdfFile) {
-        pdfStorageKey = await storePdfBlob(form.pdfFile);
-        pdfFileName = form.pdfFile.name;
-
-        const settings = useSettingsStore.getState();
-        pdfProviderId = settings.pdfProviderId;
-        const providerCfg = settings.pdfProvidersConfig?.[settings.pdfProviderId];
-        if (providerCfg) {
-          pdfProviderConfig = {
-            apiKey: providerCfg.apiKey,
-            baseUrl: providerCfg.baseUrl,
-          };
-        }
-      }
-
-      const sessionState = {
-        sessionId: nanoid(),
-        requirements,
-        pdfText: '',
-        pdfImages: [],
-        imageStorageIds: [],
-        pdfStorageKey,
-        pdfFileName,
-        pdfProviderId,
-        pdfProviderConfig,
-        sceneOutlines: null,
-        currentStep: 'generating' as const,
-      };
-      sessionStorage.setItem('generationSession', JSON.stringify(sessionState));
-
-      router.push('/generation-preview');
-    } catch (err) {
-      log.error('Error preparing generation:', err);
-      setError(err instanceof Error ? err.message : t('upload.generateFailed'));
-    }
-  };
-
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return t('classroom.today');
-    if (diffDays === 1) return t('classroom.yesterday');
-    if (diffDays < 7) return `${diffDays} ${t('classroom.daysAgo')}`;
-    return date.toLocaleDateString();
-  };
-
-  const canGenerate = !!form.requirement.trim();
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault();
-      if (canGenerate) handleGenerate();
-    }
-  };
-
-  return (
-    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-sky-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden">
-      {/* ═══ Top-right pill (unchanged) ═══ */}
-      <div
-        ref={toolbarRef}
-        className="fixed top-4 right-4 z-50 flex items-center gap-1 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md px-2 py-1.5 rounded-full border border-gray-100/50 dark:border-gray-700/50 shadow-sm"
-      >
-        {/* Language Selector */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setLanguageOpen(!languageOpen);
-              setThemeOpen(false);
-            }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all"
-          >
-              {locale === 'zh-CN' ? 'CN' : locale === 'hi-IN' ? 'HI' : 'EN'}
-          </button>
-          {languageOpen && (
-            <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[120px]">
-              <button
-                onClick={() => {
-                  setLocale('zh-CN');
-                  setLanguageOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
-                  locale === 'zh-CN' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
-                )}
-              >
-                简体中文
-              </button>
-              <button
-                onClick={() => {
-                  setLocale('hi-IN');
-                  setLanguageOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
-                  locale === 'hi-IN' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
-                )}
-              >
-                हिन्दी
-              </button>
-              <button
-                onClick={() => {
-                  setLocale('en-US');
-                  setLanguageOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
-                  locale === 'en-US' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
-                )}
-              >
-                English
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
-
-        {/* Theme Selector */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setThemeOpen(!themeOpen);
-              setLanguageOpen(false);
-            }}
-            className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all"
-          >
-            {theme === 'light' && <Sun className="w-4 h-4" />}
-            {theme === 'dark' && <Moon className="w-4 h-4" />}
-            {theme === 'system' && <Monitor className="w-4 h-4" />}
-          </button>
-          {themeOpen && (
-            <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px]">
-              <button
-                onClick={() => {
-                  setTheme('light');
-                  setThemeOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
-                  theme === 'light' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
-                )}
-              >
-                <Sun className="w-4 h-4" />
-                {t('settings.themeOptions.light')}
-              </button>
-              <button
-                onClick={() => {
-                  setTheme('dark');
-                  setThemeOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
-                  theme === 'dark' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
-                )}
-              >
-                <Moon className="w-4 h-4" />
-                {t('settings.themeOptions.dark')}
-              </button>
-              <button
-                onClick={() => {
-                  setTheme('system');
-                  setThemeOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
-                  theme === 'system' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
-                )}
-              >
-                <Monitor className="w-4 h-4" />
-                {t('settings.themeOptions.system')}
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
-
-        {/* Settings Button */}
-        <div className="relative">
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className={cn(
-              'p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group',
-              needsSetup && 'animate-setup-glow',
-            )}
-          >
-            <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
-          </button>
-          {needsSetup && (
-            <>
-              <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
-                <span className="animate-setup-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500" />
-              </span>
-              <span className="animate-setup-float absolute top-full mt-2 right-0 whitespace-nowrap text-[11px] font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/50 px-2 py-0.5 rounded-full shadow-sm pointer-events-none">
-                {t('settings.setupNeeded')}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-      <SettingsDialog
-        open={settingsOpen}
-        onOpenChange={(open) => {
-          setSettingsOpen(open);
-          if (!open) setSettingsSection(undefined);
-        }}
-        initialSection={settingsSection}
-      />
-
-      {/* ═══ Background Decor ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute -top-20 left-1/3 w-[500px] h-[500px] bg-sky-400/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '5s' }}
-        />
-        <div
-          className="absolute bottom-10 right-1/4 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '7s' }}
-        />
-        <div
-          className="absolute top-1/2 -left-10 w-64 h-64 bg-amber-400/8 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '9s' }}
-        />
-      </div>
-
-      {/* ═══ Hero section: title + input (centered, wider) ═══ */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className={cn(
-          'relative z-20 w-full max-w-[800px] flex flex-col items-center',
-          classrooms.length === 0 ? 'justify-center min-h-[calc(100dvh-8rem)]' : 'mt-[10vh]',
-        )}
-      >
-        {/* ── Logo ── */}
-        <motion.img
-          src="/logo-horizontal.png"
-          alt="OpenMAIC"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            delay: 0.1,
-            type: 'spring',
-            stiffness: 200,
-            damping: 20,
-          }}
-          className="h-12 md:h-16 mb-3 -ml-2 md:-ml-3"
-        />
-
-        {/* ── Headline ── */}
-        <motion.h1
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-2xl md:text-3xl font-bold text-center tracking-tight text-foreground/90 mb-2"
-        >
-          AI Classroom for{' '}
-          <span className="bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">
-            Every Student
-          </span>
-        </motion.h1>
-
-        {/* ── Slogan ── */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-sm text-muted-foreground/75 mb-8 text-center"
-        >
-          {t('home.slogan')}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mb-6 flex flex-wrap items-center gap-3"
-        >
-          <button
-            onClick={() => router.push('/quiz')}
-            className="rounded-full border border-sky-200 bg-sky-50/90 px-4 py-2 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:border-sky-700 dark:hover:bg-sky-900/50"
-          >
-            Quiz — Placement + Coding
-          </button>
-          <button
-            onClick={() => router.push('/interview')}
-            className="rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-900/50"
-          >
-            Interview Prep
-          </button>
-        </motion.div>
-
-        {/* ── Unified input area ── */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.35 }}
-          className="w-full"
-        >
-          <div className="w-full rounded-2xl border border-sky-100 dark:border-slate-700/60 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-sky-900/[0.04] dark:shadow-black/20 transition-shadow focus-within:shadow-2xl focus-within:shadow-sky-500/[0.10] focus-within:border-sky-200 dark:focus-within:border-sky-800/50">
-            {/* ── Greeting + Profile + Agents ── */}
-            <div className="relative z-20 flex items-start justify-between">
-              <GreetingBar />
-              <div className="pr-3 pt-3.5 shrink-0">
-                <AgentBar />
-              </div>
-            </div>
-
-            {/* Textarea */}
-            <textarea
-              ref={textareaRef}
-              placeholder={t('upload.requirementPlaceholder')}
-              className="w-full resize-none border-0 bg-transparent px-4 pt-1 pb-2 text-[13px] leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none min-h-[140px] max-h-[300px]"
-              value={form.requirement}
-              onChange={(e) => updateForm('requirement', e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={4}
-            />
-
-            {/* Toolbar row */}
-            <div className="px-3 pb-3 flex items-end gap-2">
-              <div className="flex-1 min-w-0">
-                <GenerationToolbar
-                  language={form.language}
-                  onLanguageChange={(lang) => updateForm('language', lang)}
-                  webSearch={form.webSearch}
-                  onWebSearchChange={(v) => updateForm('webSearch', v)}
-                  onSettingsOpen={(section) => {
-                    setSettingsSection(section);
-                    setSettingsOpen(true);
-                  }}
-                  pdfFile={form.pdfFile}
-                  onPdfFileChange={(f) => updateForm('pdfFile', f)}
-                  onPdfError={setError}
-                />
-              </div>
-
-              {/* Voice input */}
-              <SpeechButton
-                size="md"
-                onTranscription={(text) => {
-                  setForm((prev) => {
-                    const next = prev.requirement + (prev.requirement ? ' ' : '') + text;
-                    updateRequirementCache(next);
-                    return { ...prev, requirement: next };
-                  });
-                }}
-              />
-
-              {/* Send button */}
-              <button
-                onClick={handleGenerate}
-                disabled={!canGenerate}
-                className={cn(
-                  'shrink-0 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all px-3',
-                  canGenerate
-                    ? 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm cursor-pointer'
-                    : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
-                )}
-              >
-                <span className="text-xs font-medium">{t('toolbar.enterClassroom')}</span>
-                <ArrowUp className="size-3.5" />
-              </button>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* ── Error ── */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-3 w-full p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
-            >
-              <p className="text-sm text-destructive">{error}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* ═══ Recent classrooms — collapsible ═══ */}
-      {classrooms.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="relative z-10 mt-10 w-full max-w-6xl flex flex-col items-center"
-        >
-          {/* Trigger — divider-line with centered text */}
-          <button
-            onClick={() => {
-              const next = !recentOpen;
-              setRecentOpen(next);
-              try {
-                localStorage.setItem(RECENT_OPEN_STORAGE_KEY, String(next));
-              } catch {
-                /* ignore */
-              }
-            }}
-            className="group w-full flex items-center gap-4 py-2 cursor-pointer"
-          >
-            <div className="flex-1 h-px bg-border/40 group-hover:bg-border/70 transition-colors" />
-            <span className="shrink-0 flex items-center gap-2 text-[13px] text-muted-foreground/60 group-hover:text-foreground/70 transition-colors select-none">
-              <Clock className="size-3.5" />
-              {t('classroom.recentClassrooms')}
-              <span className="text-[11px] tabular-nums opacity-60">{classrooms.length}</span>
-              <motion.div
-                animate={{ rotate: recentOpen ? 180 : 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <ChevronDown className="size-3.5" />
-              </motion.div>
-            </span>
-            <div className="flex-1 h-px bg-border/40 group-hover:bg-border/70 transition-colors" />
-          </button>
-
-          {/* Expandable content */}
-          <AnimatePresence>
-            {recentOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                className="w-full overflow-hidden"
-              >
-                <div className="pt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8">
-                  {classrooms.map((classroom, i) => (
-                    <motion.div
-                      key={classroom.id}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        delay: i * 0.04,
-                        duration: 0.35,
-                        ease: 'easeOut',
-                      }}
-                    >
-                      <ClassroomCard
-                        classroom={classroom}
-                        slide={thumbnails[classroom.id]}
-                        formatDate={formatDate}
-                        onDelete={handleDelete}
-                        confirmingDelete={pendingDeleteId === classroom.id}
-                        onConfirmDelete={() => confirmDelete(classroom.id)}
-                        onCancelDelete={() => setPendingDeleteId(null)}
-                        onClick={() => router.push(`/classroom/${classroom.id}`)}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      )}
-
-      {/* Footer — flows with content, at the very end */}
-      <div className="mt-auto pt-12 pb-4 text-center text-xs text-muted-foreground/50 flex items-center justify-center gap-1.5">
-        <span>OpenMAIC Open Source Project</span>
-        <span className="text-muted-foreground/30">·</span>
-        <span>AI Classroom for Every Student</span>
-      </div>
-    </div>
-  );
 }
 
-// ─── Greeting Bar — avatar + "Hi, Name", click to edit in-place ────
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+// ── Step data for "How to use" section ──────────────────────────
+const HOW_TO_STEPS = [
+  {
+    num: '01',
+    title: 'Write a real prompt',
+    desc: 'Not "quantum physics." Tell it what level you\'re at and what confused you.',
+    heading: 'The prompt is everything',
+    body: 'Vague prompts create generic classrooms. The more context you give, the more specific and useful the class becomes.',
+    code: `// Bad
+quantum physics
 
-function isCustomAvatar(src: string) {
-  return src.startsWith('data:');
+// Good
+Explain quantum entanglement to someone who
+understands classical physics but has never
+done quantum mechanics. Focus on Bell's
+theorem and why it matters. Skip the math.`,
+    tip: 'Add "I\'m confused about X" at the end. The agents will specifically address your confusion in the discussion segments.',
+  },
+  {
+    num: '02',
+    title: 'Upload your own material',
+    desc: 'Paste a PDF, URL, or text. It reads your actual source, not Wikipedia.',
+    heading: 'Upload your actual source material',
+    body: 'If you\'re studying from a textbook, research paper, or lecture notes — paste the content directly. OpenMAIC builds the class around your material, not a generic summary of the topic.',
+    code: `• PDF upload (textbooks, papers, notes)
+• Paste raw text directly
+• Any public URL (articles, docs)
+• YouTube video URL (auto-transcribed)`,
+    tip: 'For dense papers, paste just the abstract + one specific section. Trying to teach a 40-page paper at once produces shallower classes.',
+  },
+  {
+    num: '03',
+    title: 'Talk back during the class',
+    desc: 'The agents go off-script when you respond. Ask "wait, explain that again."',
+    heading: 'The class responds to you',
+    body: 'Most people watch passively. That wastes 80% of what OpenMAIC can do. The agents are listening — they change course based on your responses.',
+    code: `• "Can you slow down and explain [X] again?"
+• "I don't buy that explanation — why?"
+• "Give me a real-world example of this"
+• "What's the most common mistake here?"
+• "Quiz me harder"`,
+    tip: 'If you answer a quiz question wrong, ask "explain why I was wrong." The agent gives a targeted explanation for your specific misconception.',
+  },
+  {
+    num: '04',
+    title: 'Use the roundtable for hard topics',
+    desc: 'Pick "Debate mode" to see multiple agents argue both sides of a concept.',
+    heading: 'Roundtable = best for nuanced topics',
+    body: 'For topics with multiple valid perspectives — ethical debates, design decisions, historical interpretations — pick the Roundtable mode. Multiple agents take different positions and debate. You can jump in and argue with them.',
+    code: `Best topics for roundtable:
+• React vs Vue vs Svelte
+• Was Napoleon good or bad for Europe?
+• Tabs vs spaces (genuinely, try it)
+• Should you learn Rust before C?
+• Microservices vs monolith for your use case`,
+    tip: 'In roundtable mode, take a side at the start. The agents will directly challenge your position. This forces deeper engagement.',
+  },
+  {
+    num: '05',
+    title: 'Set up your own API key',
+    desc: 'Free tier uses shared quota. Your own key = no limits, faster generation.',
+    heading: 'Bring your own API key',
+    body: 'The hosted version uses shared quota. For heavy use or if you hit rate limits, connect your own API key in Settings → Providers.',
+    code: `Recommended: Gemini 2.5 Flash
+• Best speed/quality balance
+• Set: GOOGLE_API_KEY=your_key
+
+Also works:
+• OpenAI (GPT-4o)
+• Anthropic (Claude)
+• DeepSeek (cheapest)`,
+    tip: 'Self-host via Vercel for free — click Deploy on GitHub, add your API key in env vars, done. Zero monthly cost under the Vercel free tier.',
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    q: 'Is this actually free to self-host?',
+    a: 'Yes — completely. Clone the repo, deploy to Vercel (free tier), add your own LLM API key (Google Gemini has a generous free tier), and you\'re running at zero cost. The only expense is your own API usage, which is typically a few cents per classroom generation.',
+  },
+  {
+    q: 'What LLMs does it support?',
+    a: 'OpenAI (GPT-4o, o1), Anthropic (Claude 3.5+), Google Gemini (all models), DeepSeek, and any OpenAI-compatible API. We recommend Gemini 2.5 Flash for the best speed/quality/cost balance.',
+  },
+  {
+    q: 'How is this different from ChatGPT asking me questions?',
+    a: 'OpenMAIC runs multiple agents simultaneously — a professor, a TA, and a student peer who each have distinct personas. They interact with each other, not just with you. Combined with the whiteboard, interactive simulations, and structured scene types, it\'s a fundamentally different experience from a chat interface.',
+  },
+  {
+    q: 'Can I use my own study materials?',
+    a: 'Yes — this is one of the most powerful features. Upload a PDF, paste a URL, or drop in raw text. OpenMAIC will build the entire classroom around your source material rather than pulling from general knowledge.',
+  },
+  {
+    q: "What's the AGPL license mean for me as a user?",
+    a: "If you're just using OpenMAIC to learn — absolutely nothing. The AGPL license only applies to developers who modify and redistribute the software.",
+  },
+  {
+    q: 'How long does a classroom take to generate?',
+    a: 'Typically 45–90 seconds for a full 6–8 scene classroom. Generation is async — you can leave the page and come back. The live classroom runs in real time, with agent speech and whiteboard drawing happening at natural pace.',
+  },
+];
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window.Razorpay !== 'undefined') { resolve(true); return; }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 }
 
-function GreetingBar() {
-  const { t } = useI18n();
-  const avatar = useUserProfileStore((s) => s.avatar);
-  const nickname = useUserProfileStore((s) => s.nickname);
-  const bio = useUserProfileStore((s) => s.bio);
-  const setAvatar = useUserProfileStore((s) => s.setAvatar);
-  const setNickname = useUserProfileStore((s) => s.setNickname);
-  const setBio = useUserProfileStore((s) => s.setBio);
+async function startCheckout(plan: 'pro' | 'teams', onSuccess: () => void) {
+  const loaded = await loadRazorpayScript();
+  if (!loaded) { alert('Failed to load Razorpay. Check your connection.'); return; }
 
-  const [open, setOpen] = useState(false);
-  const [editingName, setEditingName] = useState(false);
-  const [nameDraft, setNameDraft] = useState('');
-  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const res = await fetch('/api/razorpay-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan }),
+  });
+  const data = await res.json();
+  if (data.error) { alert(`Checkout error: ${data.error}`); return; }
 
-  const displayName = nickname || t('profile.defaultNickname');
-
-  // Click-outside to collapse
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-        setEditingName(false);
-        setAvatarPickerOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  const startEditName = () => {
-    setNameDraft(nickname);
-    setEditingName(true);
-    setTimeout(() => nameInputRef.current?.focus(), 50);
-  };
-
-  const commitName = () => {
-    setNickname(nameDraft.trim());
-    setEditingName(false);
-  };
-
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > MAX_AVATAR_SIZE) {
-      toast.error(t('profile.fileTooLarge'));
-      return;
-    }
-    if (!file.type.startsWith('image/')) {
-      toast.error(t('profile.invalidFileType'));
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 128;
-        canvas.height = 128;
-        const ctx = canvas.getContext('2d')!;
-        const scale = Math.max(128 / img.width, 128 / img.height);
-        const w = img.width * scale;
-        const h = img.height * scale;
-        ctx.drawImage(img, (128 - w) / 2, (128 - h) / 2, w, h);
-        setAvatar(canvas.toDataURL('image/jpeg', 0.85));
-      };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
-  return (
-    <div ref={containerRef} className="relative pl-4 pr-2 pt-3.5 pb-1 w-auto">
-      <input
-        ref={avatarInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleAvatarUpload}
-      />
-
-      {/* ── Collapsed pill (always in flow) ── */}
-      {!open && (
-        <div
-          className="flex items-center gap-2.5 cursor-pointer transition-all duration-200 group rounded-full px-2.5 py-1.5 border border-border/50 text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 active:scale-[0.97]"
-          onClick={() => setOpen(true)}
-        >
-          <div className="shrink-0 relative">
-            <div className="size-8 rounded-full overflow-hidden ring-[1.5px] ring-border/30 group-hover:ring-sky-400/60 dark:group-hover:ring-sky-400/40 transition-all duration-300">
-              <img src={avatar} alt="" className="size-full object-cover" />
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-white dark:bg-slate-800 border border-border/40 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
-              <Pencil className="size-[7px] text-muted-foreground/70" />
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="leading-none select-none flex items-center gap-1">
-                  <span>
-                    <span className="text-xs text-muted-foreground/60 group-hover:text-muted-foreground transition-colors">
-                      {t('home.greeting')}
-                    </span>
-                    <span className="text-[13px] font-semibold text-foreground/85 group-hover:text-foreground transition-colors">
-                      {displayName}
-                    </span>
-                  </span>
-                  <ChevronDown className="size-3 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors shrink-0" />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}>
-                {t('profile.editTooltip')}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-      )}
-
-      {/* ── Expanded panel (absolute, floating) ── */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.97 }}
-            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute left-4 top-3.5 z-50 w-64"
-          >
-            <div className="rounded-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-[0_1px_8px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_8px_-2px_rgba(0,0,0,0.3)] px-2.5 py-2">
-              {/* ── Row: avatar + name ── */}
-              <div
-                className="flex items-center gap-2.5 cursor-pointer transition-all duration-200"
-                onClick={() => {
-                  setOpen(false);
-                  setEditingName(false);
-                  setAvatarPickerOpen(false);
-                }}
-              >
-                {/* Avatar */}
-                <div
-                  className="shrink-0 relative cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setAvatarPickerOpen(!avatarPickerOpen);
-                  }}
-                >
-                  <div className="size-8 rounded-full overflow-hidden ring-[1.5px] ring-sky-300/70 dark:ring-sky-500/40 transition-all duration-300">
-                    <img src={avatar} alt="" className="size-full object-cover" />
-                  </div>
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-white dark:bg-slate-800 border border-border/60 flex items-center justify-center"
-                  >
-                    <ChevronDown
-                      className={cn(
-                        'size-2 text-muted-foreground/70 transition-transform duration-200',
-                        avatarPickerOpen && 'rotate-180',
-                      )}
-                    />
-                  </motion.div>
-                </div>
-
-                {/* Text */}
-                <div className="flex-1 min-w-0">
-                  {editingName ? (
-                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        ref={nameInputRef}
-                        value={nameDraft}
-                        onChange={(e) => setNameDraft(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') commitName();
-                          if (e.key === 'Escape') {
-                            setEditingName(false);
-                          }
-                        }}
-                        onBlur={commitName}
-                        maxLength={20}
-                        placeholder={t('profile.defaultNickname')}
-                        className="flex-1 min-w-0 h-6 bg-transparent border-b border-border/80 text-[13px] font-semibold text-foreground outline-none placeholder:text-muted-foreground/40"
-                      />
-                      <button
-                        onClick={commitName}
-                        className="shrink-0 size-5 rounded flex items-center justify-center text-sky-500 hover:bg-sky-100 dark:hover:bg-sky-900/30"
-                      >
-                        <Check className="size-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        startEditName();
-                      }}
-                      className="group/name inline-flex items-center gap-1 cursor-pointer"
-                    >
-                      <span className="text-[13px] font-semibold text-foreground/85 group-hover/name:text-foreground transition-colors">
-                        {displayName}
-                      </span>
-                      <Pencil className="size-2.5 text-muted-foreground/30 opacity-0 group-hover/name:opacity-100 transition-opacity" />
-                    </span>
-                  )}
-                </div>
-
-                {/* Collapse arrow */}
-                <motion.div
-                  initial={{ opacity: 0, y: -2 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="shrink-0 size-6 rounded-full flex items-center justify-center hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
-                >
-                  <ChevronUp className="size-3.5 text-muted-foreground/50" />
-                </motion.div>
-              </div>
-
-              {/* ── Expandable content ── */}
-              <div className="pt-2" onClick={(e) => e.stopPropagation()}>
-                {/* Avatar picker */}
-                <AnimatePresence>
-                  {avatarPickerOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.15, ease: 'easeInOut' }}
-                      className="overflow-hidden"
-                    >
-                      <div className="p-1 pb-2.5 flex items-center gap-1.5 flex-wrap">
-                        {AVATAR_OPTIONS.map((url) => (
-                          <button
-                            key={url}
-                            onClick={() => setAvatar(url)}
-                            className={cn(
-                              'size-7 rounded-full overflow-hidden bg-gray-50 dark:bg-gray-800 cursor-pointer transition-all duration-150',
-                              'hover:scale-110 active:scale-95',
-                              avatar === url
-                                ? 'ring-2 ring-sky-400 dark:ring-sky-500 ring-offset-0'
-                                : 'hover:ring-1 hover:ring-muted-foreground/30',
-                            )}
-                          >
-                            <img src={url} alt="" className="size-full" />
-                          </button>
-                        ))}
-                        <label
-                          className={cn(
-                            'size-7 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 border border-dashed',
-                            'hover:scale-110 active:scale-95',
-                            isCustomAvatar(avatar)
-                              ? 'ring-2 ring-sky-400 dark:ring-sky-500 ring-offset-0 border-sky-300 dark:border-sky-600 bg-sky-50 dark:bg-sky-900/30'
-                              : 'border-muted-foreground/30 text-muted-foreground/50 hover:border-muted-foreground/50',
-                          )}
-                          onClick={() => avatarInputRef.current?.click()}
-                          title={t('profile.uploadAvatar')}
-                        >
-                          <ImagePlus className="size-3" />
-                        </label>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Bio */}
-                <UITextarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder={t('profile.bioPlaceholder')}
-                  maxLength={200}
-                  rows={2}
-                  className="resize-none border-border/40 bg-transparent min-h-[72px] !text-[13px] !leading-relaxed placeholder:!text-[11px] placeholder:!leading-relaxed focus-visible:ring-1 focus-visible:ring-border/60"
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+  const rzp = new window.Razorpay({
+    key: data.keyId,
+    amount: data.amount,
+    currency: data.currency,
+    name: 'OpenMAIC',
+    description: data.name,
+    order_id: data.orderId,
+    theme: { color: '#c8f53a' },
+    handler: onSuccess,
+  });
+  rzp.open();
 }
 
-// ─── Classroom Card — clean, minimal style ──────────────────────
-function ClassroomCard({
-  classroom,
-  slide,
-  formatDate,
-  onDelete,
-  confirmingDelete,
-  onConfirmDelete,
-  onCancelDelete,
-  onClick,
-}: {
-  classroom: StageListItem;
-  slide?: Slide;
-  formatDate: (ts: number) => string;
-  onDelete: (id: string, e: React.MouseEvent) => void;
-  confirmingDelete: boolean;
-  onConfirmDelete: () => void;
-  onCancelDelete: () => void;
-  onClick: () => void;
-}) {
-  const { t } = useI18n();
-  const thumbRef = useRef<HTMLDivElement>(null);
-  const [thumbWidth, setThumbWidth] = useState(0);
+export default function LandingPage() {
+  const { theme, setTheme } = useTheme();
+  const [activeStep, setActiveStep] = useState(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [checkingOut, setCheckingOut] = useState<string | null>(null);
 
-  useEffect(() => {
-    const el = thumbRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      setThumbWidth(Math.round(entry.contentRect.width));
+  useEffect(() => setMounted(true), []);
+
+  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
+
+  const handleCheckout = useCallback(async (plan: 'pro' | 'teams') => {
+    setCheckingOut(plan);
+    await startCheckout(plan, () => {
+      setCheckingOut(null);
+      window.location.href = '/payment/success';
     });
-    ro.observe(el);
-    return () => ro.disconnect();
+    setCheckingOut(null);
   }, []);
 
   return (
-    <div className="group cursor-pointer" onClick={confirmingDelete ? undefined : onClick}>
-      {/* Thumbnail — large radius, no border, subtle bg */}
-      <div
-        ref={thumbRef}
-        className="relative w-full aspect-[16/9] rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-hidden transition-transform duration-200 group-hover:scale-[1.02]"
-      >
-        {slide && thumbWidth > 0 ? (
-          <ThumbnailSlide
-            slide={slide}
-            size={thumbWidth}
-            viewportSize={slide.viewportSize ?? 1000}
-            viewportRatio={slide.viewportRatio ?? 0.5625}
-          />
-        ) : !slide ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="size-12 rounded-2xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/30 dark:to-blue-900/30 flex items-center justify-center">
-              <span className="text-xl opacity-50">📄</span>
+    <div className="landing-page">
+      {/* ── NAV ── */}
+      <nav className="landing-nav">
+        <Link href="/" className="landing-logo">
+          Open<span>MAIC</span>
+        </Link>
+        <div className="landing-nav-links">
+          <a href="#how-to-use">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="https://github.com/Sid3548/OpenMAIC_sid" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+          <Link href="/create" className="landing-cta-btn">
+            Start free →
+          </Link>
+        </div>
+        {/* Theme toggle */}
+        {mounted && (
+          <button
+            onClick={toggleTheme}
+            className="landing-theme-toggle"
+            aria-label="Toggle theme"
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+        )}
+      </nav>
+
+      {/* ── HERO ── */}
+      <section className="landing-hero">
+        <div className="landing-eyebrow">Multi-agent AI classroom</div>
+        <h1 className="landing-h1">
+          Learn anything.<br />
+          <em>Actually</em> learn it.
+        </h1>
+        <p className="landing-hero-sub">
+          OpenMAIC turns any topic — a textbook, a paper, a URL — into a full classroom with AI
+          teachers who lecture, debate, quiz, and draw on a whiteboard. In real time. In 60 seconds.
+        </p>
+        <div className="landing-hero-actions">
+          <Link href="/create" className="landing-btn-primary">
+            Try it free — no signup →
+          </Link>
+          <a href="#how-to-use" className="landing-btn-ghost">
+            See how it works
+          </a>
+        </div>
+        <div className="landing-hero-stats">
+          <div>
+            <span className="landing-stat-val">4</span>
+            <span className="landing-stat-label">AI agents per classroom</span>
+          </div>
+          <div>
+            <span className="landing-stat-val">60s</span>
+            <span className="landing-stat-label">Avg classroom generation</span>
+          </div>
+          <div>
+            <span className="landing-stat-val">28+</span>
+            <span className="landing-stat-label">Action types (speech, draw, quiz…)</span>
+          </div>
+          <div>
+            <span className="landing-stat-val">∞</span>
+            <span className="landing-stat-label">Topics you can teach it</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── DEMO WINDOW ── */}
+      <section className="landing-demo-section">
+        <div className="landing-demo-window">
+          <div className="landing-demo-titlebar">
+            <span className="landing-dot landing-dot-r" />
+            <span className="landing-dot landing-dot-y" />
+            <span className="landing-dot landing-dot-g" />
+            <span className="landing-demo-url">openmaic/classroom/quantum-entanglement</span>
+          </div>
+          <div className="landing-demo-body">
+            <div className="landing-demo-scene">
+              <span className="landing-demo-label">Slide 3 / 8 — Quantum Entanglement</span>
+              <div className="landing-demo-scene-title">
+                Why Einstein called it &quot;spooky action at a distance&quot;
+              </div>
+              <div className="landing-demo-agent landing-demo-agent-prof">
+                <div className="landing-agent-avatar">P</div>
+                <div>
+                  <div className="landing-agent-name">Prof. Ada</div>
+                  <div className="landing-agent-text">
+                    &quot;Imagine two gloves in separate boxes, sent to opposite ends of the
+                    universe. The moment you open one and see it&apos;s a left glove — you
+                    instantly know the other is right. Entanglement is like that, except…&quot;
+                  </div>
+                </div>
+              </div>
+              <div className="landing-demo-agent landing-demo-agent-student">
+                <div className="landing-agent-avatar landing-agent-avatar-green">S</div>
+                <div>
+                  <div className="landing-agent-name" style={{ color: 'var(--l-accent2)' }}>
+                    Student Alex
+                  </div>
+                  <div className="landing-agent-text">
+                    &quot;Wait — but the gloves always had a handedness. Quantum particles
+                    don&apos;t have a spin until measured, right?&quot;
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="landing-demo-quiz">
+              <div className="landing-demo-label" style={{ marginBottom: 16 }}>
+                Quick check — Quiz
+              </div>
+              <div className="landing-quiz-q">
+                What does quantum entanglement NOT allow?
+              </div>
+              <div className="landing-quiz-opt">Instant correlation between measurements</div>
+              <div className="landing-quiz-opt landing-quiz-opt-correct">
+                Faster-than-light communication ✓
+              </div>
+              <div className="landing-quiz-opt">Violation of local realism</div>
+              <div className="landing-quiz-opt">Shared quantum state between particles</div>
+              <div className="landing-quiz-feedback">
+                Correct! The no-communication theorem prevents FTL signalling despite the
+                correlations.
+              </div>
             </div>
           </div>
-        ) : null}
+        </div>
+      </section>
 
-        {/* Delete — top-right, only on hover */}
-        <AnimatePresence>
-          {!confirmingDelete && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute top-2 right-2 size-7 opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 hover:bg-destructive/80 text-white hover:text-white backdrop-blur-sm rounded-full"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(classroom.id, e);
-                }}
-              >
-                <Trash2 className="size-3.5" />
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Inline delete confirmation overlay */}
-        <AnimatePresence>
-          {confirmingDelete && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/50 backdrop-blur-[6px]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-[13px] font-medium text-white/90">
-                {t('classroom.deleteConfirmTitle')}?
-              </span>
-              <div className="flex gap-2">
-                <button
-                  className="px-3.5 py-1 rounded-lg text-[12px] font-medium bg-white/15 text-white/80 hover:bg-white/25 backdrop-blur-sm transition-colors"
-                  onClick={onCancelDelete}
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  className="px-3.5 py-1 rounded-lg text-[12px] font-medium bg-red-500/90 text-white hover:bg-red-500 transition-colors"
-                  onClick={onConfirmDelete}
-                >
-                  {t('classroom.delete')}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Info — outside the thumbnail */}
-      <div className="mt-2.5 px-1 flex items-center gap-2">
-        <span className="shrink-0 inline-flex items-center rounded-full bg-sky-100 dark:bg-sky-900/30 px-2 py-0.5 text-[11px] font-medium text-sky-600 dark:text-sky-400">
-          {classroom.sceneCount} {t('classroom.slides')} · {formatDate(classroom.updatedAt)}
-        </span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <p className="font-medium text-[15px] truncate text-foreground/90 min-w-0">
-              {classroom.name}
-            </p>
-          </TooltipTrigger>
-          <TooltipContent
-            side="bottom"
-            sideOffset={4}
-            className="!max-w-[min(90vw,32rem)] break-words whitespace-normal"
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="break-all">{classroom.name}</span>
-              <button
-                className="shrink-0 p-0.5 rounded hover:bg-foreground/10 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigator.clipboard.writeText(classroom.name);
-                  toast.success(t('classroom.nameCopied'));
-                }}
-              >
-                <Copy className="size-3 opacity-60" />
-              </button>
+      {/* ── FEATURES ── */}
+      <section className="landing-section" id="features">
+        <div className="landing-eyebrow">What you get</div>
+        <h2 className="landing-section-title">
+          Not flashcards.<br />A real classroom.
+        </h2>
+        <p className="landing-section-sub">
+          Every generation is a complete, interactive learning experience. Not a summary, not a quiz
+          bank — an actual class.
+        </p>
+        <div className="landing-features-grid">
+          {[
+            {
+              icon: '🎓',
+              title: 'AI teachers that actually teach',
+              desc: 'Multiple agents with distinct personas — professor, TA, fellow student. They lecture, debate each other, ask you questions, and call you out if you go quiet.',
+            },
+            {
+              icon: '🖊️',
+              title: 'Live whiteboard drawing',
+              desc: 'Agents draw diagrams, equations, and flowcharts in real time as they explain. Physics problems get drawn out step by step. Circuits get diagrammed.',
+            },
+            {
+              icon: '🧪',
+              title: 'Interactive simulations',
+              desc: 'HTML-based experiments built on the fly. Drag a slider to change gravity. Watch a neural network train. Simulate gas molecules in a box.',
+            },
+            {
+              icon: '📄',
+              title: 'Teach from your own docs',
+              desc: 'Upload a PDF, paste a URL, or drop in text. OpenMAIC reads your material and builds a class around it — not generic Wikipedia content.',
+            },
+            {
+              icon: '🏗️',
+              title: 'Project-based learning',
+              desc: 'For complex topics, OpenMAIC creates a structured project with milestones and AI collaborators. Build something, not just memorize something.',
+            },
+            {
+              icon: '📤',
+              title: 'Export everything',
+              desc: 'Download the slides as an editable .pptx. Export interactive content as a standalone HTML file. Share with classmates or embed anywhere.',
+            },
+          ].map((f) => (
+            <div key={f.title} className="landing-feature">
+              <span className="landing-feature-icon">{f.icon}</span>
+              <div className="landing-feature-title">{f.title}</div>
+              <p className="landing-feature-desc">{f.desc}</p>
             </div>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW TO USE ── */}
+      <section className="landing-section landing-howto" id="how-to-use">
+        <div className="landing-eyebrow">The guide people usually skip</div>
+        <h2 className="landing-section-title">
+          How to get the<br />most out of it
+        </h2>
+        <p className="landing-section-sub">
+          Most people type one word, get confused, and leave. Here&apos;s exactly how to get a
+          classroom that blows your mind.
+        </p>
+        <div className="landing-howto-grid">
+          <div className="landing-howto-steps">
+            {HOW_TO_STEPS.map((step, i) => (
+              <div
+                key={i}
+                className={`landing-step${activeStep === i ? ' landing-step-active' : ''}`}
+                onClick={() => setActiveStep(i)}
+              >
+                <div className="landing-step-num">{step.num}</div>
+                <div>
+                  <div className="landing-step-title">{step.title}</div>
+                  <div className="landing-step-desc">{step.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="landing-howto-detail">
+            {HOW_TO_STEPS.map((step, i) => (
+              <div
+                key={i}
+                className={`landing-detail-panel${activeStep === i ? ' landing-detail-active' : ''}`}
+              >
+                <h3>{step.heading}</h3>
+                <p>{step.body}</p>
+                <pre className="landing-code-block">{step.code}</pre>
+                <div className="landing-tip-box">
+                  <strong>Pro tip:</strong> {step.tip}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRICING ── */}
+      <section className="landing-section" id="pricing">
+        <div className="landing-eyebrow">Pricing</div>
+        <h2 className="landing-section-title">
+          Start free.<br />Pay for what you use.
+        </h2>
+        <p className="landing-section-sub">
+          No subscriptions to forget about. Hosted credits for casual use. Bring your own API key
+          for serious work. Self-host for free forever.
+        </p>
+        <div className="landing-pricing-grid">
+          {/* Self-hosted */}
+          <div className="landing-plan">
+            <div className="landing-plan-name">Self-Hosted</div>
+            <div className="landing-plan-price">
+              <sup>$</sup>0
+            </div>
+            <div className="landing-plan-tagline">
+              Deploy to Vercel in 2 minutes. Your API key, your infrastructure, zero cost from us.
+            </div>
+            <hr className="landing-plan-divider" />
+            <ul className="landing-plan-features">
+              {['Unlimited classrooms', 'All features included', 'Your own LLM API key', 'Docker + Vercel deploy', 'Full source code access'].map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+              {['No hosted dashboard', 'You manage updates'].map((f) => (
+                <li key={f} className="landing-plan-feature-muted">{f}</li>
+              ))}
+            </ul>
+            <a
+              href="https://github.com/Sid3548/OpenMAIC_sid"
+              target="_blank"
+              rel="noreferrer"
+              className="landing-plan-btn landing-plan-btn-ghost"
+            >
+              Deploy to Vercel →
+            </a>
+          </div>
+          {/* Pro */}
+          <div className="landing-plan landing-plan-featured">
+            <div className="landing-plan-badge">Most popular</div>
+            <div className="landing-plan-name">Hosted Credits</div>
+            <div className="landing-plan-price">
+              <sup>$</sup>12<span>/mo</span>
+            </div>
+            <div className="landing-plan-tagline">
+              We handle the infrastructure and API costs. Just learn.
+            </div>
+            <hr className="landing-plan-divider" />
+            <ul className="landing-plan-features">
+              {['~50 classrooms/month', 'No API key needed', 'Gemini 2.5 Flash (fastest)', 'PDF & URL uploads', 'Export to PPTX + HTML', 'Voice narration included', 'Priority generation queue'].map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <button
+              className="landing-plan-btn landing-plan-btn-accent"
+              onClick={() => handleCheckout('pro')}
+              disabled={checkingOut === 'pro'}
+            >
+              {checkingOut === 'pro' ? 'Redirecting…' : 'Get started →'}
+            </button>
+          </div>
+          {/* Teams */}
+          <div className="landing-plan">
+            <div className="landing-plan-name">Teams</div>
+            <div className="landing-plan-price">
+              <sup>$</sup>39<span>/mo</span>
+            </div>
+            <div className="landing-plan-tagline">
+              For educators, tutors, and learning teams. Shared classroom library + admin dashboard.
+            </div>
+            <hr className="landing-plan-divider" />
+            <ul className="landing-plan-features">
+              {['Up to 5 users', 'Shared classroom library', 'Admin dashboard', '~250 classrooms/month', 'All Pro features', 'Bulk export', 'Priority email support'].map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <button
+              className="landing-plan-btn landing-plan-btn-ghost"
+              onClick={() => handleCheckout('teams')}
+              disabled={checkingOut === 'teams'}
+            >
+              {checkingOut === 'teams' ? 'Redirecting…' : 'Talk to us →'}
+            </button>
+          </div>
+        </div>
+        <div className="landing-payment-note">
+          <span style={{ fontSize: 20 }}>🔒</span>
+          <div>
+            <strong>Secure payments via Razorpay.</strong> Cancel anytime. No credit card required
+            for the self-hosted version. Credits roll over within the same billing month.
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="landing-section" style={{ paddingTop: 60 }}>
+        <div className="landing-eyebrow">Questions</div>
+        <h2 className="landing-section-title" style={{ marginBottom: 40 }}>
+          Quick answers
+        </h2>
+        <div className="landing-faq-list">
+          {FAQ_ITEMS.map((item, i) => (
+            <div
+              key={i}
+              className={`landing-faq-item${openFaq === i ? ' landing-faq-open' : ''}`}
+            >
+              <button
+                className="landing-faq-q"
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+              >
+                {item.q}
+              </button>
+              {openFaq === i && <div className="landing-faq-a">{item.a}</div>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA BAND ── */}
+      <section className="landing-cta-band">
+        <h2>
+          What do you want<br />to <em>actually</em> learn today?
+        </h2>
+        <p>Type a topic. 60 seconds later, you&apos;re in class.</p>
+        <Link href="/create" className="landing-btn-primary" style={{ fontSize: 16, padding: '16px 36px' }}>
+          Open the classroom →
+        </Link>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="landing-footer">
+        <div className="landing-footer-left">
+          © 2025 OpenMAIC · AGPL-3.0 License · Forked from{' '}
+          <a href="https://github.com/THU-MAIC/OpenMAIC" target="_blank" rel="noreferrer">
+            THU-MAIC
+          </a>
+          {' · '}AI Classroom for Every Student
+        </div>
+        <div className="landing-footer-links">
+          <a href="https://github.com/Sid3548/OpenMAIC_sid" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+          <Link href="/create">Live demo</Link>
+          <a href="mailto:hello@openmaic.com">Contact</a>
+        </div>
+      </footer>
     </div>
   );
-}
-
-export default function Page() {
-  return <HomePage />;
 }

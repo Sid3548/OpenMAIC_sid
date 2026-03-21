@@ -32,8 +32,10 @@
 <p align="center">
   <a href="./README.md">English</a> | <a href="./README-zh.md">简体中文</a>
   <br/>
-  <a href="https://open.maic.chat/">Live Demo</a> · <a href="#-quick-start">Quick Start</a> · <a href="#-features">Features</a> · <a href="#-use-cases">Use Cases</a> · <a href="#-openclaw-integration">OpenClaw</a>
+  <a href="https://open.maic.chat/">Live Demo</a> · <a href="#-quick-start">Quick Start</a> · <a href="#-features">Features</a> · <a href="#-use-cases">Use Cases</a> · <a href="#-openclaw-integration">OpenClaw</a> · <a href="#-customizations-by-sid">Sid's Additions</a>
 </p>
+
+> **This is a customized fork by [Sid](https://github.com/Sid3548)** — all original features preserved, plus TTS improvements, dynamic voice fetching, auto-expanding chat panel, a complete marketing landing page, Razorpay payment integration, and full SEO. See [Customizations by Sid](#-customizations-by-sid) for full details.
 
 
 ## 📖 Overview
@@ -80,9 +82,13 @@ https://github.com/user-attachments/assets/b4ab35ac-f994-46b1-8957-e82fe87ff0e9
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/THU-MAIC/OpenMAIC.git
-cd OpenMAIC
+# Sid's fork (with all extra features):
+git clone https://github.com/Sid3548/OpenMAIC_sid.git
+cd OpenMAIC_sid
 pnpm install
+
+# Or original upstream:
+# git clone https://github.com/THU-MAIC/OpenMAIC.git
 ```
 
 ### 2. Configure
@@ -365,6 +371,117 @@ Optional config in `~/.openclaw/openclaw.json`:
 
 ---
 
+## 🎨 Customizations by Sid
+
+This fork extends the original OpenMAIC with several practical improvements:
+
+### 1. TTS Provider Fixes
+
+**Problem:** The OpenAI TTS provider was exposing voices from `gpt-4o-mini-tts` (marin, cedar, ash, ballad, coral, sage, verse) that require a different model and fail with `tts-1`.
+
+**Fix:**
+- Restricted the voice list to the 6 voices compatible with `tts-1`: `alloy`, `echo`, `fable`, `nova`, `onyx`, `shimmer`
+- The provider now automatically selects `tts-1` when any of these voices is chosen — no more "access denied" errors on standard API keys
+- Added a better error hint pointing users to upgrade their OpenAI plan when premium voices are unavailable
+
+**Files changed:** `lib/audio/constants.ts`, `lib/audio/tts-providers.ts`
+
+---
+
+### 2. Dynamic Voice Fetching
+
+Added a **"Fetch Voices"** button in the TTS audio settings panel. When clicked, it:
+1. Hits `/audio/voices` on the configured provider (OpenAI-compatible)
+2. Falls back to `/models` and filters for TTS-capable entries
+3. Populates the voice dropdown with whatever your provider actually supports — useful for custom/local TTS servers
+
+**Files changed:** `app/api/tts/voices/route.ts` *(new)*, `components/settings/audio-settings.tsx`
+
+---
+
+### 3. Auto-Expand / Auto-Collapse Chat Panel
+
+The discussion/Q&A chat panel now automatically:
+- **Expands** when a discussion or Q&A session starts (so you don't miss the agents talking)
+- **Collapses** when the session ends (cleans up the UI between scenes)
+
+This prevents the common case where users miss the live discussion because the chat panel was hidden.
+
+**Files changed:** `components/stage.tsx`
+
+---
+
+### 4. Marketing Landing Page
+
+Replaced the plain creation form at `/` with a full marketing landing page styled after top SaaS products:
+
+- Dark-first design with lime accent (`#c8f53a`)
+- Interactive "How to use" step tabs
+- Feature grid, pricing tiers, FAQ accordion
+- Demo window mockup showing the classroom in action
+- **Dark ↔ Light mode toggle** (top-right button, one click)
+- The creation form moved to `/create`
+
+**Files changed:** `app/page.tsx` *(new landing)*, `app/create/page.tsx` *(creation form)*
+**New CSS:** `app/globals.css` (landing page design system added as `.landing-*` classes)
+
+---
+
+### 5. Full SEO
+
+- Open Graph tags (title, description, image, locale)
+- Twitter card metadata
+- JSON-LD `WebApplication` structured data for Google
+- Canonical URL
+- Robots directives
+- Google Fonts: **Instrument Serif** + **DM Mono** added via `next/font/google`
+
+**Files changed:** `app/layout.tsx`
+
+---
+
+### 6. Stripe Payment Integration
+
+Complete Razorpay checkout flow wired up:
+
+| File | Purpose |
+|------|---------|
+| `app/api/razorpay-checkout/route.ts` | Creates a Razorpay order, returns orderId + keyId for client-side modal |
+| `app/api/razorpay-webhook/route.ts` | Handles `payment.captured`, `payment.failed`, `subscription.cancelled` |
+| `app/payment/success/page.tsx` | Post-payment confirmation page |
+
+**Setup:**
+
+```bash
+# 1. Get your keys from https://dashboard.razorpay.com/app/keys
+# 2. Add to .env.local:
+RAZORPAY_KEY_ID=rzp_live_...
+RAZORPAY_KEY_SECRET=...
+
+
+RAZORPAY_WEBHOOK_SECRET=...   # From Dashboard → Webhooks
+
+```
+
+The "Get started" and "Talk to us" buttons call `/api/razorpay-checkout` which returns an order, then open the Razorpay checkout modal directly on the page — no redirect needed.
+
+---
+
+## 💳 Razorpay Setup Guide
+
+1. **Create a Razorpay account** at [razorpay.com](https://razorpay.com)
+2. Go to **Settings → API Keys** — copy your Key ID and Key Secret
+
+
+3. Set up a webhook: **Settings → Webhooks → Add New Webhook**
+   - URL: `https://yourdomain.com/api/razorpay-webhook`
+   - Events: `payment.captured`, `payment.failed`, `subscription.cancelled`
+4. Copy the webhook secret`)
+5. Add the three env vars to `.env.local` (see above)
+6. For local testing, use [ngrok](https://ngrok.com) to expose localhost and point the Razorpay webhook to your ngrok URL
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions from the community! Whether it's bug reports, feature ideas, or pull requests — every bit helps.
@@ -381,7 +498,12 @@ OpenMAIC/
 │   │   ├── pbl/                #     Project-Based Learning endpoints
 │   │   └── ...                 #     quiz-grade, parse-pdf, web-search, transcription, etc.
 │   ├── classroom/[id]/         #   Classroom playback page
-│   └── page.tsx                #   Home page (generation input)
+│   ├── create/                 #   Generation input (creation form)  [Sid]
+│   ├── payment/success/        #   Post-Razorpay-checkout confirmation  [Sid]
+│   ├── api/stripe-checkout/    #   Razorpay order creation API  [Sid]
+│   ├── api/stripe-webhook/     #   Razorpay webhook handler  [Sid]
+│   ├── api/tts/voices/         #   Dynamic TTS voice listing  [Sid]
+│   └── page.tsx                #   Marketing landing page  [Sid]
 │
 ├── lib/                        # Core business logic
 │   ├── generation/             #   Two-stage lesson generation pipeline
