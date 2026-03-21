@@ -32,8 +32,10 @@
 <p align="center">
   <a href="./README.md">English</a> | <a href="./README-zh.md">简体中文</a>
   <br/>
-  <a href="https://open.maic.chat/">Live Demo</a> · <a href="#-quick-start">Quick Start</a> · <a href="#-features">Features</a> · <a href="#-use-cases">Use Cases</a> · <a href="#-openclaw-integration">OpenClaw</a>
+  <a href="https://open.maic.chat/">Live Demo</a> · <a href="#-quick-start">Quick Start</a> · <a href="#-features">Features</a> · <a href="#-use-cases">Use Cases</a> · <a href="#-openclaw-integration">OpenClaw</a> · <a href="#-customizations-by-sid">Sid's Additions</a>
 </p>
+
+> **This is a customized fork by [Sid](https://github.com/Sid3548)** — all original features preserved, plus TTS improvements, dynamic voice fetching, auto-expanding chat panel, a complete marketing landing page, Stripe payment integration, and full SEO. See [Customizations by Sid](#-customizations-by-sid) for full details.
 
 
 ## 📖 Overview
@@ -80,9 +82,13 @@ https://github.com/user-attachments/assets/b4ab35ac-f994-46b1-8957-e82fe87ff0e9
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/THU-MAIC/OpenMAIC.git
-cd OpenMAIC
+# Sid's fork (with all extra features):
+git clone https://github.com/Sid3548/OpenMAIC_sid.git
+cd OpenMAIC_sid
 pnpm install
+
+# Or original upstream:
+# git clone https://github.com/THU-MAIC/OpenMAIC.git
 ```
 
 ### 2. Configure
@@ -365,6 +371,117 @@ Optional config in `~/.openclaw/openclaw.json`:
 
 ---
 
+## 🎨 Customizations by Sid
+
+This fork extends the original OpenMAIC with several practical improvements:
+
+### 1. TTS Provider Fixes
+
+**Problem:** The OpenAI TTS provider was exposing voices from `gpt-4o-mini-tts` (marin, cedar, ash, ballad, coral, sage, verse) that require a different model and fail with `tts-1`.
+
+**Fix:**
+- Restricted the voice list to the 6 voices compatible with `tts-1`: `alloy`, `echo`, `fable`, `nova`, `onyx`, `shimmer`
+- The provider now automatically selects `tts-1` when any of these voices is chosen — no more "access denied" errors on standard API keys
+- Added a better error hint pointing users to upgrade their OpenAI plan when premium voices are unavailable
+
+**Files changed:** `lib/audio/constants.ts`, `lib/audio/tts-providers.ts`
+
+---
+
+### 2. Dynamic Voice Fetching
+
+Added a **"Fetch Voices"** button in the TTS audio settings panel. When clicked, it:
+1. Hits `/audio/voices` on the configured provider (OpenAI-compatible)
+2. Falls back to `/models` and filters for TTS-capable entries
+3. Populates the voice dropdown with whatever your provider actually supports — useful for custom/local TTS servers
+
+**Files changed:** `app/api/tts/voices/route.ts` *(new)*, `components/settings/audio-settings.tsx`
+
+---
+
+### 3. Auto-Expand / Auto-Collapse Chat Panel
+
+The discussion/Q&A chat panel now automatically:
+- **Expands** when a discussion or Q&A session starts (so you don't miss the agents talking)
+- **Collapses** when the session ends (cleans up the UI between scenes)
+
+This prevents the common case where users miss the live discussion because the chat panel was hidden.
+
+**Files changed:** `components/stage.tsx`
+
+---
+
+### 4. Marketing Landing Page
+
+Replaced the plain creation form at `/` with a full marketing landing page styled after top SaaS products:
+
+- Dark-first design with lime accent (`#c8f53a`)
+- Interactive "How to use" step tabs
+- Feature grid, pricing tiers, FAQ accordion
+- Demo window mockup showing the classroom in action
+- **Dark ↔ Light mode toggle** (top-right button, one click)
+- The creation form moved to `/create`
+
+**Files changed:** `app/page.tsx` *(new landing)*, `app/create/page.tsx` *(creation form)*
+**New CSS:** `app/globals.css` (landing page design system added as `.landing-*` classes)
+
+---
+
+### 5. Full SEO
+
+- Open Graph tags (title, description, image, locale)
+- Twitter card metadata
+- JSON-LD `WebApplication` structured data for Google
+- Canonical URL
+- Robots directives
+- Google Fonts: **Instrument Serif** + **DM Mono** added via `next/font/google`
+
+**Files changed:** `app/layout.tsx`
+
+---
+
+### 6. Stripe Payment Integration
+
+Complete Stripe checkout flow wired up:
+
+| File | Purpose |
+|------|---------|
+| `app/api/stripe-checkout/route.ts` | Creates a Stripe Checkout session, returns redirect URL |
+| `app/api/stripe-webhook/route.ts` | Handles `checkout.session.completed`, `subscription.deleted`, `payment_failed` |
+| `app/payment/success/page.tsx` | Post-payment confirmation page |
+
+**Setup:**
+
+```bash
+# 1. Get your keys from https://dashboard.stripe.com/apikeys
+# 2. Add to .env.local:
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...   # from Stripe CLI: stripe listen --forward-to localhost:3000/api/stripe-webhook
+
+# 3. Create products in Stripe Dashboard → Products, then paste price IDs:
+STRIPE_PRICE_PRO=price_...
+STRIPE_PRICE_TEAMS=price_...
+```
+
+The "Get started" and "Talk to us" buttons on the landing page call `/api/stripe-checkout` and redirect to Stripe Checkout automatically.
+
+---
+
+## 💳 Stripe Setup Guide
+
+1. **Create a Stripe account** at [stripe.com](https://stripe.com)
+2. Go to **Developers → API Keys** — copy your `sk_live_...` secret key
+3. Go to **Products → Add Product** — create "OpenMAIC Pro" ($12/mo) and "OpenMAIC Teams" ($39/mo)
+4. Copy each **Price ID** (`price_...`) from the product page
+5. Set up webhooks: **Developers → Webhooks → Add endpoint**
+   - URL: `https://yourdomain.com/api/stripe-webhook`
+   - Events: `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
+6. Copy the webhook signing secret (`whsec_...`)
+7. Add all four env vars to `.env.local` (see above)
+8. For local testing: `stripe listen --forward-to localhost:3000/api/stripe-webhook`
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions from the community! Whether it's bug reports, feature ideas, or pull requests — every bit helps.
@@ -381,7 +498,12 @@ OpenMAIC/
 │   │   ├── pbl/                #     Project-Based Learning endpoints
 │   │   └── ...                 #     quiz-grade, parse-pdf, web-search, transcription, etc.
 │   ├── classroom/[id]/         #   Classroom playback page
-│   └── page.tsx                #   Home page (generation input)
+│   ├── create/                 #   Generation input (creation form)  [Sid]
+│   ├── payment/success/        #   Post-Stripe-checkout confirmation  [Sid]
+│   ├── api/stripe-checkout/    #   Stripe Checkout session API  [Sid]
+│   ├── api/stripe-webhook/     #   Stripe event webhook handler  [Sid]
+│   ├── api/tts/voices/         #   Dynamic TTS voice listing  [Sid]
+│   └── page.tsx                #   Marketing landing page  [Sid]
 │
 ├── lib/                        # Core business logic
 │   ├── generation/             #   Two-stage lesson generation pipeline
