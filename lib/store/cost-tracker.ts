@@ -11,13 +11,13 @@ import { persist } from 'zustand/middleware';
 // Sources: provider docs as of 2026. Update as pricing changes.
 export const PROVIDER_PRICING = {
   // LLM — per 1M tokens
-  'google:gemini-2.5-pro':          { input: 1.25,   output: 10.00 }, // Best quality — recommended
+  'google:gemini-2.5-pro':          { input: 1.25,   output: 10.00 }, // text-only tasks only
   'google:gemini-2.5-flash':        { input: 0.15,   output: 0.60  }, // Fast + cheap
   'google:gemini-2.5-flash-lite':   { input: 0.075,  output: 0.30  }, // Ultra-cheap
   'google:gemini-2.0-flash':        { input: 0.075,  output: 0.30  },
   'google:gemini-2.5-flash-preview':{ input: 0.15,   output: 0.60  },
   'google:gemini-1.5-pro':          { input: 1.25,   output: 5.00  },
-  'openai:gpt-4o':                  { input: 2.50,   output: 10.00 },
+  'openai:gpt-4o':                  { input: 2.50,   output: 10.00 }, // Default — recommended
   'openai:gpt-4o-mini':             { input: 0.15,   output: 0.60  },
   'anthropic:claude-sonnet-4-6':    { input: 3.00,   output: 15.00 }, // Claude latest
   'anthropic:claude-sonnet-4-5':    { input: 3.00,   output: 15.00 },
