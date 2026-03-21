@@ -35,7 +35,7 @@
   <a href="https://open.maic.chat/">Live Demo</a> · <a href="#-quick-start">Quick Start</a> · <a href="#-features">Features</a> · <a href="#-use-cases">Use Cases</a> · <a href="#-openclaw-integration">OpenClaw</a> · <a href="#-customizations-by-sid">Sid's Additions</a>
 </p>
 
-> **This is a customized fork by [Sid](https://github.com/Sid3548)** — all original features preserved, plus TTS improvements, dynamic voice fetching, auto-expanding chat panel, a complete marketing landing page, Stripe payment integration, and full SEO. See [Customizations by Sid](#-customizations-by-sid) for full details.
+> **This is a customized fork by [Sid](https://github.com/Sid3548)** — all original features preserved, plus TTS improvements, dynamic voice fetching, auto-expanding chat panel, a complete marketing landing page, Razorpay payment integration, and full SEO. See [Customizations by Sid](#-customizations-by-sid) for full details.
 
 
 ## 📖 Overview
@@ -442,43 +442,43 @@ Replaced the plain creation form at `/` with a full marketing landing page style
 
 ### 6. Stripe Payment Integration
 
-Complete Stripe checkout flow wired up:
+Complete Razorpay checkout flow wired up:
 
 | File | Purpose |
 |------|---------|
-| `app/api/stripe-checkout/route.ts` | Creates a Stripe Checkout session, returns redirect URL |
-| `app/api/stripe-webhook/route.ts` | Handles `checkout.session.completed`, `subscription.deleted`, `payment_failed` |
+| `app/api/razorpay-checkout/route.ts` | Creates a Razorpay order, returns orderId + keyId for client-side modal |
+| `app/api/razorpay-webhook/route.ts` | Handles `payment.captured`, `payment.failed`, `subscription.cancelled` |
 | `app/payment/success/page.tsx` | Post-payment confirmation page |
 
 **Setup:**
 
 ```bash
-# 1. Get your keys from https://dashboard.stripe.com/apikeys
+# 1. Get your keys from https://dashboard.razorpay.com/app/keys
 # 2. Add to .env.local:
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...   # from Stripe CLI: stripe listen --forward-to localhost:3000/api/stripe-webhook
+RAZORPAY_KEY_ID=rzp_live_...
+RAZORPAY_KEY_SECRET=...
 
-# 3. Create products in Stripe Dashboard → Products, then paste price IDs:
-STRIPE_PRICE_PRO=price_...
-STRIPE_PRICE_TEAMS=price_...
+
+RAZORPAY_WEBHOOK_SECRET=...   # From Dashboard → Webhooks
+
 ```
 
-The "Get started" and "Talk to us" buttons on the landing page call `/api/stripe-checkout` and redirect to Stripe Checkout automatically.
+The "Get started" and "Talk to us" buttons call `/api/razorpay-checkout` which returns an order, then open the Razorpay checkout modal directly on the page — no redirect needed.
 
 ---
 
-## 💳 Stripe Setup Guide
+## 💳 Razorpay Setup Guide
 
-1. **Create a Stripe account** at [stripe.com](https://stripe.com)
-2. Go to **Developers → API Keys** — copy your `sk_live_...` secret key
-3. Go to **Products → Add Product** — create "OpenMAIC Pro" ($12/mo) and "OpenMAIC Teams" ($39/mo)
-4. Copy each **Price ID** (`price_...`) from the product page
-5. Set up webhooks: **Developers → Webhooks → Add endpoint**
-   - URL: `https://yourdomain.com/api/stripe-webhook`
-   - Events: `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
-6. Copy the webhook signing secret (`whsec_...`)
-7. Add all four env vars to `.env.local` (see above)
-8. For local testing: `stripe listen --forward-to localhost:3000/api/stripe-webhook`
+1. **Create a Razorpay account** at [razorpay.com](https://razorpay.com)
+2. Go to **Settings → API Keys** — copy your Key ID and Key Secret
+
+
+3. Set up a webhook: **Settings → Webhooks → Add New Webhook**
+   - URL: `https://yourdomain.com/api/razorpay-webhook`
+   - Events: `payment.captured`, `payment.failed`, `subscription.cancelled`
+4. Copy the webhook secret`)
+5. Add the three env vars to `.env.local` (see above)
+6. For local testing, use [ngrok](https://ngrok.com) to expose localhost and point the Razorpay webhook to your ngrok URL
 
 ---
 
@@ -499,9 +499,9 @@ OpenMAIC/
 │   │   └── ...                 #     quiz-grade, parse-pdf, web-search, transcription, etc.
 │   ├── classroom/[id]/         #   Classroom playback page
 │   ├── create/                 #   Generation input (creation form)  [Sid]
-│   ├── payment/success/        #   Post-Stripe-checkout confirmation  [Sid]
-│   ├── api/stripe-checkout/    #   Stripe Checkout session API  [Sid]
-│   ├── api/stripe-webhook/     #   Stripe event webhook handler  [Sid]
+│   ├── payment/success/        #   Post-Razorpay-checkout confirmation  [Sid]
+│   ├── api/stripe-checkout/    #   Razorpay order creation API  [Sid]
+│   ├── api/stripe-webhook/     #   Razorpay webhook handler  [Sid]
 │   ├── api/tts/voices/         #   Dynamic TTS voice listing  [Sid]
 │   └── page.tsx                #   Marketing landing page  [Sid]
 │

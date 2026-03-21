@@ -1,9 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/lib/hooks/use-theme';
 import { Sun, Moon } from 'lucide-react';
+
+// Razorpay global type (loaded via CDN script)
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: new (options: Record<string, any>) => { open(): void };
+  }
+}
 
 // ── Step data for "How to use" section ──────────────────────────
 const HOW_TO_STEPS = [
@@ -107,22 +115,40 @@ const FAQ_ITEMS = [
   },
 ];
 
-async function startCheckout(plan: 'pro' | 'teams') {
-  try {
-    const res = await fetch('/api/stripe-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan }),
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert(`Checkout error: ${data.error ?? 'Unknown error'}`);
-    }
-  } catch {
-    alert('Failed to start checkout. Please try again.');
-  }
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window.Razorpay !== 'undefined') { resolve(true); return; }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+async function startCheckout(plan: 'pro' | 'teams', onSuccess: () => void) {
+  const loaded = await loadRazorpayScript();
+  if (!loaded) { alert('Failed to load Razorpay. Check your connection.'); return; }
+
+  const res = await fetch('/api/razorpay-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan }),
+  });
+  const data = await res.json();
+  if (data.error) { alert(`Checkout error: ${data.error}`); return; }
+
+  const rzp = new window.Razorpay({
+    key: data.keyId,
+    amount: data.amount,
+    currency: data.currency,
+    name: 'OpenMAIC',
+    description: data.name,
+    order_id: data.orderId,
+    theme: { color: '#c8f53a' },
+    handler: onSuccess,
+  });
+  rzp.open();
 }
 
 export default function LandingPage() {
@@ -138,11 +164,14 @@ export default function LandingPage() {
 
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
-  const handleCheckout = async (plan: 'pro' | 'teams') => {
+  const handleCheckout = useCallback(async (plan: 'pro' | 'teams') => {
     setCheckingOut(plan);
-    await startCheckout(plan);
+    await startCheckout(plan, () => {
+      setCheckingOut(null);
+      window.location.href = '/payment/success';
+    });
     setCheckingOut(null);
-  };
+  }, []);
 
   return (
     <div className="landing-page">

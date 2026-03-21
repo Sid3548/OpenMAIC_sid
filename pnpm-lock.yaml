@@ -62,9 +62,6 @@ importers:
       '@radix-ui/react-use-controllable-state':
         specifier: ^1.2.2
         version: 1.2.2(@types/react@19.2.14)(react@19.2.3)
-      '@stripe/stripe-js':
-        specifier: ^8.11.0
-        version: 8.11.0
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -194,6 +191,9 @@ importers:
       radix-ui:
         specifier: ^1.4.3
         version: 1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      razorpay:
+        specifier: ^2.9.6
+        version: 2.9.6
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -215,9 +215,6 @@ importers:
       streamdown:
         specifier: ^2.1.0
         version: 2.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      stripe:
-        specifier: ^20.4.1
-        version: 20.4.1(@types/node@20.19.37)
       svg-arc-to-cubic-bezier:
         specifier: ^3.2.0
         version: 3.2.0
@@ -2929,10 +2926,6 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
-
-  '@stripe/stripe-js@8.11.0':
-    resolution: {integrity: sha512-3fVF4z3efsgwgyj64nFK+6F4/vMw0mUXD2TBbOfftJtKVNx4JNv3CSfe1fY4DCtCk0JFp8/YPNcRkzgV0HJ8cg==}
-    engines: {node: '>=12.16'}
 
   '@stylistic/eslint-plugin@4.4.1':
     resolution: {integrity: sha512-CEigAk7eOLyHvdgmpZsKFwtiqS2wFwI1fn4j09IU9GmD4euFM4jEBAViWeCqaNLlbX2k2+A/Fq9cje4HQBXuJQ==}
@@ -7484,6 +7477,9 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
+  razorpay@2.9.6:
+    resolution: {integrity: sha512-zsHAQzd6e1Cc6BNoCNZQaf65ElL6O6yw0wulxmoG5VQDr363fZC90Mp1V5EktVzG45yPyNomNXWlf4cQ3622gQ==}
+
   react-dom@19.2.3:
     resolution: {integrity: sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==}
     peerDependencies:
@@ -8128,15 +8124,6 @@ packages:
   strip-json-comments@3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
-
-  stripe@20.4.1:
-    resolution: {integrity: sha512-axCguHItc8Sxt0HC6aSkdVRPffjYPV7EQqZRb2GkIa8FzWDycE7nHJM19C6xAIynH1Qp1/BHiopSi96jGBxT0w==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      '@types/node': '>=16'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
 
   stubborn-fs@2.0.0:
     resolution: {integrity: sha512-Y0AvSwDw8y+nlSNFXMm2g6L51rBGdAQT20J3YSOqxC53Lo3bjWRtr2BKcfYoAf352WYpsZSTURrA0tqhfgudPA==}
@@ -11613,8 +11600,6 @@ snapshots:
       '@sinonjs/commons': 3.0.1
 
   '@standard-schema/spec@1.1.0': {}
-
-  '@stripe/stripe-js@8.11.0': {}
 
   '@stylistic/eslint-plugin@4.4.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
@@ -16984,6 +16969,12 @@ snapshots:
       iconv-lite: 0.7.2
       unpipe: 1.0.0
 
+  razorpay@2.9.6:
+    dependencies:
+      axios: 1.13.6
+    transitivePeerDependencies:
+      - debug
+
   react-dom@19.2.3(react@19.2.3):
     dependencies:
       react: 19.2.3
@@ -17829,10 +17820,6 @@ snapshots:
   strip-json-comments@2.0.1: {}
 
   strip-json-comments@3.1.1: {}
-
-  stripe@20.4.1(@types/node@20.19.37):
-    optionalDependencies:
-      '@types/node': 20.19.37
 
   stubborn-fs@2.0.0:
     dependencies:
