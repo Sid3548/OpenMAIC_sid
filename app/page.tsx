@@ -219,8 +219,8 @@ export default function LandingPage() {
           teachers who lecture, debate, quiz, and draw on a whiteboard. In real time. In 60 seconds.
         </p>
         <div className="landing-hero-actions">
-          <Link href="/create" className="landing-btn-primary">
-            Try it free — no signup →
+          <Link href="/signup" className="landing-btn-primary">
+            Try it free — sign up →
           </Link>
           <a href="#how-to-use" className="landing-btn-ghost">
             See how it works
