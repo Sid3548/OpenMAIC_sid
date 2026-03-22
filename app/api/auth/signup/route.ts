@@ -7,6 +7,7 @@
 
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 
@@ -26,18 +27,18 @@ export async function POST(req: NextRequest) {
     // Basic mobile validation (10 digits, optional +91 prefix)
     const mobileClean = mobile.replace(/\D/g, '');
     if (mobileClean.length < 10) {
-      return apiError('INVALID_FIELD', 400, 'Enter a valid mobile number');
+      return apiError('INVALID_REQUEST', 400, 'Enter a valid mobile number');
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return apiError('DUPLICATE', 409, 'An account with this email already exists');
+      return apiError('INVALID_REQUEST', 409, 'An account with this email already exists');
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Create user + grant 1 signup credit in a transaction
-    const user = await prisma.$transaction(async (tx) => {
+    const user = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const newUser = await tx.user.create({
         data: {
           name,
