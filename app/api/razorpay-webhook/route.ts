@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { prisma } from '@/lib/prisma';
+import { grantCredits, CREDITS_PER_PLAN } from '@/lib/credits';
 
 export const runtime = 'nodejs';
 
@@ -46,20 +48,57 @@ export async function POST(req: NextRequest) {
   switch (event) {
     case 'payment.captured': {
       const payment = (payload?.payment as Record<string, unknown>)?.entity as Record<string, unknown>;
-      console.log('[Razorpay] Payment captured:', payment?.id, payment?.email);
-      // TODO: provision subscription access — update DB, send welcome email, etc.
+      const notes = payment?.notes as Record<string, string> | undefined;
+      const userId = notes?.userId;
+      const plan = notes?.plan || 'individual';
+      const orderId = payment?.order_id as string | undefined;
+      const paymentId = payment?.id as string;
+
+      if (userId) {
+        const creditsToGrant = CREDITS_PER_PLAN[plan] ?? 30;
+        await grantCredits(userId, creditsToGrant, 'purchase', `Plan: ${plan}, payment: ${paymentId}`);
+        await prisma.subscription.upsert({
+          where: { userId },
+          create: {
+            userId,
+            plan,
+            status: 'active',
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId,
+            creditsGranted: creditsToGrant,
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          },
+          update: {
+            plan,
+            status: 'active',
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId,
+            creditsGranted: creditsToGrant,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          },
+        });
+      }
+      console.log('[Razorpay] Payment captured:', paymentId, '— userId:', userId, '— plan:', plan);
       break;
     }
     case 'payment.failed': {
       const payment = (payload?.payment as Record<string, unknown>)?.entity as Record<string, unknown>;
       console.log('[Razorpay] Payment failed:', payment?.id);
-      // TODO: notify customer
+      // No action needed — user keeps existing credits
       break;
     }
     case 'subscription.cancelled': {
       const sub = (payload?.subscription as Record<string, unknown>)?.entity as Record<string, unknown>;
-      console.log('[Razorpay] Subscription cancelled:', sub?.id);
-      // TODO: revoke access
+      const notes = sub?.notes as Record<string, string> | undefined;
+      const userId = notes?.userId;
+      if (userId) {
+        await prisma.subscription.updateMany({
+          where: { userId },
+          data: { status: 'cancelled' },
+        });
+      }
+      console.log('[Razorpay] Subscription cancelled:', sub?.id, '— userId:', userId);
       break;
     }
     default:

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { resolveModelFromHeaders } from '@/lib/server/resolve-model';
+import { resolveVerificationModelFromHeaders } from '@/lib/server/resolve-model';
 import { callLLM } from '@/lib/ai/llm';
 import { buildInterviewDebriefPrompt } from '@/lib/interview/prompts';
 import type { InterviewConfig } from '@/lib/interview/types';
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       config: InterviewConfig;
       turns: Array<{ question: string; answer?: string }>;
     };
-    const { model } = resolveModelFromHeaders(req);
+    const { model } = resolveVerificationModelFromHeaders(req);
     const result = await callLLM(
       {
         model,

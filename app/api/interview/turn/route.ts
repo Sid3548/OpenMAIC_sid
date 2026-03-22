@@ -20,7 +20,7 @@
 
 import { NextRequest } from 'next/server';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { resolveModelFromHeaders } from '@/lib/server/resolve-model';
+import { resolveVerificationModelFromHeaders } from '@/lib/server/resolve-model';
 import { statelessGenerate } from '@/lib/orchestration/stateless-generate';
 import { buildInterviewTurnPrompt } from '@/lib/interview/prompts';
 import type { InterviewConfig } from '@/lib/interview/types';
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'answer and config are required');
     }
 
-    const { model: languageModel, modelString } = resolveModelFromHeaders(req);
+    const { model: languageModel, modelString } = resolveVerificationModelFromHeaders(req);
 
     const signal = req.signal;
     const thinking: ThinkingConfig = { enabled: false };

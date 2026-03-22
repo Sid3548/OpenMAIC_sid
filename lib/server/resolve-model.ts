@@ -27,7 +27,7 @@ export function resolveModel(params: {
   providerType?: string;
   requiresApiKey?: boolean;
 }): ResolvedModel {
-  const modelString = params.modelString || process.env.DEFAULT_MODEL || 'gpt-4o-mini';
+  const modelString = params.modelString || process.env.DEFAULT_MODEL || 'google:gemini-3-flash-preview';
   const { providerId, modelId } = parseModelString(modelString);
 
   const clientBaseUrl = params.baseUrl || undefined;
@@ -64,6 +64,26 @@ export function resolveModel(params: {
 export function resolveModelFromHeaders(req: NextRequest): ResolvedModel {
   return resolveModel({
     modelString: req.headers.get('x-model') || undefined,
+    apiKey: req.headers.get('x-api-key') || undefined,
+    baseUrl: req.headers.get('x-base-url') || undefined,
+    providerType: req.headers.get('x-provider-type') || undefined,
+    requiresApiKey: req.headers.get('x-requires-api-key') === 'true' ? true : undefined,
+  });
+}
+
+/**
+ * Resolve a language model for verification tasks (quiz, interview).
+ *
+ * Checks DEFAULT_VERIFICATION_MODEL env var before falling back to DEFAULT_MODEL.
+ * Reads: x-model, x-api-key, x-base-url, x-provider-type, x-requires-api-key
+ */
+export function resolveVerificationModelFromHeaders(req: NextRequest): ResolvedModel {
+  return resolveModel({
+    modelString:
+      req.headers.get('x-model') ||
+      process.env.DEFAULT_VERIFICATION_MODEL ||
+      process.env.DEFAULT_MODEL ||
+      'google:gemini-3-flash-preview',
     apiKey: req.headers.get('x-api-key') || undefined,
     baseUrl: req.headers.get('x-base-url') || undefined,
     providerType: req.headers.get('x-provider-type') || undefined,
