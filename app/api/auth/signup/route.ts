@@ -7,7 +7,6 @@
 
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Create user + grant 1 signup credit in a transaction
-    const user = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const user = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
           name,
