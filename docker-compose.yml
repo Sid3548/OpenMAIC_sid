@@ -1,15 +1,50 @@
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: openmaic
+      POSTGRES_USER: openmaic
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openmaic"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_URL: postgresql://openmaic:${POSTGRES_PASSWORD}@db:5432/openmaic
+    command: ["npx", "prisma", "migrate", "deploy"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
   openmaic:
     build: .
     ports:
       - "3000:3000"
     env_file:
       - .env.local
+    environment:
+      DATABASE_URL: postgresql://openmaic:${POSTGRES_PASSWORD}@db:5432/openmaic
     volumes:
       # Optional: mount server-providers.yml for provider config
       # - ./server-providers.yml:/app/server-providers.yml:ro
       - openmaic-data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:
+  postgres-data:
   openmaic-data:

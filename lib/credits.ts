@@ -8,6 +8,7 @@
  * Batch plan    (₹399/user)  → 30 credits/user/month (min 5 users)
  */
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 export const CREDITS_PER_PLAN: Record<string, number> = {
@@ -37,7 +38,7 @@ export async function deductCredit(
   reason: string = 'activity_use',
 ): Promise<{ ok: boolean; balance: number }> {
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Lock the user row and read current balance
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -83,7 +84,7 @@ export async function refundCredit(
   activityId: string,
   note: string = 'Activity failed — credit refunded',
 ): Promise<void> {
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
       select: { credits: true },
@@ -119,7 +120,7 @@ export async function grantCredits(
   reason: string,
   note?: string,
 ): Promise<void> {
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
       select: { credits: true },
