@@ -22,22 +22,27 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { text, audioId, ttsProviderId, ttsVoice, ttsSpeed, ttsApiKey, ttsBaseUrl } = body as {
+    const { text, audioId, ttsSpeed, ttsApiKey, ttsBaseUrl } = body as {
       text: string;
       audioId: string;
-      ttsProviderId: TTSProviderId;
-      ttsVoice: string;
       ttsSpeed?: number;
       ttsApiKey?: string;
       ttsBaseUrl?: string;
     };
+    const ttsProviderId = (body.ttsProviderId ||
+      process.env.DEFAULT_TTS_PROVIDER ||
+      'azure-tts') as TTSProviderId;
+    const ttsVoice =
+      body.ttsVoice ||
+      process.env.DEFAULT_TTS_VOICE ||
+      'zh-CN-XiaoxiaoNeural';
 
     // Validate required fields
-    if (!text || !audioId || !ttsProviderId || !ttsVoice) {
+    if (!text || !audioId) {
       return apiError(
         'MISSING_REQUIRED_FIELD',
         400,
-        'Missing required fields: text, audioId, ttsProviderId, ttsVoice',
+        'Missing required fields: text, audioId',
       );
     }
 
