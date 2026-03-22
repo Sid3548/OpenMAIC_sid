@@ -126,7 +126,7 @@ function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
-async function startCheckout(plan: 'pro' | 'teams', onSuccess: () => void) {
+async function startCheckout(plan: string, onSuccess: () => void) {
   const loaded = await loadRazorpayScript();
   if (!loaded) { alert('Failed to load Razorpay. Check your connection.'); return; }
 
@@ -164,7 +164,7 @@ export default function LandingPage() {
 
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
-  const handleCheckout = useCallback(async (plan: 'pro' | 'teams') => {
+  const handleCheckout = useCallback(async (plan: string) => {
     setCheckingOut(plan);
     await startCheckout(plan, () => {
       setCheckingOut(null);
@@ -187,8 +187,11 @@ export default function LandingPage() {
           <a href="https://github.com/Sid3548/OpenMAIC_sid" target="_blank" rel="noreferrer">
             GitHub
           </a>
-          <Link href="/create" className="landing-cta-btn">
-            Start free →
+          <Link href="/login" style={{ color: 'inherit', textDecoration: 'none' }}>
+            Sign in
+          </Link>
+          <Link href="/signup" className="landing-cta-btn">
+            Sign up free →
           </Link>
         </div>
         {/* Theme toggle */}
@@ -404,93 +407,88 @@ export default function LandingPage() {
       <section className="landing-section" id="pricing">
         <div className="landing-eyebrow">Pricing</div>
         <h2 className="landing-section-title">
-          Start free.<br />Pay for what you use.
+          1 credit = 1 activity.<br />Start with 1 free.
         </h2>
         <p className="landing-section-sub">
-          No subscriptions to forget about. Hosted credits for casual use. Bring your own API key
-          for serious work. Self-host for free forever.
+          Sign up and get 1 free activity credit to try it out — no card needed.
+          Buy a plan to unlock 30 credits a month.
         </p>
         <div className="landing-pricing-grid">
-          {/* Self-hosted */}
+          {/* Free trial */}
           <div className="landing-plan">
-            <div className="landing-plan-name">Self-Hosted</div>
+            <div className="landing-plan-name">Free Trial</div>
             <div className="landing-plan-price">
-              <sup>$</sup>0
+              <sup>₹</sup>0
             </div>
             <div className="landing-plan-tagline">
-              Deploy to Vercel in 2 minutes. Your API key, your infrastructure, zero cost from us.
+              Sign up and get 1 free credit to explore the platform at no cost.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
-              {['Unlimited classrooms', 'All features included', 'Your own LLM API key', 'Docker + Vercel deploy', 'Full source code access'].map((f) => (
+              {['1 free activity credit', 'Full classroom experience', 'All AI features included', 'No credit card required'].map((f) => (
                 <li key={f}>{f}</li>
               ))}
-              {['No hosted dashboard', 'You manage updates'].map((f) => (
+              {['Credits do not renew', 'No priority queue'].map((f) => (
                 <li key={f} className="landing-plan-feature-muted">{f}</li>
               ))}
             </ul>
-            <a
-              href="https://github.com/Sid3548/OpenMAIC_sid"
-              target="_blank"
-              rel="noreferrer"
-              className="landing-plan-btn landing-plan-btn-ghost"
-            >
-              Deploy to Vercel →
-            </a>
+            <Link href="/signup" className="landing-plan-btn landing-plan-btn-ghost">
+              Sign up free →
+            </Link>
           </div>
-          {/* Pro */}
+          {/* Individual */}
           <div className="landing-plan landing-plan-featured">
             <div className="landing-plan-badge">Most popular</div>
-            <div className="landing-plan-name">Hosted Credits</div>
+            <div className="landing-plan-name">Individual</div>
             <div className="landing-plan-price">
-              <sup>$</sup>12<span>/mo</span>
+              <sup>₹</sup>499<span>/mo</span>
             </div>
             <div className="landing-plan-tagline">
-              We handle the infrastructure and API costs. Just learn.
+              30 activity credits every month. We handle infrastructure and AI costs.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
-              {['~50 classrooms/month', 'No API key needed', 'Gemini 2.5 Flash (fastest)', 'PDF & URL uploads', 'Export to PPTX + HTML', 'Voice narration included', 'Priority generation queue'].map((f) => (
+              {['30 credits/month (~30 classrooms)', 'No API key needed', 'GPT-5 powered generation', 'PDF & URL uploads', 'Export to PPTX + HTML', 'Voice narration (Google TTS)', 'Quiz + interview modules', 'Credit refund if anything breaks'].map((f) => (
                 <li key={f}>{f}</li>
               ))}
             </ul>
             <button
               className="landing-plan-btn landing-plan-btn-accent"
-              onClick={() => handleCheckout('pro')}
-              disabled={checkingOut === 'pro'}
+              onClick={() => handleCheckout('individual')}
+              disabled={checkingOut === 'individual'}
             >
-              {checkingOut === 'pro' ? 'Redirecting…' : 'Get started →'}
+              {checkingOut === 'individual' ? 'Redirecting…' : 'Get started →'}
             </button>
           </div>
-          {/* Teams */}
+          {/* Batch / Teacher */}
           <div className="landing-plan">
-            <div className="landing-plan-name">Teams</div>
+            <div className="landing-plan-name">Batch / Teacher</div>
             <div className="landing-plan-price">
-              <sup>$</sup>39<span>/mo</span>
+              <sup>₹</sup>399<span>/user/mo</span>
             </div>
             <div className="landing-plan-tagline">
-              For educators, tutors, and learning teams. Shared classroom library + admin dashboard.
+              For educators managing multiple students. Minimum 5 users. Contact us to set up.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
-              {['Up to 5 users', 'Shared classroom library', 'Admin dashboard', '~250 classrooms/month', 'All Pro features', 'Bulk export', 'Priority email support'].map((f) => (
+              {['Min. 5 users', '30 credits/user/month', 'Shared classroom library', 'Admin dashboard', 'All Individual features', 'Priority email support', 'Onboarding call included'].map((f) => (
                 <li key={f}>{f}</li>
               ))}
             </ul>
-            <button
+            <a
+              href="mailto:contact@openmaic.com?subject=Batch%20Plan%20Inquiry"
               className="landing-plan-btn landing-plan-btn-ghost"
-              onClick={() => handleCheckout('teams')}
-              disabled={checkingOut === 'teams'}
             >
-              {checkingOut === 'teams' ? 'Redirecting…' : 'Talk to us →'}
-            </button>
+              Contact us →
+            </a>
           </div>
         </div>
         <div className="landing-payment-note">
           <span style={{ fontSize: 20 }}>🔒</span>
           <div>
-            <strong>Secure payments via Razorpay.</strong> Cancel anytime. No credit card required
-            for the self-hosted version. Credits roll over within the same billing month.
+            <strong>Secure payments via Razorpay.</strong> Cancel anytime.
+            If a generation fails or the AI misbehaves, your credit is automatically refunded
+            with an apology.
           </div>
         </div>
       </section>

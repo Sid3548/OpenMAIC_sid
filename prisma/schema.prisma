@@ -1,0 +1,100 @@
+// Prisma Schema for OpenMAIC
+// Run: pnpm prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Auth (NextAuth v5 required tables) ────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ── Core User ──────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  mobile       String?
+  passwordHash String?
+  emailVerified DateTime?
+  image        String?
+  credits      Int       @default(0) // current balance (fast read)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  subscription Subscription?
+  ledger       CreditLedger[]
+}
+
+// ── Subscription ───────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              String    // 'individual' | 'batch'
+  status            String    @default("active") // 'active' | 'cancelled' | 'expired'
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  creditsGranted    Int       @default(0)
+  startDate         DateTime  @default(now())
+  endDate           DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+// ── Credit Ledger (full audit trail) ──────────────────────────────────────────
+
+model CreditLedger {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delta      Int      // positive = credit added, negative = credit used
+  balance    Int      // running balance after this entry
+  reason     String   // 'signup_bonus' | 'purchase' | 'activity_use' | 'refund'
+  activityId String?  // optional — links to the specific generation/session
+  note       String?  // optional human-readable note (e.g. "hallucination detected")
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
