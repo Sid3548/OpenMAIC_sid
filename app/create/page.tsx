@@ -323,7 +323,7 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-sky-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden">
+    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-lime-50/40 via-white to-stone-100 dark:from-[#0a0a0a] dark:via-[#0f0f0f] dark:to-[#111111] flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden">
       {/* ═══ Top-right pill (unchanged) ═══ */}
       <div
         ref={toolbarRef}
@@ -350,7 +350,7 @@ function HomePage() {
                 className={cn(
                   'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
                   locale === 'zh-CN' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
+                    'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400',
                 )}
               >
                 简体中文
@@ -363,7 +363,7 @@ function HomePage() {
                 className={cn(
                   'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
                   locale === 'hi-IN' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
+                    'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400',
                 )}
               >
                 हिन्दी
@@ -376,7 +376,7 @@ function HomePage() {
                 className={cn(
                   'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
                   locale === 'en-US' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
+                    'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400',
                 )}
               >
                 English
@@ -410,7 +410,7 @@ function HomePage() {
                 className={cn(
                   'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                   theme === 'light' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
+                    'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400',
                 )}
               >
                 <Sun className="w-4 h-4" />
@@ -424,7 +424,7 @@ function HomePage() {
                 className={cn(
                   'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                   theme === 'dark' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
+                    'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400',
                 )}
               >
                 <Moon className="w-4 h-4" />
@@ -438,7 +438,7 @@ function HomePage() {
                 className={cn(
                   'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                   theme === 'system' &&
-                    'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
+                    'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400',
                 )}
               >
                 <Monitor className="w-4 h-4" />
@@ -464,10 +464,10 @@ function HomePage() {
           {needsSetup && (
             <>
               <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
-                <span className="animate-setup-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500" />
+                <span className="animate-setup-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-lime-500" />
               </span>
-              <span className="animate-setup-float absolute top-full mt-2 right-0 whitespace-nowrap text-[11px] font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/50 px-2 py-0.5 rounded-full shadow-sm pointer-events-none">
+              <span className="animate-setup-float absolute top-full mt-2 right-0 whitespace-nowrap text-[11px] font-medium text-lime-700 dark:text-lime-400 bg-lime-50 dark:bg-lime-950/40 border border-lime-200 dark:border-lime-800/50 px-2 py-0.5 rounded-full shadow-sm pointer-events-none">
                 {t('settings.setupNeeded')}
               </span>
             </>
@@ -486,7 +486,7 @@ function HomePage() {
       {/* ═══ Background Decor ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute -top-20 left-1/3 w-[500px] h-[500px] bg-sky-400/10 rounded-full blur-3xl animate-pulse"
+          className="absolute -top-20 left-1/3 w-[500px] h-[500px] bg-lime-400/10 rounded-full blur-3xl animate-pulse"
           style={{ animationDuration: '5s' }}
         />
         <div
@@ -512,7 +512,7 @@ function HomePage() {
         {/* ── Logo ── */}
         <motion.img
           src="/logo-horizontal.png"
-          alt="OpenMAIC"
+          alt="Open Classroom"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{
@@ -532,7 +532,7 @@ function HomePage() {
           className="text-2xl md:text-3xl font-bold text-center tracking-tight text-foreground/90 mb-2"
         >
           AI Classroom for{' '}
-          <span className="bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-lime-500 to-emerald-500 bg-clip-text text-transparent">
             Every Student
           </span>
         </motion.h1>
@@ -555,7 +555,7 @@ function HomePage() {
         >
           <button
             onClick={() => router.push('/quiz')}
-            className="rounded-full border border-sky-200 bg-sky-50/90 px-4 py-2 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:border-sky-700 dark:hover:bg-sky-900/50"
+            className="rounded-full border border-lime-200 bg-lime-50/90 px-4 py-2 text-sm font-semibold text-lime-700 shadow-sm transition hover:border-lime-300 hover:bg-lime-100 dark:border-lime-800 dark:bg-lime-900/30 dark:text-lime-300 dark:hover:border-lime-700 dark:hover:bg-lime-900/50"
           >
             Quiz — Placement + Coding
           </button>
@@ -574,7 +574,7 @@ function HomePage() {
           transition={{ delay: 0.35 }}
           className="w-full"
         >
-          <div className="w-full rounded-2xl border border-sky-100 dark:border-slate-700/60 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-sky-900/[0.04] dark:shadow-black/20 transition-shadow focus-within:shadow-2xl focus-within:shadow-sky-500/[0.10] focus-within:border-sky-200 dark:focus-within:border-sky-800/50">
+          <div className="w-full rounded-2xl border border-lime-100 dark:border-slate-700/60 bg-white/90 dark:bg-[#1a1a1a]/90 backdrop-blur-xl shadow-xl shadow-lime-900/[0.04] dark:shadow-black/30 transition-shadow focus-within:shadow-2xl focus-within:shadow-lime-500/[0.10] focus-within:border-lime-200 dark:focus-within:border-lime-800/50">
             {/* ── Greeting + Profile + Agents ── */}
             <div className="relative z-20 flex items-start justify-between">
               <GreetingBar />
@@ -843,7 +843,7 @@ function GreetingBar() {
           onClick={() => setOpen(true)}
         >
           <div className="shrink-0 relative">
-            <div className="size-8 rounded-full overflow-hidden ring-[1.5px] ring-border/30 group-hover:ring-sky-400/60 dark:group-hover:ring-sky-400/40 transition-all duration-300">
+            <div className="size-8 rounded-full overflow-hidden ring-[1.5px] ring-border/30 group-hover:ring-lime-400/60 dark:group-hover:ring-lime-400/40 transition-all duration-300">
               <img src={avatar} alt="" className="size-full object-cover" />
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-white dark:bg-slate-800 border border-border/40 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
@@ -901,7 +901,7 @@ function GreetingBar() {
                     setAvatarPickerOpen(!avatarPickerOpen);
                   }}
                 >
-                  <div className="size-8 rounded-full overflow-hidden ring-[1.5px] ring-sky-300/70 dark:ring-sky-500/40 transition-all duration-300">
+                  <div className="size-8 rounded-full overflow-hidden ring-[1.5px] ring-lime-300/70 dark:ring-lime-500/40 transition-all duration-300">
                     <img src={avatar} alt="" className="size-full object-cover" />
                   </div>
                   <motion.div
@@ -939,7 +939,7 @@ function GreetingBar() {
                       />
                       <button
                         onClick={commitName}
-                        className="shrink-0 size-5 rounded flex items-center justify-center text-sky-500 hover:bg-sky-100 dark:hover:bg-sky-900/30"
+                        className="shrink-0 size-5 rounded flex items-center justify-center text-lime-600 hover:bg-lime-100 dark:hover:bg-lime-900/30"
                       >
                         <Check className="size-3" />
                       </button>
@@ -991,7 +991,7 @@ function GreetingBar() {
                               'size-7 rounded-full overflow-hidden bg-gray-50 dark:bg-gray-800 cursor-pointer transition-all duration-150',
                               'hover:scale-110 active:scale-95',
                               avatar === url
-                                ? 'ring-2 ring-sky-400 dark:ring-sky-500 ring-offset-0'
+                                ? 'ring-2 ring-lime-400 dark:ring-lime-500 ring-offset-0'
                                 : 'hover:ring-1 hover:ring-muted-foreground/30',
                             )}
                           >
@@ -1003,7 +1003,7 @@ function GreetingBar() {
                             'size-7 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 border border-dashed',
                             'hover:scale-110 active:scale-95',
                             isCustomAvatar(avatar)
-                              ? 'ring-2 ring-sky-400 dark:ring-sky-500 ring-offset-0 border-sky-300 dark:border-sky-600 bg-sky-50 dark:bg-sky-900/30'
+                              ? 'ring-2 ring-lime-400 dark:ring-lime-500 ring-offset-0 border-lime-300 dark:border-lime-600 bg-lime-50 dark:bg-lime-900/30'
                               : 'border-muted-foreground/30 text-muted-foreground/50 hover:border-muted-foreground/50',
                           )}
                           onClick={() => avatarInputRef.current?.click()}
@@ -1084,7 +1084,7 @@ function ClassroomCard({
           />
         ) : !slide ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="size-12 rounded-2xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/30 dark:to-blue-900/30 flex items-center justify-center">
+            <div className="size-12 rounded-2xl bg-gradient-to-br from-lime-100 to-emerald-100 dark:from-lime-900/30 dark:to-emerald-900/30 flex items-center justify-center">
               <span className="text-xl opacity-50">📄</span>
             </div>
           </div>
@@ -1149,7 +1149,7 @@ function ClassroomCard({
 
       {/* Info — outside the thumbnail */}
       <div className="mt-2.5 px-1 flex items-center gap-2">
-        <span className="shrink-0 inline-flex items-center rounded-full bg-sky-100 dark:bg-sky-900/30 px-2 py-0.5 text-[11px] font-medium text-sky-600 dark:text-sky-400">
+        <span className="shrink-0 inline-flex items-center rounded-full bg-lime-100 dark:bg-lime-900/30 px-2 py-0.5 text-[11px] font-medium text-lime-700 dark:text-lime-400">
           {classroom.sceneCount} {t('classroom.slides')} · {formatDate(classroom.updatedAt)}
         </span>
         <Tooltip>
