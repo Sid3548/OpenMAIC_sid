@@ -24,6 +24,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
 COPY . .
 
+# Generate Prisma client before building
+RUN pnpm prisma generate
+
 RUN pnpm build
 
 # ---- Stage 4: Runner ----
