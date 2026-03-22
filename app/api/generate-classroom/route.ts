@@ -10,20 +10,35 @@ import { deductCredit } from '@/lib/credits';
 
 export const maxDuration = 30;
 
+const GUEST_TRIAL_COOKIE = 'guest_trial_used';
+
 export async function POST(req: NextRequest) {
-  // Auth + credit check
   const session = await auth();
-  if (!session?.user?.id) {
-    return apiError('UNAUTHORIZED', 401, 'Sign in to generate a classroom');
-  }
   const jobId = nanoid(10);
-  const creditResult = await deductCredit(session.user.id, jobId, 'activity_use');
-  if (!creditResult.ok) {
-    return apiError(
-      'INSUFFICIENT_CREDITS',
-      402,
-      'You have no credits left. Purchase a plan to continue.',
-    );
+
+  let isGuest = false;
+
+  if (!session?.user?.id) {
+    // Allow one free guest generation tracked via cookie
+    const guestUsed = req.cookies.get(GUEST_TRIAL_COOKIE)?.value;
+    if (guestUsed === 'true') {
+      return apiError(
+        'UNAUTHORIZED',
+        401,
+        'Sign up free to keep generating classrooms — your first one is already done!',
+      );
+    }
+    isGuest = true;
+  } else {
+    // Authenticated: deduct credit
+    const creditResult = await deductCredit(session.user.id, jobId, 'activity_use');
+    if (!creditResult.ok) {
+      return apiError(
+        'INSUFFICIENT_CREDITS',
+        402,
+        'You have no credits left. Purchase a plan to continue.',
+      );
+    }
   }
 
   try {
@@ -54,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     after(() => runClassroomGenerationJob(jobId, body, baseUrl));
 
-    return apiSuccess(
+    const res = apiSuccess(
       {
         jobId,
         status: job.status,
@@ -65,6 +80,18 @@ export async function POST(req: NextRequest) {
       },
       202,
     );
+
+    // Mark guest trial as used so they can only generate once without signing up
+    if (isGuest) {
+      res.cookies.set(GUEST_TRIAL_COOKIE, 'true', {
+        maxAge: 60 * 60 * 24 * 365,
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+      });
+    }
+
+    return res;
   } catch (error) {
     // Refund the credit since the job could not be started
     if (session?.user?.id) {

@@ -36,7 +36,7 @@ theorem and why it matters. Skip the math.`,
     title: 'Upload your own material',
     desc: 'Paste a PDF, URL, or text. It reads your actual source, not Wikipedia.',
     heading: 'Upload your actual source material',
-    body: 'If you\'re studying from a textbook, research paper, or lecture notes — paste the content directly. OpenMAIC builds the class around your material, not a generic summary of the topic.',
+    body: 'If you\'re studying from a textbook, research paper, or lecture notes — paste the content directly. Open Classroom builds the class around your material, not a generic summary of the topic.',
     code: `• PDF upload (textbooks, papers, notes)
 • Paste raw text directly
 • Any public URL (articles, docs)
@@ -48,7 +48,7 @@ theorem and why it matters. Skip the math.`,
     title: 'Talk back during the class',
     desc: 'The agents go off-script when you respond. Ask "wait, explain that again."',
     heading: 'The class responds to you',
-    body: 'Most people watch passively. That wastes 80% of what OpenMAIC can do. The agents are listening — they change course based on your responses.',
+    body: 'Most people watch passively. That wastes 80% of what Open Classroom can do. The agents are listening — they change course based on your responses.',
     code: `• "Can you slow down and explain [X] again?"
 • "I don't buy that explanation — why?"
 • "Give me a real-world example of this"
@@ -99,15 +99,15 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How is this different from ChatGPT asking me questions?',
-    a: 'OpenMAIC runs multiple agents simultaneously — a professor, a TA, and a student peer who each have distinct personas. They interact with each other, not just with you. Combined with the whiteboard, interactive simulations, and structured scene types, it\'s a fundamentally different experience from a chat interface.',
+    a: 'Open Classroom runs multiple agents simultaneously — a professor, a TA, and a student peer who each have distinct personas. They interact with each other, not just with you. Combined with the whiteboard, interactive simulations, and structured scene types, it\'s a fundamentally different experience from a chat interface.',
   },
   {
     q: 'Can I use my own study materials?',
-    a: 'Yes — this is one of the most powerful features. Upload a PDF, paste a URL, or drop in raw text. OpenMAIC will build the entire classroom around your source material rather than pulling from general knowledge.',
+    a: 'Yes — this is one of the most powerful features. Upload a PDF, paste a URL, or drop in raw text. Open Classroom will build the entire classroom around your source material rather than pulling from general knowledge.',
   },
   {
     q: "What's the AGPL license mean for me as a user?",
-    a: "If you're just using OpenMAIC to learn — absolutely nothing. The AGPL license only applies to developers who modify and redistribute the software.",
+    a: "If you're just using Open Classroom to learn — absolutely nothing. The AGPL license only applies to developers who modify and redistribute the software.",
   },
   {
     q: 'How long does a classroom take to generate?',
@@ -142,7 +142,7 @@ async function startCheckout(plan: string, onSuccess: () => void) {
     key: data.keyId,
     amount: data.amount,
     currency: data.currency,
-    name: 'OpenMAIC',
+    name: 'Open Classroom',
     description: data.name,
     order_id: data.orderId,
     theme: { color: '#c8f53a' },
@@ -178,7 +178,7 @@ export default function LandingPage() {
       {/* ── NAV ── */}
       <nav className="landing-nav">
         <Link href="/" className="landing-logo">
-          Open<span>MAIC</span>
+          Open<span>Classroom</span>
         </Link>
         <div className="landing-nav-links">
           <a href="#how-to-use">How it works</a>
@@ -215,7 +215,7 @@ export default function LandingPage() {
           <em>Actually</em> learn it.
         </h1>
         <p className="landing-hero-sub">
-          OpenMAIC turns any topic — a textbook, a paper, a URL — into a full classroom with AI
+          Open Classroom turns any topic — a textbook, a paper, a URL — into a full classroom with AI
           teachers who lecture, debate, quiz, and draw on a whiteboard. In real time. In 60 seconds.
         </p>
         <div className="landing-hero-actions">
@@ -253,7 +253,7 @@ export default function LandingPage() {
             <span className="landing-dot landing-dot-r" />
             <span className="landing-dot landing-dot-y" />
             <span className="landing-dot landing-dot-g" />
-            <span className="landing-demo-url">openmaic/classroom/quantum-entanglement</span>
+            <span className="landing-demo-url">openclassroom/classroom/quantum-entanglement</span>
           </div>
           <div className="landing-demo-body">
             <div className="landing-demo-scene">
@@ -337,12 +337,12 @@ export default function LandingPage() {
             {
               icon: '📄',
               title: 'Teach from your own docs',
-              desc: 'Upload a PDF, paste a URL, or drop in text. OpenMAIC reads your material and builds a class around it — not generic Wikipedia content.',
+              desc: 'Upload a PDF, paste a URL, or drop in text. Open Classroom reads your material and builds a class around it — not generic Wikipedia content.',
             },
             {
               icon: '🏗️',
               title: 'Project-based learning',
-              desc: 'For complex topics, OpenMAIC creates a structured project with milestones and AI collaborators. Build something, not just memorize something.',
+              desc: 'For complex topics, Open Classroom creates a structured project with milestones and AI collaborators. Build something, not just memorize something.',
             },
             {
               icon: '📤',
@@ -476,7 +476,7 @@ export default function LandingPage() {
               ))}
             </ul>
             <a
-              href="mailto:contact@openmaic.com?subject=Batch%20Plan%20Inquiry"
+              href="mailto:contact@openclassroom.online?subject=Batch%20Plan%20Inquiry"
               className="landing-plan-btn landing-plan-btn-ghost"
             >
               Contact us →
@@ -531,7 +531,7 @@ export default function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className="landing-footer">
         <div className="landing-footer-left">
-          © 2025 OpenMAIC · AGPL-3.0 License · Forked from{' '}
+          © 2025 Open Classroom · AGPL-3.0 License · Forked from{' '}
           <a href="https://github.com/THU-MAIC/OpenMAIC" target="_blank" rel="noreferrer">
             THU-MAIC
           </a>
@@ -542,7 +542,7 @@ export default function LandingPage() {
             GitHub
           </a>
           <Link href="/create">Live demo</Link>
-          <a href="mailto:hello@openmaic.com">Contact</a>
+          <a href="mailto:hello@openclassroom.online">Contact</a>
         </div>
       </footer>
     </div>

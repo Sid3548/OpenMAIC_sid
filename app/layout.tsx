@@ -37,8 +37,8 @@ const siteUrl = 'https://openclassroom.online';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'OpenMAIC — AI Classroom for Every Student',
-    template: '%s | OpenMAIC',
+    default: 'Open Classroom — AI Classroom for Every Student',
+    template: '%s | Open Classroom',
   },
   description:
     'Universal AI-powered interactive classroom. Upload a PDF, paste a URL, or type any topic — and get a full multi-agent learning experience in 60 seconds.',
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     'multi-agent learning',
     'AI tutoring',
     'interactive learning',
-    'OpenMAIC',
+    'Open Classroom',
     'generative education',
     'AI teacher',
   ],
@@ -57,8 +57,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: siteUrl,
-    siteName: 'OpenMAIC',
-    title: 'OpenMAIC — AI Classroom for Every Student',
+    siteName: 'Open Classroom',
+    title: 'Open Classroom — AI Classroom for Every Student',
     description:
       'Multi-agent AI interactive classroom. Upload a PDF to instantly generate an immersive, full learning experience with AI teachers who lecture, quiz, and draw on a whiteboard.',
     images: [
@@ -66,13 +66,13 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'OpenMAIC — AI Classroom for Every Student',
+        alt: 'Open Classroom — AI Classroom for Every Student',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OpenMAIC — AI Classroom for Every Student',
+    title: 'Open Classroom — AI Classroom for Every Student',
     description:
       'Multi-agent AI interactive classroom. Learn anything in 60 seconds with AI teachers that actually teach.',
     images: ['/og-image.png'],
@@ -112,7 +112,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebApplication',
-              name: 'OpenMAIC',
+              name: 'Open Classroom',
               description:
                 'Universal AI-powered interactive classroom with multi-agent teachers that lecture, quiz, and draw on a whiteboard.',
               url: siteUrl,
