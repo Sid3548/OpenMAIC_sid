@@ -4,12 +4,28 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import { useTheme } from '@/lib/hooks/use-theme';
+import { Sun, Moon } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const inputStyle: React.CSSProperties = {
+    background: isDark ? '#1a1a1a' : '#fff',
+    border: `1px solid ${isDark ? '#333' : '#ddd'}`,
+    borderRadius: 8,
+    padding: '11px 14px',
+    color: isDark ? '#fff' : '#111',
+    fontSize: 14,
+    outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box',
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -38,11 +54,18 @@ export default function LoginPage() {
 
   return (
     <main
-      style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}
+      style={{ background: isDark ? '#0a0a0a' : '#f8f8f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', position: 'relative' }}
     >
+      <button
+        onClick={() => setTheme(isDark ? 'light' : 'dark')}
+        style={{ position: 'absolute', top: 20, right: 20, background: isDark ? '#1a1a1a' : '#e8e8e0', border: 'none', borderRadius: 8, padding: '8px', cursor: 'pointer', color: isDark ? '#ccc' : '#555', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        aria-label="Toggle theme"
+      >
+        {isDark ? <Sun size={16} /> : <Moon size={16} />}
+      </button>
       <div style={{ width: '100%', maxWidth: 380 }}>
-        <h1 style={{ color: '#fff', fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Sign in</h1>
-        <p style={{ color: '#888', marginBottom: 28, fontSize: 14 }}>
+        <h1 style={{ color: isDark ? '#fff' : '#111', fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Sign in</h1>
+        <p style={{ color: isDark ? '#888' : '#666', marginBottom: 28, fontSize: 14 }}>
           <Link href="/signup" style={{ color: '#c8f53a' }}>Create an account</Link>
           {' '}to get 1 free credit.
         </p>
@@ -95,14 +118,3 @@ export default function LoginPage() {
   );
 }
 
-const inputStyle: React.CSSProperties = {
-  background: '#1a1a1a',
-  border: '1px solid #333',
-  borderRadius: 8,
-  padding: '11px 14px',
-  color: '#fff',
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
-};
