@@ -31,11 +31,11 @@ export async function POST(req: NextRequest) {
     };
     const ttsProviderId = (body.ttsProviderId ||
       process.env.DEFAULT_TTS_PROVIDER ||
-      'azure-tts') as TTSProviderId;
+      'google-tts') as TTSProviderId;
     const ttsVoice =
       body.ttsVoice ||
       process.env.DEFAULT_TTS_VOICE ||
-      'zh-CN-XiaoxiaoNeural';
+      'hi-IN-Neural2-A';
 
     // Validate required fields
     if (!text || !audioId) {
