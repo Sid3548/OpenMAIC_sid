@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useTheme } from '@/lib/hooks/use-theme';
@@ -9,6 +9,7 @@ import { Sun, Moon } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const [form, setForm] = useState({ email: '', password: '' });
@@ -46,7 +47,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/create');
+      const next = searchParams.get('next') || '/create';
+      router.push(next);
     } finally {
       setLoading(false);
     }
