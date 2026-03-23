@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useTheme } from '@/lib/hooks/use-theme';
 import { Sun, Moon } from 'lucide-react';
 
@@ -136,6 +138,7 @@ async function startCheckout(plan: string, onSuccess: () => void) {
     body: JSON.stringify({ plan }),
   });
   const data = await res.json();
+  if (res.status === 401) { window.location.href = '/login?next=/'; return; }
   if (data.error) { alert(`Checkout error: ${data.error}`); return; }
 
   const rzp = new window.Razorpay({
@@ -153,6 +156,8 @@ async function startCheckout(plan: string, onSuccess: () => void) {
 
 export default function LandingPage() {
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -165,13 +170,14 @@ export default function LandingPage() {
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
   const handleCheckout = useCallback(async (plan: string) => {
+    if (!session) { router.push('/login?next=/'); return; }
     setCheckingOut(plan);
     await startCheckout(plan, () => {
       setCheckingOut(null);
       window.location.href = '/payment/success';
     });
     setCheckingOut(null);
-  }, []);
+  }, [session, router]);
 
   return (
     <div className="landing-page">
