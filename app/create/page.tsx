@@ -47,6 +47,7 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDraftCache } from '@/lib/hooks/use-draft-cache';
 import { SpeechButton } from '@/components/audio/speech-button';
+import { Walkthrough } from '@/components/onboarding/walkthrough';
 
 const log = createLogger('Home');
 
@@ -482,6 +483,8 @@ function HomePage() {
         }}
         initialSection={settingsSection}
       />
+
+      <Walkthrough onOpenSettings={() => setSettingsOpen(true)} />
 
       {/* ═══ Background Decor ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

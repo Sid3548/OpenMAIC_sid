@@ -76,13 +76,13 @@ theorem and why it matters. Skip the math.`,
     desc: 'Free tier uses shared quota. Your own key = no limits, faster generation.',
     heading: 'Bring your own API key',
     body: 'The hosted version uses shared quota. For heavy use or if you hit rate limits, connect your own API key in Settings → Providers.',
-    code: `Recommended: Gemini 2.5 Flash
+    code: `Recommended: GPT-5 mini
 • Best speed/quality balance
-• Set: GOOGLE_API_KEY=your_key
+• Set: OPENAI_API_KEY=your_key
 
 Also works:
-• OpenAI (GPT-4o)
 • Anthropic (Claude)
+• Google (Gemini)
 • DeepSeek (cheapest)`,
     tip: 'Self-host via Vercel for free — click Deploy on GitHub, add your API key in env vars, done. Zero monthly cost under the Vercel free tier.',
   },
@@ -91,11 +91,11 @@ Also works:
 const FAQ_ITEMS = [
   {
     q: 'Is this actually free to self-host?',
-    a: 'Yes — completely. Clone the repo, deploy to Vercel (free tier), add your own LLM API key (Google Gemini has a generous free tier), and you\'re running at zero cost. The only expense is your own API usage, which is typically a few cents per classroom generation.',
+    a: 'Yes — completely. Clone the repo, deploy to Vercel (free tier), add your own LLM API key (OpenAI GPT-5 mini is fast and affordable), and you\'re running at zero cost. The only expense is your own API usage, which is typically a few cents per classroom generation.',
   },
   {
     q: 'What LLMs does it support?',
-    a: 'OpenAI (GPT-4o, o1), Anthropic (Claude 3.5+), Google Gemini (all models), DeepSeek, and any OpenAI-compatible API. We recommend Gemini 2.5 Flash for the best speed/quality/cost balance.',
+    a: 'OpenAI (GPT-5 mini, GPT-5, GPT-5.4), Anthropic (Claude 3.5+), Google Gemini (all models), DeepSeek, and any OpenAI-compatible API. We recommend GPT-5 mini for the best speed/quality/cost balance.',
   },
   {
     q: 'How is this different from ChatGPT asking me questions?',
