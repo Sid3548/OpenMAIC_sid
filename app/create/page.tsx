@@ -10,6 +10,7 @@ import {
   Clock,
   Copy,
   ImagePlus,
+  Library,
   Pencil,
   Trash2,
   Settings,
@@ -19,6 +20,7 @@ import {
   BotOff,
   ChevronUp,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { detectPreferredLocale, isSupportedLocale } from '@/lib/utils/language';
 import { createLogger } from '@/lib/logger';
@@ -47,6 +49,7 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDraftCache } from '@/lib/hooks/use-draft-cache';
 import { SpeechButton } from '@/components/audio/speech-button';
+import { Walkthrough } from '@/components/onboarding/walkthrough';
 
 const log = createLogger('Home');
 
@@ -450,6 +453,17 @@ function HomePage() {
 
         <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
 
+        {/* Library Link */}
+        <Link
+          href="/library"
+          className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all"
+          title="My Library"
+        >
+          <Library className="w-4 h-4" />
+        </Link>
+
+        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
+
         {/* Settings Button */}
         <div className="relative">
           <button
@@ -482,6 +496,8 @@ function HomePage() {
         }}
         initialSection={settingsSection}
       />
+
+      <Walkthrough onOpenSettings={() => setSettingsOpen(true)} />
 
       {/* ═══ Background Decor ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -690,6 +706,14 @@ function HomePage() {
                 <ChevronDown className="size-3.5" />
               </motion.div>
             </span>
+            <Link
+              href="/library"
+              onClick={(e) => e.stopPropagation()}
+              className="shrink-0 flex items-center gap-1 text-[11px] text-muted-foreground/50 hover:text-lime-600 dark:hover:text-lime-400 transition-colors"
+            >
+              <Library className="size-3" />
+              View all
+            </Link>
             <div className="flex-1 h-px bg-border/40 group-hover:bg-border/70 transition-colors" />
           </button>
 
