@@ -188,6 +188,9 @@ export default function LandingPage() {
           <a href="https://github.com/Sid3548/OpenMAIC_sid" target="_blank" rel="noreferrer">
             GitHub
           </a>
+          <Link href="/library" style={{ color: 'inherit', textDecoration: 'none' }}>
+            My Library
+          </Link>
           <Link href="/login" style={{ color: 'inherit', textDecoration: 'none' }}>
             Sign in
           </Link>
