@@ -159,7 +159,7 @@ async function generateOpenAITTS(
       'Content-Type': 'application/json; charset=utf-8',
     },
     body: JSON.stringify({
-      model: 'tts-1',
+      model: 'gpt-4o-mini-tts',
       input: text,
       voice: config.voice,
       speed: config.speed || 1.0,

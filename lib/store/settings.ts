@@ -254,10 +254,10 @@ const getDefaultProvidersConfig = (): ProvidersConfig => {
 
 // Initialize default audio config
 const getDefaultAudioConfig = () => ({
-  ttsProviderId: 'browser-native-tts' as TTSProviderId,
-  ttsVoice: 'default',
+  ttsProviderId: 'openai-tts' as TTSProviderId,
+  ttsVoice: 'alloy',
   ttsSpeed: 1.0,
-  asrProviderId: 'browser-native' as ASRProviderId,
+  asrProviderId: 'openai-whisper' as ASRProviderId,
   asrLanguage: 'zh',
   ttsProvidersConfig: {
     'openai-tts': { apiKey: '', baseUrl: '', enabled: true },
@@ -515,9 +515,11 @@ export const useSettingsStore = create<SettingsState>()(
               // Only auto-switch if the user hasn't explicitly chosen a non-default provider
               const onDefaultTTS =
                 state.ttsProviderId === 'browser-native-tts' ||
+                state.ttsProviderId === 'openai-tts' ||
                 !state.ttsProvidersConfig[state.ttsProviderId]?.apiKey?.trim();
               const onDefaultASR =
                 state.asrProviderId === 'browser-native' ||
+                state.asrProviderId === 'openai-whisper' ||
                 !state.asrProvidersConfig[state.asrProviderId]?.apiKey?.trim();
 
               if (suggestedTTS && onDefaultTTS) {

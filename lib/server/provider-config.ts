@@ -266,7 +266,11 @@ export function getServerTTSProviders(): Record<string, { baseUrl?: string }> {
 
 export function resolveTTSApiKey(providerId: string, clientKey?: string): string {
   if (clientKey) return clientKey;
-  return getConfig().tts[providerId]?.apiKey || '';
+  const configKey = getConfig().tts[providerId]?.apiKey;
+  if (configKey) return configKey;
+  // openai-tts shares the same key as the main OpenAI LLM provider — no separate key needed
+  if (providerId === 'openai-tts') return process.env.OPENAI_API_KEY || '';
+  return '';
 }
 
 export function resolveTTSBaseUrl(providerId: string, clientBaseUrl?: string): string | undefined {
@@ -290,7 +294,11 @@ export function getServerASRProviders(): Record<string, { baseUrl?: string }> {
 
 export function resolveASRApiKey(providerId: string, clientKey?: string): string {
   if (clientKey) return clientKey;
-  return getConfig().asr[providerId]?.apiKey || '';
+  const configKey = getConfig().asr[providerId]?.apiKey;
+  if (configKey) return configKey;
+  // openai-whisper shares the same key as the main OpenAI LLM provider — no separate key needed
+  if (providerId === 'openai-whisper') return process.env.OPENAI_API_KEY || '';
+  return '';
 }
 
 export function resolveASRBaseUrl(providerId: string, clientBaseUrl?: string): string | undefined {
