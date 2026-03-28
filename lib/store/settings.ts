@@ -432,8 +432,8 @@ export const useSettingsStore = create<SettingsState>()(
 
       return {
         // Initial state (use migrated data if available)
-        providerId: migratedData?.providerId || 'openai',
-        modelId: migratedData?.modelId || 'gpt-5',
+        providerId: migratedData?.providerId || 'deepseek',
+        modelId: migratedData?.modelId || 'deepseek-chat',
         providersConfig: migratedData?.providersConfig || getDefaultProvidersConfig(),
         ttsModel: migratedData?.ttsModel || 'openai-tts',
         selectedAgentIds: migratedData?.selectedAgentIds || ['default-1', 'default-2', 'default-3'],
@@ -998,7 +998,7 @@ export const useSettingsStore = create<SettingsState>()(
     },
     {
       name: 'settings-storage',
-      version: 4,
+      version: 5,
       // Migrate persisted state
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Partial<SettingsState>;
@@ -1076,6 +1076,13 @@ export const useSettingsStore = create<SettingsState>()(
           ) {
             state.modelId = 'gpt-5';
           }
+        }
+
+        // v4 → v5: Switch all users to DeepSeek for text generation
+        // DeepSeek V3 offers better quality at lower cost than OpenAI for text generation
+        if (version < 5) {
+          state.providerId = 'deepseek' as ProviderId;
+          state.modelId = 'deepseek-chat';
         }
 
         // Add default media generation toggles if missing
