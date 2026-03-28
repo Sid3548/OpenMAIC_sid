@@ -72,7 +72,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve API key: client > server > empty
-    const modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-4o-mini-2024-07-18';
+    let modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-4o-mini-2024-07-18';
+
+    // gpt-5-mini returns empty responses — fall back to gpt-4o-mini
+    if (modelString.includes('gpt-5-mini')) {
+      modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-4o-mini-2024-07-18');
+    }
+
     const { providerId, modelId } = parseModelString(modelString);
 
     const clientBaseUrl = body.baseUrl || undefined;
