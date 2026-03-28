@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/lib/hooks/use-theme';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Menu, X } from 'lucide-react';
 
 // Razorpay global type (loaded via CDN script)
 declare global {
@@ -158,6 +158,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -209,7 +210,35 @@ export default function LandingPage() {
             {isDark ? <Sun size={15} /> : <Moon size={15} />}
           </button>
         )}
+        {/* Mobile menu toggle */}
+        <button
+          className="landing-mobile-toggle"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </nav>
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div className="landing-mobile-menu" onClick={() => setMobileMenuOpen(false)}>
+          <a href="#how-to-use">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="https://github.com/Sid3548/OpenMAIC_sid" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+          <Link href="/library" style={{ color: 'inherit', textDecoration: 'none' }}>
+            My Library
+          </Link>
+          <Link href="/login" style={{ color: 'inherit', textDecoration: 'none' }}>
+            Sign in
+          </Link>
+          <Link href="/signup" className="landing-cta-btn" style={{ textAlign: 'center' }}>
+            Sign up free →
+          </Link>
+        </div>
+      )}
 
       {/* ── HERO ── */}
       <section className="landing-hero">
