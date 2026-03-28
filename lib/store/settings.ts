@@ -433,7 +433,7 @@ export const useSettingsStore = create<SettingsState>()(
       return {
         // Initial state (use migrated data if available)
         providerId: migratedData?.providerId || 'openai',
-        modelId: migratedData?.modelId || 'gpt-4o-mini-2024-07-18',
+        modelId: migratedData?.modelId || 'gpt-4o',
         providersConfig: migratedData?.providersConfig || getDefaultProvidersConfig(),
         ttsModel: migratedData?.ttsModel || 'openai-tts',
         selectedAgentIds: migratedData?.selectedAgentIds || ['default-1', 'default-2', 'default-3'],
@@ -1056,14 +1056,15 @@ export const useSettingsStore = create<SettingsState>()(
           delete (state as Record<string, unknown>).deepResearchProvidersConfig;
         }
 
-        // v2 → v3: Switch gpt-5-mini users to gpt-4o-mini-2024-07-18
-        // gpt-5-mini returns empty responses for scene content generation
+        // v2 → v3: Switch broken models to gpt-4o
+        // gpt-5-mini returns empty responses; gpt-4o-mini quality too low
         if (version < 3) {
           if (
             state.providerId === 'openai' &&
-            (state.modelId === '' || (state.modelId && state.modelId.startsWith('gpt-5-mini')))
+            (state.modelId === '' ||
+              (state.modelId && (state.modelId.startsWith('gpt-5-mini') || state.modelId.startsWith('gpt-4o-mini'))))
           ) {
-            state.modelId = 'gpt-4o-mini-2024-07-18';
+            state.modelId = 'gpt-4o';
           }
         }
 

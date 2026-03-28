@@ -72,11 +72,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve API key: client > server > empty
-    let modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-4o-mini-2024-07-18';
+    let modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-4o';
 
-    // gpt-5-mini returns empty responses — fall back to gpt-4o-mini
+    // gpt-5-mini returns empty responses — fall back to gpt-4o
     if (modelString.includes('gpt-5-mini')) {
-      modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-4o-mini-2024-07-18');
+      modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-4o');
     }
 
     const { providerId, modelId } = parseModelString(modelString);
