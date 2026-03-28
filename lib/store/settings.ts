@@ -265,7 +265,7 @@ const getDefaultAudioConfig = () => ({
     'glm-tts': { apiKey: '', baseUrl: '', enabled: false },
     'qwen-tts': { apiKey: '', baseUrl: '', enabled: false },
     'google-tts': { apiKey: '', baseUrl: '', enabled: false },
-    'browser-native-tts': { apiKey: '', baseUrl: '', enabled: true },
+    'browser-native-tts': { apiKey: '', baseUrl: '', enabled: false },
   } as Record<TTSProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
   asrProvidersConfig: {
     'openai-whisper': { apiKey: '', baseUrl: '', enabled: true },
