@@ -452,7 +452,7 @@ export default function LandingPage() {
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
-              {['30 credits/month (~30 classrooms)', 'No API key needed', 'GPT-5 powered generation', 'PDF & URL uploads', 'Export to PPTX + HTML', 'Voice narration (Google TTS)', 'Quiz + interview modules', 'Credit refund if anything breaks'].map((f) => (
+              {['30 credits/month (~30 classrooms)', 'No API key needed', 'GPT-5 powered generation', 'PDF & URL uploads', 'Export to PPTX + HTML', 'Voice narration (OpenAI TTS)', 'Quiz + interview modules', 'Credit refund if anything breaks'].map((f) => (
                 <li key={f}>{f}</li>
               ))}
             </ul>

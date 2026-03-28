@@ -266,7 +266,12 @@ export function getServerTTSProviders(): Record<string, { baseUrl?: string }> {
 
 export function resolveTTSApiKey(providerId: string, clientKey?: string): string {
   if (clientKey) return clientKey;
-  return getConfig().tts[providerId]?.apiKey || '';
+  const serverKey = getConfig().tts[providerId]?.apiKey;
+  if (serverKey) return serverKey;
+  if (providerId === 'openai-tts') {
+    return getConfig().providers['openai']?.apiKey || process.env.OPENAI_API_KEY || '';
+  }
+  return '';
 }
 
 export function resolveTTSBaseUrl(providerId: string, clientBaseUrl?: string): string | undefined {
@@ -290,7 +295,12 @@ export function getServerASRProviders(): Record<string, { baseUrl?: string }> {
 
 export function resolveASRApiKey(providerId: string, clientKey?: string): string {
   if (clientKey) return clientKey;
-  return getConfig().asr[providerId]?.apiKey || '';
+  const serverKey = getConfig().asr[providerId]?.apiKey;
+  if (serverKey) return serverKey;
+  if (providerId === 'openai-whisper') {
+    return getConfig().providers['openai']?.apiKey || process.env.OPENAI_API_KEY || '';
+  }
+  return '';
 }
 
 export function resolveASRBaseUrl(providerId: string, clientBaseUrl?: string): string | undefined {

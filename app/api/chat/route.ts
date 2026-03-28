@@ -21,6 +21,8 @@ import type { ThinkingConfig } from '@/lib/types/provider';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 const log = createLogger('Chat API');
 
 // Allow streaming responses up to 60 seconds
@@ -46,6 +48,14 @@ export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
 
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use chat');
+    }
+
+    const rl = await checkRateLimit('chat', session.user.id, 20, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body: StatelessChatRequest = await req.json();
 
     // Validate required fields

@@ -7,6 +7,7 @@ import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import { auth } from '@/auth';
 import { deductCredit } from '@/lib/credits';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 export const maxDuration = 30;
 
@@ -16,6 +17,10 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) {
     return apiError('UNAUTHORIZED', 401, 'Sign in to generate a classroom');
   }
+
+  const rl = await checkRateLimit('generate-classroom', session.user.id, 5, 60);
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   const jobId = nanoid(10);
   const creditResult = await deductCredit(session.user.id, jobId, 'activity_use');
   if (!creditResult.ok) {

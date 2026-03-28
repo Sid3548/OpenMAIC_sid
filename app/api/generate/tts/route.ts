@@ -14,6 +14,7 @@ import type { TTSProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('TTS API');
 
@@ -21,6 +22,10 @@ export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rl = await checkRateLimit('tts', ip, 30, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = await req.json();
     const { text, audioId, ttsSpeed, ttsApiKey, ttsBaseUrl } = body as {
       text: string;
@@ -31,11 +36,11 @@ export async function POST(req: NextRequest) {
     };
     const ttsProviderId = (body.ttsProviderId ||
       process.env.DEFAULT_TTS_PROVIDER ||
-      'google-tts') as TTSProviderId;
+      'openai-tts') as TTSProviderId;
     const ttsVoice =
       body.ttsVoice ||
       process.env.DEFAULT_TTS_VOICE ||
-      'hi-IN-Neural2-A';
+      'alloy';
 
     // Validate required fields
     if (!text || !audioId) {
