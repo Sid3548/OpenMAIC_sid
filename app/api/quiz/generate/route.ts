@@ -4,6 +4,8 @@ import { buildCodingQuizPrompt, buildPlacementQuizPrompt } from '@/lib/quiz/prom
 import { parseQuizSession } from '@/lib/quiz/question-parser';
 import { callQuizLLM } from '@/lib/quiz/llm';
 import type { QuizSession } from '@/lib/quiz/types';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 function validateQuizSession(session: QuizSession) {
   if (session.track === 'placement-aptitude') {
@@ -21,6 +23,13 @@ function validateQuizSession(session: QuizSession) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use this feature');
+    }
+    const rl = await checkRateLimit('quiz-generate', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = (await req.json()) as Record<string, string>;
     const track = body.track;
 

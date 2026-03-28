@@ -5,15 +5,25 @@
  * Simple JSON request/response using Tavily search.
  */
 
+import { NextRequest } from 'next/server';
 import { searchWithTavily, formatSearchResultsAsContext } from '@/lib/web-search/tavily';
 import { resolveWebSearchApiKey } from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('WebSearch');
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use this feature');
+    }
+    const rl = await checkRateLimit('web-search', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = await req.json();
     const { query, apiKey: clientApiKey } = body as {
       query?: string;

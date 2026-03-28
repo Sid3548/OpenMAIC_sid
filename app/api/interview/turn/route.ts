@@ -27,6 +27,8 @@ import type { InterviewConfig } from '@/lib/interview/types';
 import type { StatelessChatRequest, StatelessEvent } from '@/lib/types/chat';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import { createLogger } from '@/lib/logger';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('Interview Turn API');
 
@@ -68,6 +70,13 @@ function extractJson(raw: string): Record<string, unknown> {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use this feature');
+    }
+    const rl = await checkRateLimit('interview-turn', session.user.id, 20, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = (await req.json()) as {
       config: InterviewConfig;
       history: Array<{ question: string; answer?: string }>;

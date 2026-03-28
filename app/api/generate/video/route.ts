@@ -23,6 +23,8 @@ import type { VideoProviderId, VideoGenerationOptions } from '@/lib/media/types'
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('VideoGeneration API');
 
@@ -30,6 +32,13 @@ export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use this feature');
+    }
+    const rl = await checkRateLimit('generate-video', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = (await request.json()) as VideoGenerationOptions;
 
     if (!body.prompt) {
