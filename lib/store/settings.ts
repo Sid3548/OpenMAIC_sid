@@ -254,10 +254,10 @@ const getDefaultProvidersConfig = (): ProvidersConfig => {
 
 // Initialize default audio config
 const getDefaultAudioConfig = () => ({
-  ttsProviderId: 'browser-native-tts' as TTSProviderId,
-  ttsVoice: 'default',
+  ttsProviderId: 'openai-tts' as TTSProviderId,
+  ttsVoice: 'alloy',
   ttsSpeed: 1.0,
-  asrProviderId: 'browser-native' as ASRProviderId,
+  asrProviderId: 'openai-whisper' as ASRProviderId,
   asrLanguage: 'zh',
   ttsProvidersConfig: {
     'openai-tts': { apiKey: '', baseUrl: '', enabled: true },

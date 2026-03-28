@@ -64,7 +64,7 @@ export const metadata: Metadata = {
       'Multi-agent AI interactive classroom. Upload a PDF to instantly generate an immersive, full learning experience with AI teachers who lecture, quiz, and draw on a whiteboard.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/api/og',
         width: 1200,
         height: 630,
         alt: 'Open Classroom — AI Classroom for Every Student',
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     title: 'Open Classroom — AI Classroom for Every Student',
     description:
       'Multi-agent AI interactive classroom. Learn anything in 60 seconds with AI teachers that actually teach.',
-    images: ['/og-image.png'],
+    images: ['/api/og'],
     creator: '@Sid3548',
   },
   robots: {

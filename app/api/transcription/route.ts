@@ -5,12 +5,17 @@ import type { ASRProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 const log = createLogger('Transcription');
 
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rl = await checkRateLimit('transcription', ip, 20, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const formData = await req.formData();
     const audioFile = formData.get('audio') as File;
     const providerId = formData.get('providerId') as ASRProviderId | null;
