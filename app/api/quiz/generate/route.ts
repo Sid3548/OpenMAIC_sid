@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
       'quiz-generate',
     );
 
-    const session = validateQuizSession(parseQuizSession(result.text.trim()));
-    return apiSuccess({ ...session });
+    const quizSession = validateQuizSession(parseQuizSession(result.text.trim()));
+    return apiSuccess({ ...quizSession });
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',
