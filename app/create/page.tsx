@@ -131,6 +131,15 @@ function HomePage() {
   const needsSetup = storeHydrated && !currentModelId;
   const [languageOpen, setLanguageOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+
+  // Fetch credit balance on mount
+  useEffect(() => {
+    fetch('/api/credits')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.credits !== undefined) setCredits(d.credits); })
+      .catch(() => {});
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [classrooms, setClassrooms] = useState<StageListItem[]>([]);
   const [thumbnails, setThumbnails] = useState<Record<string, Slide>>({});
@@ -450,6 +459,19 @@ function HomePage() {
             </div>
           )}
         </div>
+
+        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
+
+        {/* Credit Counter */}
+        {credits !== null && (
+          <div
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400"
+            title={`${credits} credit${credits !== 1 ? 's' : ''} remaining`}
+          >
+            <span className="text-sm">⚡</span>
+            {credits}
+          </div>
+        )}
 
         <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
 
