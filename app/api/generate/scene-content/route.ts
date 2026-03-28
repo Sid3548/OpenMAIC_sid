@@ -17,7 +17,7 @@ import type { AgentInfo } from '@/lib/generation/generation-pipeline';
 import type { SceneOutline, PdfImage, ImageMapping } from '@/lib/types/generation';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { resolveModelFromHeaders } from '@/lib/server/resolve-model';
+import { resolveModelFromHeaders, resolveModel } from '@/lib/server/resolve-model';
 import { auth } from '@/auth';
 import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
@@ -79,8 +79,18 @@ export async function POST(req: NextRequest) {
       language: rawOutline.language || (stageInfo?.language as 'zh-CN' | 'en-US' | 'hi-IN') || 'zh-CN',
     };
 
-    // ── Model resolution from request headers ──
-    const { model: languageModel, modelInfo, modelString } = resolveModelFromHeaders(req);
+    // ── Model resolution ──
+    // Interactive scenes need strong code generation — use a dedicated model if configured
+    const interactiveModel = process.env.DEFAULT_INTERACTIVE_MODEL;
+    const useInteractiveModel = outline.type === 'interactive' && interactiveModel;
+
+    const { model: languageModel, modelInfo, modelString } = useInteractiveModel
+      ? resolveModel({ modelString: interactiveModel })
+      : resolveModelFromHeaders(req);
+
+    if (useInteractiveModel) {
+      log.info(`Interactive scene — using ${interactiveModel} instead of default`);
+    }
 
     // Detect vision capability
     const hasVision = !!modelInfo?.capabilities?.vision;
