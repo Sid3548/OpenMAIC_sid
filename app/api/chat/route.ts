@@ -25,8 +25,8 @@ import { auth } from '@/auth';
 import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 const log = createLogger('Chat API');
 
-// Allow streaming responses up to 60 seconds
-export const maxDuration = 60;
+// Allow streaming responses up to 5 minutes (gpt-5 can take ~70s+ per turn)
+export const maxDuration = 300;
 
 /**
  * POST /api/chat
@@ -72,11 +72,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve API key: client > server > empty
-    let modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-4o';
+    let modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-5';
 
-    // gpt-5-mini returns empty responses — fall back to gpt-4o
+    // gpt-5-mini returns empty responses — fall back to gpt-5
     if (modelString.includes('gpt-5-mini')) {
-      modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-4o');
+      modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-5');
     }
 
     const { providerId, modelId } = parseModelString(modelString);

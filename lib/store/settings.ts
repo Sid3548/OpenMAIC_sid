@@ -433,7 +433,7 @@ export const useSettingsStore = create<SettingsState>()(
       return {
         // Initial state (use migrated data if available)
         providerId: migratedData?.providerId || 'openai',
-        modelId: migratedData?.modelId || 'gpt-4o',
+        modelId: migratedData?.modelId || 'gpt-5',
         providersConfig: migratedData?.providersConfig || getDefaultProvidersConfig(),
         ttsModel: migratedData?.ttsModel || 'openai-tts',
         selectedAgentIds: migratedData?.selectedAgentIds || ['default-1', 'default-2', 'default-3'],
@@ -1056,15 +1056,15 @@ export const useSettingsStore = create<SettingsState>()(
           delete (state as Record<string, unknown>).deepResearchProvidersConfig;
         }
 
-        // v2 → v3: Switch broken models to gpt-4o
-        // gpt-5-mini returns empty responses; gpt-4o-mini quality too low
+        // v2 → v3: Switch broken/weak models to gpt-5
+        // gpt-5-mini returns empty; gpt-4o-mini quality too low; gpt-5 is the best working model
         if (version < 3) {
           if (
             state.providerId === 'openai' &&
             (state.modelId === '' ||
-              (state.modelId && (state.modelId.startsWith('gpt-5-mini') || state.modelId.startsWith('gpt-4o-mini'))))
+              (state.modelId && (state.modelId.startsWith('gpt-5-mini') || state.modelId.startsWith('gpt-4o-mini') || state.modelId === 'gpt-4o')))
           ) {
-            state.modelId = 'gpt-4o';
+            state.modelId = 'gpt-5';
           }
         }
 
