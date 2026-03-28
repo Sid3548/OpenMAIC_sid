@@ -21,9 +21,48 @@ import { resolveModelFromHeaders, resolveModel } from '@/lib/server/resolve-mode
 import { auth } from '@/auth';
 import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
+import type { GeneratedInteractiveContent } from '@/lib/types/generation';
+
 const log = createLogger('Scene Content API');
 
 export const maxDuration = 300;
+
+/**
+ * Validate that generated interactive HTML is actually interactive.
+ * Checks for proper structure, JavaScript, and interactive elements.
+ * Returns null if valid, or a reason string if invalid.
+ */
+function validateInteractiveHtml(content: unknown): string | null {
+  const ic = content as GeneratedInteractiveContent | null;
+  if (!ic?.html) return 'no html field';
+
+  const html = ic.html;
+
+  // Must be a reasonable size (a real interactive page is at least 1KB)
+  if (html.length < 500) return `too short (${html.length} chars)`;
+
+  // Must have basic HTML structure
+  if (!html.includes('<html') || !html.includes('</html>'))
+    return 'missing <html> structure';
+
+  // Must have a <script> tag with actual code
+  const scriptMatch = html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+  if (!scriptMatch || scriptMatch[1].trim().length < 50)
+    return 'missing or empty <script> tag';
+
+  // Must have at least one interactive element or API
+  const interactiveSignals = [
+    'addEventListener', 'onclick', 'oninput', 'onchange', 'onmousemove',
+    'onmousedown', 'ontouchstart', 'ondrag',
+    '<input', '<button', '<select', '<range', '<canvas', '<svg',
+    'requestAnimationFrame', 'setInterval', 'getContext',
+    'slider', 'drag', 'click',
+  ];
+  const hasInteractive = interactiveSignals.some((s) => html.toLowerCase().includes(s.toLowerCase()));
+  if (!hasInteractive) return 'no interactive elements found';
+
+  return null; // valid
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -141,32 +180,49 @@ export async function POST(req: NextRequest) {
     let usedModelString: string;
 
     if (isInteractive && interactiveModelChain.length > 0) {
-      // Try each model in the chain until one succeeds
+      const MAX_RETRIES = 2; // attempts per model before moving to next
+
       for (let i = 0; i < interactiveModelChain.length; i++) {
         const ms = interactiveModelChain[i];
-        try {
-          const resolved = resolveModel({ modelString: ms });
-          const { aiCall, hasVision, modelString: mStr } = buildAiCall(resolved);
-          log.info(`Interactive scene — trying ${ms} (${i + 1}/${interactiveModelChain.length})`);
 
-          content = await generateSceneContent(
-            effectiveOutline, aiCall, assignedImages, imageMapping,
-            effectiveOutline.type === 'pbl' ? resolved.model : undefined,
-            hasVision, generatedMediaMapping, agents,
-          );
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            const resolved = resolveModel({ modelString: ms });
+            const { aiCall, hasVision, modelString: mStr } = buildAiCall(resolved);
+            log.info(`Interactive scene — ${ms} attempt ${attempt}/${MAX_RETRIES} (model ${i + 1}/${interactiveModelChain.length})`);
 
-          if (content) {
+            const result = await generateSceneContent(
+              effectiveOutline, aiCall, assignedImages, imageMapping,
+              effectiveOutline.type === 'pbl' ? resolved.model : undefined,
+              hasVision, generatedMediaMapping, agents,
+            );
+
+            if (!result) {
+              log.warn(`Interactive ${ms} attempt ${attempt}: returned null`);
+              continue;
+            }
+
+            // Validate the HTML has actual interactive elements
+            const issue = validateInteractiveHtml(result);
+            if (issue) {
+              log.warn(`Interactive ${ms} attempt ${attempt}: validation failed — ${issue}`);
+              continue;
+            }
+
+            // Passed validation
+            content = result;
             usedModelString = mStr;
-            log.info(`Interactive scene succeeded with ${ms}`);
+            log.info(`Interactive scene validated OK with ${ms} (attempt ${attempt})`);
             break;
+          } catch (err) {
+            log.warn(`Interactive ${ms} attempt ${attempt}: error — ${err instanceof Error ? err.message : err}`);
           }
-          log.warn(`Interactive scene returned null with ${ms}, trying next`);
-        } catch (err) {
-          log.warn(`Interactive scene failed with ${ms}: ${err instanceof Error ? err.message : err}`);
         }
+
+        if (content) break; // found a good one, stop trying models
       }
 
-      // Final fallback: use the default model from headers
+      // Final fallback: default model from headers (no validation — best effort)
       if (!content) {
         log.info(`Interactive fallback chain exhausted, trying default model`);
         const { aiCall, hasVision } = buildAiCall(defaultResolved);
