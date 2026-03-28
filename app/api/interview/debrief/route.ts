@@ -5,6 +5,8 @@ import { callLLM } from '@/lib/ai/llm';
 import { buildInterviewDebriefPrompt } from '@/lib/interview/prompts';
 import type { InterviewConfig } from '@/lib/interview/types';
 import { parseFirstJsonObject } from '@/lib/server/json-parser';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 function clampTenPointScore(value: unknown) {
   const numeric = Number(value);
@@ -39,6 +41,13 @@ function normalizeInterviewDebriefResult(input: Record<string, unknown>) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use this feature');
+    }
+    const rl = await checkRateLimit('interview-debrief', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = (await req.json()) as {
       config: InterviewConfig;
       turns: Array<{ question: string; answer?: string }>;

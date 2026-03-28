@@ -11,6 +11,8 @@ import type { PBLAgent, PBLIssue } from '@/lib/pbl/types';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromHeaders } from '@/lib/server/resolve-model';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 const log = createLogger('PBL Chat');
 
 interface PBLChatRequest {
@@ -24,6 +26,13 @@ interface PBLChatRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use this feature');
+    }
+    const rl = await checkRateLimit('pbl-chat', session.user.id, 20, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = (await req.json()) as PBLChatRequest;
     const { message, agent, currentIssue, recentMessages, userRole, agentType } = body;
 

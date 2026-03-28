@@ -26,6 +26,8 @@ import type { SpeechAction } from '@/lib/types/action';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromHeaders } from '@/lib/server/resolve-model';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('Scene Actions API');
 
@@ -33,6 +35,13 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in to use this feature');
+    }
+    const rl = await checkRateLimit('scene-actions', session.user.id, 30, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = await req.json();
     const {
       outline,
