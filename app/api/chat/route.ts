@@ -72,13 +72,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve API key: client > server > empty
-    let modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-5';
-
-    // gpt-5-mini returns empty responses — fall back to gpt-5
-    if (modelString.includes('gpt-5-mini')) {
-      modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-5');
-    }
-
+    const modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'deepseek:deepseek-chat';
     const { providerId, modelId } = parseModelString(modelString);
 
     const clientBaseUrl = body.baseUrl || undefined;

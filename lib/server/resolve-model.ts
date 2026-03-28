@@ -27,12 +27,7 @@ export function resolveModel(params: {
   providerType?: string;
   requiresApiKey?: boolean;
 }): ResolvedModel {
-  let modelString = params.modelString || process.env.DEFAULT_MODEL || 'openai:gpt-5';
-
-  // gpt-5-mini returns empty responses for content generation — fall back to gpt-5
-  if (modelString.includes('gpt-5-mini')) {
-    modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-5');
-  }
+  const modelString = params.modelString || process.env.DEFAULT_MODEL || 'deepseek:deepseek-chat';
 
   const { providerId, modelId } = parseModelString(modelString);
 
@@ -89,7 +84,7 @@ export function resolveVerificationModelFromHeaders(req: NextRequest): ResolvedM
       req.headers.get('x-model') ||
       process.env.DEFAULT_VERIFICATION_MODEL ||
       process.env.DEFAULT_MODEL ||
-      'openai:gpt-5',
+      'deepseek:deepseek-chat',
     apiKey: req.headers.get('x-api-key') || undefined,
     baseUrl: req.headers.get('x-base-url') || undefined,
     providerType: req.headers.get('x-provider-type') || undefined,
