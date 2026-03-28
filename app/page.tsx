@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from '@/lib/hooks/use-theme';
-import { Sun, Moon, Menu, X } from 'lucide-react';
+import { Sun, Moon, Menu, X, LogOut } from 'lucide-react';
 
 // Razorpay global type (loaded via CDN script)
 declare global {
@@ -153,6 +154,7 @@ async function startCheckout(plan: string, onSuccess: () => void) {
 }
 
 export default function LandingPage() {
+  const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -192,12 +194,29 @@ export default function LandingPage() {
           <Link href="/library" style={{ color: 'inherit', textDecoration: 'none' }}>
             My Library
           </Link>
-          <Link href="/login" style={{ color: 'inherit', textDecoration: 'none' }}>
-            Sign in
-          </Link>
-          <Link href="/signup" className="landing-cta-btn">
-            Sign up free →
-          </Link>
+          {session ? (
+            <>
+              <Link href="/create" style={{ color: 'inherit', textDecoration: 'none' }}>
+                {session.user?.name || session.user?.email || 'Dashboard'}
+              </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="landing-cta-btn"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer' }}
+              >
+                <LogOut size={14} /> Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" style={{ color: 'inherit', textDecoration: 'none' }}>
+                Sign in
+              </Link>
+              <Link href="/signup" className="landing-cta-btn">
+                Sign up free →
+              </Link>
+            </>
+          )}
         </div>
         {/* Theme toggle */}
         {mounted && (
@@ -231,12 +250,29 @@ export default function LandingPage() {
           <Link href="/library" style={{ color: 'inherit', textDecoration: 'none' }}>
             My Library
           </Link>
-          <Link href="/login" style={{ color: 'inherit', textDecoration: 'none' }}>
-            Sign in
-          </Link>
-          <Link href="/signup" className="landing-cta-btn" style={{ textAlign: 'center' }}>
-            Sign up free →
-          </Link>
+          {session ? (
+            <>
+              <Link href="/create" style={{ color: 'inherit', textDecoration: 'none' }}>
+                {session.user?.name || session.user?.email || 'Dashboard'}
+              </Link>
+              <button
+                onClick={() => { signOut({ callbackUrl: '/login' }); setMobileMenuOpen(false); }}
+                className="landing-cta-btn"
+                style={{ textAlign: 'center', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: 'none', cursor: 'pointer' }}
+              >
+                <LogOut size={14} /> Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" style={{ color: 'inherit', textDecoration: 'none' }}>
+                Sign in
+              </Link>
+              <Link href="/signup" className="landing-cta-btn" style={{ textAlign: 'center' }}>
+                Sign up free →
+              </Link>
+            </>
+          )}
         </div>
       )}
 

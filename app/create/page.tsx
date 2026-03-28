@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea as UITextarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
+import { LogoutButton } from '@/components/logout-button';
 import { GenerationToolbar } from '@/components/generation/generation-toolbar';
 import { AgentBar } from '@/components/agent/agent-bar';
 import { useTheme } from '@/lib/hooks/use-theme';
@@ -509,6 +510,8 @@ function HomePage() {
             </>
           )}
         </div>
+        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
+        <LogoutButton />
       </div>
       <SettingsDialog
         open={settingsOpen}
