@@ -27,11 +27,11 @@ export function resolveModel(params: {
   providerType?: string;
   requiresApiKey?: boolean;
 }): ResolvedModel {
-  let modelString = params.modelString || process.env.DEFAULT_MODEL || 'openai:gpt-4o-mini-2024-07-18';
+  let modelString = params.modelString || process.env.DEFAULT_MODEL || 'openai:gpt-4o';
 
-  // gpt-5-mini returns empty responses for content generation — fall back to gpt-4o-mini
+  // gpt-5-mini returns empty responses for content generation — fall back to gpt-4o
   if (modelString.includes('gpt-5-mini')) {
-    modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-4o-mini-2024-07-18');
+    modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-4o');
   }
 
   const { providerId, modelId } = parseModelString(modelString);
@@ -89,7 +89,7 @@ export function resolveVerificationModelFromHeaders(req: NextRequest): ResolvedM
       req.headers.get('x-model') ||
       process.env.DEFAULT_VERIFICATION_MODEL ||
       process.env.DEFAULT_MODEL ||
-      'openai:gpt-4o-mini-2024-07-18',
+      'openai:gpt-4o',
     apiKey: req.headers.get('x-api-key') || undefined,
     baseUrl: req.headers.get('x-base-url') || undefined,
     providerType: req.headers.get('x-provider-type') || undefined,
