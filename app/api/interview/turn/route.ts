@@ -32,7 +32,7 @@ import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('Interview Turn API');
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // ── Agent IDs ─────────────────────────────────────────────────────────────────
 
