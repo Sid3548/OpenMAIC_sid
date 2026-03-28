@@ -27,7 +27,13 @@ export function resolveModel(params: {
   providerType?: string;
   requiresApiKey?: boolean;
 }): ResolvedModel {
-  const modelString = params.modelString || process.env.DEFAULT_MODEL || 'openai:gpt-4o-mini-2024-07-18';
+  let modelString = params.modelString || process.env.DEFAULT_MODEL || 'openai:gpt-4o-mini-2024-07-18';
+
+  // gpt-5-mini returns empty responses for content generation — fall back to gpt-4o-mini
+  if (modelString.includes('gpt-5-mini')) {
+    modelString = modelString.replace(/gpt-5-mini[^\s]*/g, 'gpt-4o-mini-2024-07-18');
+  }
+
   const { providerId, modelId } = parseModelString(modelString);
 
   const clientBaseUrl = params.baseUrl || undefined;

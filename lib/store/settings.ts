@@ -433,7 +433,7 @@ export const useSettingsStore = create<SettingsState>()(
       return {
         // Initial state (use migrated data if available)
         providerId: migratedData?.providerId || 'openai',
-        modelId: migratedData?.modelId || '',
+        modelId: migratedData?.modelId || 'gpt-4o-mini-2024-07-18',
         providersConfig: migratedData?.providersConfig || getDefaultProvidersConfig(),
         ttsModel: migratedData?.ttsModel || 'openai-tts',
         selectedAgentIds: migratedData?.selectedAgentIds || ['default-1', 'default-2', 'default-3'],
@@ -998,7 +998,7 @@ export const useSettingsStore = create<SettingsState>()(
     },
     {
       name: 'settings-storage',
-      version: 2,
+      version: 3,
       // Migrate persisted state
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Partial<SettingsState>;
@@ -1054,6 +1054,17 @@ export const useSettingsStore = create<SettingsState>()(
         if (version < 2) {
           delete (state as Record<string, unknown>).deepResearchProviderId;
           delete (state as Record<string, unknown>).deepResearchProvidersConfig;
+        }
+
+        // v2 → v3: Switch gpt-5-mini users to gpt-4o-mini-2024-07-18
+        // gpt-5-mini returns empty responses for scene content generation
+        if (version < 3) {
+          if (
+            state.providerId === 'openai' &&
+            (state.modelId === '' || (state.modelId && state.modelId.startsWith('gpt-5-mini')))
+          ) {
+            state.modelId = 'gpt-4o-mini-2024-07-18';
+          }
         }
 
         // Add default media generation toggles if missing
