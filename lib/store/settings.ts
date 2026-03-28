@@ -998,7 +998,7 @@ export const useSettingsStore = create<SettingsState>()(
     },
     {
       name: 'settings-storage',
-      version: 3,
+      version: 4,
       // Migrate persisted state
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Partial<SettingsState>;
@@ -1063,6 +1063,16 @@ export const useSettingsStore = create<SettingsState>()(
             state.providerId === 'openai' &&
             (state.modelId === '' ||
               (state.modelId && (state.modelId.startsWith('gpt-5-mini') || state.modelId.startsWith('gpt-4o-mini') || state.modelId === 'gpt-4o')))
+          ) {
+            state.modelId = 'gpt-5';
+          }
+        }
+
+        // v3 → v4: Force gpt-5 for users still on gpt-4o after previous migration
+        if (version < 4) {
+          if (
+            state.providerId === 'openai' &&
+            (!state.modelId || state.modelId.startsWith('gpt-4o') || state.modelId.startsWith('gpt-5-mini'))
           ) {
             state.modelId = 'gpt-5';
           }
