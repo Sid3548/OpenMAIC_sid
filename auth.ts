@@ -1,7 +1,6 @@
 import NextAuth from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
-import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 
@@ -43,44 +42,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
       },
     }),
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true,
-    }),
   ],
-  events: {
-    // Grant 1 free credit to new users created via OAuth
-    async createUser({ user }) {
-      if (user.id) {
-        await prisma.$transaction(async (tx: typeof prisma) => {
-          await tx.user.update({
-            where: { id: user.id! },
-            data: { credits: 1 },
-          });
-          await tx.creditLedger.create({
-            data: {
-              userId: user.id!,
-              delta: 1,
-              balance: 1,
-              reason: 'signup_bonus',
-              note: 'Free trial credit on signup (Google)',
-            },
-          });
-        });
-      }
-    },
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        // Fetch credits from DB — OAuth users may not have credits on the user object
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id! },
-          select: { credits: true },
-        });
-        token.credits = dbUser?.credits ?? 0;
+        token.credits = (user as { credits?: number }).credits ?? 0;
       }
       return token;
     },
