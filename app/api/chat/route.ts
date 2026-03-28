@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve API key: client > server > empty
-    const modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-4o-mini';
+    const modelString = body.model || process.env.DEFAULT_CHAT_MODEL || 'openai:gpt-4o-mini-2024-07-18';
     const { providerId, modelId } = parseModelString(modelString);
 
     const clientBaseUrl = body.baseUrl || undefined;
