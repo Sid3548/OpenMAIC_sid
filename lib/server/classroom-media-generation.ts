@@ -228,6 +228,9 @@ export async function generateTTSForClassroom(
   const voice = DEFAULT_TTS_VOICES[providerId] || 'default';
   const format = TTS_PROVIDERS[providerId]?.supportedFormats?.[0] || 'mp3';
 
+  // Collect all speech actions across all scenes, then generate TTS in parallel
+  const ttsJobs: Array<{ scene: typeof scenes[number]; action: SpeechAction; audioId: string }> = [];
+
   for (const scene of scenes) {
     if (!scene.actions) continue;
 
@@ -237,24 +240,35 @@ export async function generateTTSForClassroom(
 
     for (const action of scene.actions) {
       if (action.type !== 'speech' || !(action as SpeechAction).text) continue;
-      const speechAction = action as SpeechAction;
-      const audioId = `tts_${action.id}`;
+      ttsJobs.push({ scene, action: action as SpeechAction, audioId: `tts_${action.id}` });
+    }
+  }
 
-      try {
+  // Run all TTS calls in parallel (batched to avoid overwhelming the provider)
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < ttsJobs.length; i += BATCH_SIZE) {
+    const batch = ttsJobs.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map(async ({ action, audioId }) => {
         const result = await generateTTS(
-          { providerId, apiKey, baseUrl: ttsBaseUrl, voice, speed: speechAction.speed },
-          speechAction.text,
+          { providerId, apiKey, baseUrl: ttsBaseUrl, voice, speed: action.speed },
+          action.text,
         );
-
         const filename = `${audioId}.${format}`;
         await fs.writeFile(path.join(audioDir, filename), result.audio);
+        return { audioId, filename, size: result.audio.length };
+      }),
+    );
 
-        speechAction.audioId = audioId;
-        speechAction.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${filename}`);
-        log.info(`Generated TTS: ${filename} (${result.audio.length} bytes)`);
-      } catch (err) {
-        log.warn(`TTS generation failed for action ${action.id}:`, err);
+    results.forEach((r, j) => {
+      const job = batch[j];
+      if (r.status === 'fulfilled') {
+        job.action.audioId = job.audioId;
+        job.action.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${r.value.filename}`);
+        log.info(`Generated TTS: ${r.value.filename} (${r.value.size} bytes)`);
+      } else {
+        log.warn(`TTS generation failed for action ${job.action.id}:`, r.reason);
       }
-    }
+    });
   }
 }
