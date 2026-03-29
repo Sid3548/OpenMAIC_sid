@@ -189,9 +189,7 @@ async function generateTTSForScene(
 
   // Generate all TTS in parallel
   const results = await Promise.allSettled(
-    speechActions.map((action) =>
-      generateAndStoreTTS(action.audioId!, action.text, signal),
-    ),
+    speechActions.map((action) => generateAndStoreTTS(action.audioId!, action.text, signal)),
   );
 
   let failedCount = 0;
@@ -199,7 +197,10 @@ async function generateTTSForScene(
   results.forEach((r, i) => {
     if (r.status === 'rejected') {
       failedCount++;
-      lastError = r.reason instanceof Error ? r.reason.message : `TTS failed for action ${speechActions[i].id}`;
+      lastError =
+        r.reason instanceof Error
+          ? r.reason.message
+          : `TTS failed for action ${speechActions[i].id}`;
       log.warn('TTS generation failed:', {
         providerId,
         actionId: speechActions[i].id,
@@ -304,10 +305,34 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
           .map((a) => a.text);
       }
 
-      // Serial generation loop — two-step per outline
+      // Pipelined generation loop — pre-fetch next scene's content while
+      // current scene's actions + TTS are running, saving ~10-20s per scene.
       try {
         let pausedByFailureOrAbort = false;
-        for (const outline of pending) {
+
+        // Check for pre-fetched content from generation-preview (scene 2)
+        let prefetchedContent: Awaited<ReturnType<typeof fetchSceneContent>> | null = null;
+        try {
+          const genParamsStr = sessionStorage.getItem('generationParams');
+          const genParams = genParamsStr ? JSON.parse(genParamsStr) : {};
+          if (
+            genParams.prefetchedContent &&
+            pending.length > 0 &&
+            genParams.prefetchedContent.forOutlineId === pending[0].id
+          ) {
+            prefetchedContent = {
+              success: true,
+              content: genParams.prefetchedContent.content,
+              effectiveOutline: genParams.prefetchedContent.effectiveOutline,
+            };
+            log.info(`Using pre-fetched content for "${pending[0].title}"`);
+          }
+        } catch {
+          /* ignore parsing errors */
+        }
+
+        for (let i = 0; i < pending.length; i++) {
+          const outline = pending[i];
           if (abortRef.current || store.getState().generationEpoch !== startEpoch) {
             store.getState().setGenerationStatus('paused');
             pausedByFailureOrAbort = true;
@@ -316,20 +341,23 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
 
           store.getState().setCurrentGeneratingOrder(outline.order);
 
-          // Step 1: Generate content
+          // Step 1: Generate content (use prefetched if available)
           options.onPhaseChange?.('content', outline);
-          const contentResult = await fetchSceneContent(
-            {
-              outline,
-              allOutlines: outlines,
-              stageId: stage.id,
-              pdfImages: params.pdfImages,
-              imageMapping: params.imageMapping,
-              stageInfo: params.stageInfo,
-              agents: params.agents,
-            },
-            signal,
-          );
+          const contentResult =
+            prefetchedContent ??
+            (await fetchSceneContent(
+              {
+                outline,
+                allOutlines: outlines,
+                stageId: stage.id,
+                pdfImages: params.pdfImages,
+                imageMapping: params.imageMapping,
+                stageInfo: params.stageInfo,
+                agents: params.agents,
+              },
+              signal,
+            ));
+          prefetchedContent = null; // consumed
 
           if (!contentResult.success || !contentResult.content) {
             if (abortRef.current || store.getState().generationEpoch !== startEpoch) {
@@ -349,8 +377,29 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             break;
           }
 
-          // Step 2: Generate actions + assemble scene
+          // Step 2: Generate actions + TTS + pre-fetch next content IN PARALLEL
           options.onPhaseChange?.('actions', outline);
+
+          // Start pre-fetching next scene's content (doesn't depend on current actions)
+          const nextOutline = i + 1 < pending.length ? pending[i + 1] : null;
+          const nextContentPromise = nextOutline
+            ? fetchSceneContent(
+                {
+                  outline: nextOutline,
+                  allOutlines: outlines,
+                  stageId: stage.id,
+                  pdfImages: params.pdfImages,
+                  imageMapping: params.imageMapping,
+                  stageInfo: params.stageInfo,
+                  agents: params.agents,
+                },
+                signal,
+              ).catch((err) => {
+                log.warn(`Pre-fetch content failed for "${nextOutline.title}":`, err);
+                return null;
+              })
+            : null;
+
           const actionsResult = await fetchSceneActions(
             {
               outline: contentResult.effectiveOutline || outline,
@@ -368,19 +417,13 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             const scene = actionsResult.scene;
             const settings = useSettingsStore.getState();
 
-            // TTS generation — failure means the whole scene fails
+            // TTS generation — non-fatal, continue without audio on failure
             if (settings.ttsEnabled && settings.ttsProviderId !== 'browser-native-tts') {
               const ttsResult = await generateTTSForScene(scene, signal);
               if (!ttsResult.success) {
-                if (abortRef.current || store.getState().generationEpoch !== startEpoch) {
-                  pausedByFailureOrAbort = true;
-                  break;
-                }
-                store.getState().addFailedOutline(outline);
-                options.onSceneFailed?.(outline, ttsResult.error || 'TTS generation failed');
-                store.getState().setGenerationStatus('paused');
-                pausedByFailureOrAbort = true;
-                break;
+                log.warn(
+                  `[TTS] ${ttsResult.failedCount} actions failed for "${outline.title}" — continuing without audio`,
+                );
               }
             }
 
@@ -404,6 +447,11 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             store.getState().setGenerationStatus('paused');
             pausedByFailureOrAbort = true;
             break;
+          }
+
+          // Collect pre-fetched content for next iteration
+          if (nextContentPromise) {
+            prefetchedContent = await nextContentPromise;
           }
         }
 

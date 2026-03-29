@@ -35,7 +35,9 @@ export function getWeakAreaSummary(): WeakAreaSummary[] {
       map.set(area, current);
     }
   }
-  return Array.from(map.values()).sort((a, b) => b.misses - a.misses).slice(0, 8);
+  return Array.from(map.values())
+    .sort((a, b) => b.misses - a.misses)
+    .slice(0, 8);
 }
 
 export function getSuggestedNextQuiz() {

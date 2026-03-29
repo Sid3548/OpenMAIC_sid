@@ -23,17 +23,27 @@ function modelHeaders() {
   return headers;
 }
 
-export function QuizRunner({ session, onBack }: { session: PlacementQuizSession | CodingQuizSession; onBack: () => void }) {
+export function QuizRunner({
+  session,
+  onBack,
+}: {
+  session: PlacementQuizSession | CodingQuizSession;
+  onBack: () => void;
+}) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [placementAnswers, setPlacementAnswers] = useState<Record<string, string>>({});
   const [codeAnswers, setCodeAnswers] = useState<Record<string, string>>(
     session.track === 'coding-examination'
-      ? Object.fromEntries(session.problems.map((problem) => [problem.id, problem.starterCode || '']))
+      ? Object.fromEntries(
+          session.problems.map((problem) => [problem.id, problem.starterCode || '']),
+        )
       : {},
   );
   const [debrief, setDebrief] = useState<{ summary?: string; percentileEstimate?: string }>({});
-  const [codeReviews, setCodeReviews] = useState<Array<{ id: string; title: string; review: CodeReviewResult }>>([]);
+  const [codeReviews, setCodeReviews] = useState<
+    Array<{ id: string; title: string; review: CodeReviewResult }>
+  >([]);
 
   const placementScore = useMemo(() => {
     if (session.track !== 'placement-aptitude') return null;
@@ -56,8 +66,11 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
           const data = await response.json();
           const debriefData = data.data || data;
           setDebrief({
-            summary: debriefData.summary || 'Review arithmetic speed, accuracy, and elimination strategies.',
-            percentileEstimate: debriefData.percentileEstimate || estimatePercentile(score.percentage),
+            summary:
+              debriefData.summary ||
+              'Review arithmetic speed, accuracy, and elimination strategies.',
+            percentileEstimate:
+              debriefData.percentileEstimate || estimatePercentile(score.percentage),
           });
         } else {
           setDebrief({
@@ -94,7 +107,16 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
               return {
                 id: problem.id,
                 title: problem.title,
-                review: { score: 0, verdict: 'fail' as const, summary: 'Review unavailable.', strengths: [], missingPoints: [], optimalApproach: '', timeComplexity: '', spaceComplexity: '' },
+                review: {
+                  score: 0,
+                  verdict: 'fail' as const,
+                  summary: 'Review unavailable.',
+                  strengths: [],
+                  missingPoints: [],
+                  optimalApproach: '',
+                  timeComplexity: '',
+                  spaceComplexity: '',
+                },
               };
             }
             const data = await response.json();
@@ -124,7 +146,8 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
           metadata: { language: session.language, difficulty: session.difficulty },
         });
         setDebrief({
-          summary: 'AI review completed. Focus on writing cleaner edge-case handling, stronger complexity explanations, and a more systematic optimal approach.',
+          summary:
+            'AI review completed. Focus on writing cleaner edge-case handling, stronger complexity explanations, and a more systematic optimal approach.',
           percentileEstimate: 'Interview-style qualitative review',
         });
       }
@@ -146,22 +169,44 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <QuizTimer durationMinutes={session.durationMinutes} onExpire={handleSubmit} running={!submitted} />
-          <button onClick={onBack} className="rounded-xl border border-gray-200 px-4 py-2 text-sm dark:border-gray-700">Back</button>
-          <button onClick={handleSubmit} disabled={loading} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900">{loading ? 'Submitting...' : 'Submit'}</button>
+          <QuizTimer
+            durationMinutes={session.durationMinutes}
+            onExpire={handleSubmit}
+            running={!submitted}
+          />
+          <button
+            onClick={onBack}
+            className="rounded-xl border border-gray-200 px-4 py-2 text-sm dark:border-gray-700"
+          >
+            Back
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
+          >
+            {loading ? 'Submitting...' : 'Submit'}
+          </button>
         </div>
       </div>
 
       {session.track === 'placement-aptitude' && !submitted ? (
         <div className="space-y-4">
           {session.questions.map((question, index) => (
-            <div key={question.id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-              <p className="text-sm font-semibold">Q{index + 1}. {question.question}</p>
+            <div
+              key={question.id}
+              className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+            >
+              <p className="text-sm font-semibold">
+                Q{index + 1}. {question.question}
+              </p>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 {question.options.map((option) => (
                   <button
                     key={option.id}
-                    onClick={() => setPlacementAnswers((prev) => ({ ...prev, [question.id]: option.id }))}
+                    onClick={() =>
+                      setPlacementAnswers((prev) => ({ ...prev, [question.id]: option.id }))
+                    }
                     className={`rounded-xl border px-4 py-3 text-left text-sm transition ${placementAnswers[question.id] === option.id ? 'border-slate-400 bg-slate-100 dark:border-slate-600 dark:bg-slate-800/60' : 'border-gray-200 hover:border-slate-300 dark:border-gray-700 dark:hover:border-slate-600'}`}
                   >
                     <span className="font-medium">{option.id}.</span> {option.text}
@@ -188,17 +233,31 @@ export function QuizRunner({ session, onBack }: { session: PlacementQuizSession 
       ) : null}
 
       {submitted && session.track === 'placement-aptitude' && placementScore ? (
-        <QuizResults title="Placement Aptitude" score={placementScore.score} total={placementScore.total} debrief={debrief}>
+        <QuizResults
+          title="Placement Aptitude"
+          score={placementScore.score}
+          total={placementScore.total}
+          debrief={debrief}
+        >
           <div className="space-y-4">
             {session.questions.map((question) => {
               const selected = placementAnswers[question.id];
               const correct = selected === question.correctAnswer;
               return (
-                <div key={question.id} className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+                <div
+                  key={question.id}
+                  className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+                >
                   <p className="font-medium">{question.question}</p>
-                  <p className="mt-2 text-sm">Your answer: <strong>{selected || '—'}</strong></p>
-                  <p className="text-sm">Correct answer: <strong>{question.correctAnswer}</strong></p>
-                  {!correct ? <p className="mt-2 text-sm text-muted-foreground">{question.explanation}</p> : null}
+                  <p className="mt-2 text-sm">
+                    Your answer: <strong>{selected || '—'}</strong>
+                  </p>
+                  <p className="text-sm">
+                    Correct answer: <strong>{question.correctAnswer}</strong>
+                  </p>
+                  {!correct ? (
+                    <p className="mt-2 text-sm text-muted-foreground">{question.explanation}</p>
+                  ) : null}
                 </div>
               );
             })}

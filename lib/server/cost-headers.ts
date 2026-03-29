@@ -12,18 +12,13 @@ export function estimateTokens(text: string): number {
 }
 
 /** Estimate LLM cost and return as header value string */
-export function llmCostHeader(
-  modelKey: string,
-  inputText: string,
-  outputText: string,
-): string {
+export function llmCostHeader(modelKey: string, inputText: string, outputText: string): string {
   const pricing = PROVIDER_PRICING[modelKey as ProviderPricingKey];
   if (!pricing || !('input' in pricing)) return '0';
   const inputTokens = estimateTokens(inputText);
   const outputTokens = estimateTokens(outputText);
   const cost =
-    (inputTokens / 1_000_000) * pricing.input +
-    (outputTokens / 1_000_000) * pricing.output;
+    (inputTokens / 1_000_000) * pricing.input + (outputTokens / 1_000_000) * pricing.output;
   return cost.toFixed(6);
 }
 

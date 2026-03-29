@@ -130,12 +130,11 @@ export async function POST(req: NextRequest) {
     const hasVision = !!modelInfo?.capabilities?.vision;
 
     // Build prompt (same logic as generateSceneOutlinesFromRequirements)
-    let availableImagesText =
-      isChineseLanguage(requirements.language)
-        ? '无可用图片'
-        : isHindiLanguage(requirements.language)
-          ? 'कोई image उपलब्ध नहीं है'
-          : 'No images available';
+    let availableImagesText = isChineseLanguage(requirements.language)
+      ? '无可用图片'
+      : isHindiLanguage(requirements.language)
+        ? 'कोई image उपलब्ध नहीं है'
+        : 'No images available';
     let visionImages: Array<{ id: string; src: string }> | undefined;
 
     if (pdfImages && pdfImages.length > 0) {
@@ -197,7 +196,13 @@ export async function POST(req: NextRequest) {
             ? 'कोई नहीं'
             : 'None',
       availableImages: availableImagesText,
-      researchContext: researchContext || (isChineseLanguage(requirements.language) ? '无' : isHindiLanguage(requirements.language) ? 'कोई नहीं' : 'None'),
+      researchContext:
+        researchContext ||
+        (isChineseLanguage(requirements.language)
+          ? '无'
+          : isHindiLanguage(requirements.language)
+            ? 'कोई नहीं'
+            : 'None'),
       mediaGenerationPolicy,
       teacherContext,
     });

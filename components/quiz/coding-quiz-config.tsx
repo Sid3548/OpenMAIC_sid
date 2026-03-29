@@ -26,7 +26,9 @@ export function CodingQuizConfig({
           onChange={(event) => onLanguageChange(event.target.value as CodingLanguage)}
         >
           {CODING_LANGUAGES.map((item) => (
-            <option key={item.value} value={item.value}>{item.label}</option>
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
           ))}
         </select>
       </label>
@@ -38,7 +40,9 @@ export function CodingQuizConfig({
           onChange={(event) => onDifficultyChange(event.target.value as CodingDifficulty)}
         >
           {difficulties.map((item) => (
-            <option key={item} value={item}>{item}</option>
+            <option key={item} value={item}>
+              {item}
+            </option>
           ))}
         </select>
       </label>

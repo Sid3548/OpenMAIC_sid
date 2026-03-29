@@ -177,9 +177,7 @@ function LibraryCard({
   useEffect(() => {
     const el = thumbRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) =>
-      setThumbWidth(Math.round(entry.contentRect.width)),
-    );
+    const ro = new ResizeObserver(([entry]) => setThumbWidth(Math.round(entry.contentRect.width)));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -313,13 +311,7 @@ function LibraryCard({
 }
 
 // ─── Empty State ──────────────────────────────────────────────────
-function EmptyState({
-  hasFilters,
-  onReset,
-}: {
-  hasFilters: boolean;
-  onReset: () => void;
-}) {
+function EmptyState({ hasFilters, onReset }: { hasFilters: boolean; onReset: () => void }) {
   if (hasFilters) {
     return (
       <div className="flex flex-col items-center justify-center py-28 gap-3">
@@ -448,23 +440,20 @@ export default function LibraryPage() {
     load();
   }, [load]);
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      try {
-        await deleteStageData(id);
-        setClassrooms((prev) => prev.filter((c) => c.id !== id));
-        setThumbnails((prev) => {
-          const n = { ...prev };
-          delete n[id];
-          return n;
-        });
-        toast.success('Classroom deleted');
-      } catch {
-        toast.error('Failed to delete classroom');
-      }
-    },
-    [],
-  );
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      await deleteStageData(id);
+      setClassrooms((prev) => prev.filter((c) => c.id !== id));
+      setThumbnails((prev) => {
+        const n = { ...prev };
+        delete n[id];
+        return n;
+      });
+      toast.success('Classroom deleted');
+    } catch {
+      toast.error('Failed to delete classroom');
+    }
+  }, []);
 
   // Filter + sort
   const filtered = classrooms
@@ -616,7 +605,13 @@ export default function LibraryPage() {
         {loading ? (
           <SkeletonGrid />
         ) : filtered.length === 0 ? (
-          <EmptyState hasFilters={hasFilters} onReset={() => { setSearch(''); setActiveFilter(FILTER_ALL); }} />
+          <EmptyState
+            hasFilters={hasFilters}
+            onReset={() => {
+              setSearch('');
+              setActiveFilter(FILTER_ALL);
+            }}
+          />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8">
             {filtered.map((classroom, i) => (

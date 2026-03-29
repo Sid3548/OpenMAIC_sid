@@ -523,12 +523,15 @@ export const useSettingsStore = create<SettingsState>()(
               if (suggestedTTS && onDefaultTTS) {
                 ttsUpdate = {
                   ttsProviderId: suggestedTTS as typeof state.ttsProviderId,
-                  ttsVoice: DEFAULT_TTS_VOICES[suggestedTTS as typeof state.ttsProviderId] ?? state.ttsVoice,
+                  ttsVoice:
+                    DEFAULT_TTS_VOICES[suggestedTTS as typeof state.ttsProviderId] ??
+                    state.ttsVoice,
                 };
               }
               if (suggestedASR && onDefaultASR) {
                 const supportedLanguages =
-                  ASR_PROVIDERS[suggestedASR as keyof typeof ASR_PROVIDERS]?.supportedLanguages || [];
+                  ASR_PROVIDERS[suggestedASR as keyof typeof ASR_PROVIDERS]?.supportedLanguages ||
+                  [];
                 asrUpdate = {
                   asrProviderId: suggestedASR as typeof state.asrProviderId,
                   ...(supportedLanguages.length && !supportedLanguages.includes(state.asrLanguage)
@@ -1062,7 +1065,10 @@ export const useSettingsStore = create<SettingsState>()(
           if (
             state.providerId === 'openai' &&
             (state.modelId === '' ||
-              (state.modelId && (state.modelId.startsWith('gpt-5-mini') || state.modelId.startsWith('gpt-4o-mini') || state.modelId === 'gpt-4o')))
+              (state.modelId &&
+                (state.modelId.startsWith('gpt-5-mini') ||
+                  state.modelId.startsWith('gpt-4o-mini') ||
+                  state.modelId === 'gpt-4o')))
           ) {
             state.modelId = 'gpt-5';
           }
@@ -1072,7 +1078,9 @@ export const useSettingsStore = create<SettingsState>()(
         if (version < 4) {
           if (
             state.providerId === 'openai' &&
-            (!state.modelId || state.modelId.startsWith('gpt-4o') || state.modelId.startsWith('gpt-5-mini'))
+            (!state.modelId ||
+              state.modelId.startsWith('gpt-4o') ||
+              state.modelId.startsWith('gpt-5-mini'))
           ) {
             state.modelId = 'gpt-5';
           }

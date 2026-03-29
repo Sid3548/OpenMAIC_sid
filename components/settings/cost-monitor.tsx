@@ -24,8 +24,8 @@ export function CostMonitor() {
   const barColor = isOverLimit()
     ? 'bg-destructive'
     : isNearLimit()
-    ? 'bg-amber-400'
-    : 'bg-emerald-400';
+      ? 'bg-amber-400'
+      : 'bg-emerald-400';
 
   return (
     <div className="space-y-6 p-1">
@@ -54,7 +54,8 @@ export function CostMonitor() {
             ${today.totalUsd.toFixed(4)}
             {dailyLimitUsd > 0 && (
               <span className="text-muted-foreground text-sm font-normal">
-                {' '}/ ${dailyLimitUsd.toFixed(2)}
+                {' '}
+                / ${dailyLimitUsd.toFixed(2)}
               </span>
             )}
           </span>
@@ -147,8 +148,8 @@ export function CostMonitor() {
         {/* Alert threshold */}
         <div className="space-y-1.5">
           <label className="text-sm font-medium">
-            Warn me at{' '}
-            <span className="text-primary font-semibold">{alertThresholdPct}%</span> of limit
+            Warn me at <span className="text-primary font-semibold">{alertThresholdPct}%</span> of
+            limit
           </label>
           <input
             type="range"
@@ -160,7 +161,8 @@ export function CostMonitor() {
             className="w-full accent-primary"
           />
           <div className="flex justify-between text-[10px] text-muted-foreground">
-            <span>50%</span><span>95%</span>
+            <span>50%</span>
+            <span>95%</span>
           </div>
         </div>
       </div>
@@ -175,25 +177,36 @@ export function CostMonitor() {
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-muted/50 border-b border-border">
-                <th className="text-left px-3 py-2 font-medium text-muted-foreground">Provider / Model</th>
+                <th className="text-left px-3 py-2 font-medium text-muted-foreground">
+                  Provider / Model
+                </th>
                 <th className="text-right px-3 py-2 font-medium text-muted-foreground">Rate</th>
               </tr>
             </thead>
             <tbody>
-              {(Object.entries(PROVIDER_PRICING) as [string, Record<string, number>][]).map(([key, price]) => (
-                <tr key={key} className="border-b border-border/50 last:border-0 hover:bg-muted/30">
-                  <td className="px-3 py-1.5 font-mono text-foreground/80">{key}</td>
-                  <td className="px-3 py-1.5 text-right text-muted-foreground">
-                    {'input' in price
-                      ? `$${price.input}/$${price.output} /1M tok`
-                      : 'chars' in price
-                      ? price.chars === 0 ? 'Free' : `$${price.chars} /1M chars`
-                      : 'minutes' in price
-                      ? price.minutes === 0 ? 'Free' : `$${price.minutes} /min`
-                      : '—'}
-                  </td>
-                </tr>
-              ))}
+              {(Object.entries(PROVIDER_PRICING) as [string, Record<string, number>][]).map(
+                ([key, price]) => (
+                  <tr
+                    key={key}
+                    className="border-b border-border/50 last:border-0 hover:bg-muted/30"
+                  >
+                    <td className="px-3 py-1.5 font-mono text-foreground/80">{key}</td>
+                    <td className="px-3 py-1.5 text-right text-muted-foreground">
+                      {'input' in price
+                        ? `$${price.input}/$${price.output} /1M tok`
+                        : 'chars' in price
+                          ? price.chars === 0
+                            ? 'Free'
+                            : `$${price.chars} /1M chars`
+                          : 'minutes' in price
+                            ? price.minutes === 0
+                              ? 'Free'
+                              : `$${price.minutes} /min`
+                            : '—'}
+                    </td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>

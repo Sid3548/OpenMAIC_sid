@@ -11,12 +11,19 @@ export function RecentHistory({ items }: { items: QuizHistoryItem[] }) {
           <p className="text-sm text-muted-foreground">No attempts yet.</p>
         ) : (
           items.map((item) => (
-            <div key={item.id} className="rounded-xl border border-gray-100 p-3 dark:border-gray-800">
+            <div
+              key={item.id}
+              className="rounded-xl border border-gray-100 p-3 dark:border-gray-800"
+            >
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="font-medium">{item.title}</span>
-                <span>{item.score}/{item.total}</span>
+                <span>
+                  {item.score}/{item.total}
+                </span>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{new Date(item.createdAt).toLocaleString()}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {new Date(item.createdAt).toLocaleString()}
+              </p>
             </div>
           ))
         )}

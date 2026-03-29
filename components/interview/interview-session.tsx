@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { SpeechButton } from '@/components/audio/speech-button';
-import type { InterviewConfig, InterviewSessionSummary, InterviewTurn } from '@/lib/interview/types';
+import type {
+  InterviewConfig,
+  InterviewSessionSummary,
+  InterviewTurn,
+} from '@/lib/interview/types';
 import { InterviewChatPanel } from './interview-chat-panel';
 import { InterviewFeedbackCard } from './interview-feedback-card';
 import { InterviewSummary } from './interview-summary';
@@ -34,8 +38,18 @@ function modelHeaders() {
   return headers;
 }
 
-export function InterviewSession({ config, openingQuestion, onComplete }: { config: InterviewConfig; openingQuestion: string; onComplete: (summary: InterviewSessionSummary, turns: InterviewTurn[]) => void }) {
-  const [turns, setTurns] = useState<InterviewTurn[]>([{ id: createId(), question: openingQuestion }]);
+export function InterviewSession({
+  config,
+  openingQuestion,
+  onComplete,
+}: {
+  config: InterviewConfig;
+  openingQuestion: string;
+  onComplete: (summary: InterviewSessionSummary, turns: InterviewTurn[]) => void;
+}) {
+  const [turns, setTurns] = useState<InterviewTurn[]>([
+    { id: createId(), question: openingQuestion },
+  ]);
   const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<InterviewSessionSummary | null>(null);
@@ -58,7 +72,9 @@ export function InterviewSession({ config, openingQuestion, onComplete }: { conf
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data?.message || data?.error?.message || 'Failed to submit interview answer');
+        throw new Error(
+          data?.message || data?.error?.message || 'Failed to submit interview answer',
+        );
       }
       const payload = data.data || data;
       if (!payload?.feedback || !payload?.nextQuestion) {
@@ -92,7 +108,7 @@ export function InterviewSession({ config, openingQuestion, onComplete }: { conf
       const finalTurns = turns.map((turn) =>
         turn.id === activeTurn?.id && answer.trim()
           ? { question: turn.question, answer: answer.trim() }
-          : { question: turn.question, answer: turn.answer }
+          : { question: turn.question, answer: turn.answer },
       );
       const response = await fetch('/api/interview/debrief', {
         method: 'POST',
@@ -114,9 +130,7 @@ export function InterviewSession({ config, openingQuestion, onComplete }: { conf
       onComplete(
         payload,
         turns.map((turn) =>
-          turn.id === activeTurn?.id && answer.trim()
-            ? { ...turn, answer: answer.trim() }
-            : turn,
+          turn.id === activeTurn?.id && answer.trim() ? { ...turn, answer: answer.trim() } : turn,
         ),
       );
     } catch (error) {
@@ -146,10 +160,31 @@ export function InterviewSession({ config, openingQuestion, onComplete }: { conf
               className="mt-4 min-h-[140px] w-full rounded-xl border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-950"
             />
             <div className="mt-3 flex items-center justify-between gap-3">
-              <SpeechButton size="md" onTranscription={(text) => setAnswer((current) => current + (current ? ' ' : '') + text)} />
+              <SpeechButton
+                size="md"
+                onTranscription={(text) =>
+                  setAnswer((current) => current + (current ? ' ' : '') + text)
+                }
+              />
               <div className="flex gap-3">
-                <button onClick={finishInterview} disabled={loading} className="rounded-xl border border-gray-200 px-4 py-2 text-sm dark:border-gray-700">Finish</button>
-                <button onClick={submitAnswer} disabled={loading || !answer.trim()} className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-500">{loading ? 'Working...' : questionCount >= 6 ? 'Submit & Continue' : 'Submit Answer'}</button>
+                <button
+                  onClick={finishInterview}
+                  disabled={loading}
+                  className="rounded-xl border border-gray-200 px-4 py-2 text-sm dark:border-gray-700"
+                >
+                  Finish
+                </button>
+                <button
+                  onClick={submitAnswer}
+                  disabled={loading || !answer.trim()}
+                  className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                >
+                  {loading
+                    ? 'Working...'
+                    : questionCount >= 6
+                      ? 'Submit & Continue'
+                      : 'Submit Answer'}
+                </button>
               </div>
             </div>
           </div>

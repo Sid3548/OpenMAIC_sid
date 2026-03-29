@@ -23,7 +23,9 @@ export function PlacementQuizConfig(props: PlacementQuizConfigProps) {
           onChange={(event) => props.onCompanyChange(event.target.value)}
         >
           {companies.map((company) => (
-            <option key={company} value={company}>{company}</option>
+            <option key={company} value={company}>
+              {company}
+            </option>
           ))}
         </select>
       </label>
@@ -35,7 +37,9 @@ export function PlacementQuizConfig(props: PlacementQuizConfigProps) {
           onChange={(event) => props.onDifficultyChange(event.target.value as PlacementDifficulty)}
         >
           {difficulties.map((difficulty) => (
-            <option key={difficulty} value={difficulty}>{difficulty}</option>
+            <option key={difficulty} value={difficulty}>
+              {difficulty}
+            </option>
           ))}
         </select>
       </label>

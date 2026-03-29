@@ -15,7 +15,8 @@ export function HindiAudioHints() {
         <div>
           <p className="font-medium">Hindi audio defaults enabled</p>
           <p className="mt-1 text-sky-800/80 dark:text-sky-200/80">
-            TTS will prefer Google Cloud TTS with hi-IN-Neural2-A, and ASR will prefer browser recognition with hi-IN.
+            TTS will prefer Google Cloud TTS with hi-IN-Neural2-A, and ASR will prefer browser
+            recognition with hi-IN.
           </p>
         </div>
       </div>

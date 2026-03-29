@@ -38,7 +38,7 @@ export function LinkDialog({ visible, onClose }: LinkDialogProps) {
 
   useEffect(() => {
     if (visible) setUrl(currentLinkTarget);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, currentLinkTarget]);
 
   const handleSave = () => {

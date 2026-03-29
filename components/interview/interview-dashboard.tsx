@@ -5,7 +5,11 @@ import { InterviewConfigForm } from './interview-config-form';
 import { InterviewHistory } from './interview-history';
 import { InterviewSession } from './interview-session';
 import { getInterviewHistory, saveInterviewHistory } from '@/lib/interview/storage';
-import type { InterviewConfig, InterviewSessionSummary, InterviewTurn } from '@/lib/interview/types';
+import type {
+  InterviewConfig,
+  InterviewSessionSummary,
+  InterviewTurn,
+} from '@/lib/interview/types';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { getCurrentModelConfig } from '@/lib/utils/model-config';
 
@@ -75,7 +79,11 @@ export function InterviewDashboard() {
   return (
     <div className="space-y-8">
       {openingQuestion ? (
-        <InterviewSession config={{ ...config, language: locale }} openingQuestion={openingQuestion} onComplete={handleComplete} />
+        <InterviewSession
+          config={{ ...config, language: locale }}
+          openingQuestion={openingQuestion}
+          onComplete={handleComplete}
+        />
       ) : (
         <div className="space-y-3">
           {error ? (
@@ -83,7 +91,12 @@ export function InterviewDashboard() {
               {error}
             </p>
           ) : null}
-          <InterviewConfigForm config={{ ...config, language: locale }} onChange={setConfig} onStart={startInterview} loading={loading} />
+          <InterviewConfigForm
+            config={{ ...config, language: locale }}
+            onChange={setConfig}
+            onStart={startInterview}
+            loading={loading}
+          />
         </div>
       )}
       <InterviewHistory items={history} />

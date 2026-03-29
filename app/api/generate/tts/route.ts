@@ -37,18 +37,11 @@ export async function POST(req: NextRequest) {
     const ttsProviderId = (body.ttsProviderId ||
       process.env.DEFAULT_TTS_PROVIDER ||
       'openai-tts') as TTSProviderId;
-    const ttsVoice =
-      body.ttsVoice ||
-      process.env.DEFAULT_TTS_VOICE ||
-      'alloy';
+    const ttsVoice = body.ttsVoice || process.env.DEFAULT_TTS_VOICE || 'alloy';
 
     // Validate required fields
     if (!text || !audioId) {
-      return apiError(
-        'MISSING_REQUIRED_FIELD',
-        400,
-        'Missing required fields: text, audioId',
-      );
+      return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required fields: text, audioId');
     }
 
     // Reject browser-native TTS — must be handled client-side

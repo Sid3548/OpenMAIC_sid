@@ -1,6 +1,18 @@
 'use client';
 
-export function QuizConfigForm({ title, description, children, onStart, loading }: { title: string; description: string; children: React.ReactNode; onStart: () => void; loading?: boolean }) {
+export function QuizConfigForm({
+  title,
+  description,
+  children,
+  onStart,
+  loading,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+  onStart: () => void;
+  loading?: boolean;
+}) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <h2 className="text-xl font-semibold">{title}</h2>

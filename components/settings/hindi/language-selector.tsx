@@ -11,7 +11,11 @@ import {
 } from '@/components/ui/select';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useSettingsStore } from '@/lib/store/settings';
-import { getAsrLanguageForLocale, getDefaultTTSProviderForLocale, getDefaultTTSVoiceForLocale } from '@/lib/utils/language';
+import {
+  getAsrLanguageForLocale,
+  getDefaultTTSProviderForLocale,
+  getDefaultTTSVoiceForLocale,
+} from '@/lib/utils/language';
 import type { Locale } from '@/lib/i18n';
 import type { TTSProviderId } from '@/lib/audio/types';
 

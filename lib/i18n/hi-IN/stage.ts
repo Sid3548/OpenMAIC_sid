@@ -9,7 +9,8 @@ export const stageHiIN = {
     paused: 'रुका हुआ',
     generationFailed: 'जनरेशन विफल',
     confirmSwitchTitle: 'दृश्य बदलें',
-    confirmSwitchMessage: 'अभी एक topic चल रहा है। दृश्य बदलने पर वर्तमान topic समाप्त हो जाएगा। क्या आप निश्चित हैं?',
+    confirmSwitchMessage:
+      'अभी एक topic चल रहा है। दृश्य बदलने पर वर्तमान topic समाप्त हो जाएगा। क्या आप निश्चित हैं?',
     generatingNextPage: 'दृश्य बन रहा है, कृपया प्रतीक्षा करें...',
   },
   whiteboard: {

@@ -37,7 +37,7 @@ theorem and why it matters. Skip the math.`,
     title: 'Upload your own material',
     desc: 'Paste a PDF, URL, or text. It reads your actual source, not Wikipedia.',
     heading: 'Upload your actual source material',
-    body: 'If you\'re studying from a textbook, research paper, or lecture notes — paste the content directly. Open Classroom builds the class around your material, not a generic summary of the topic.',
+    body: "If you're studying from a textbook, research paper, or lecture notes — paste the content directly. Open Classroom builds the class around your material, not a generic summary of the topic.",
     code: `• PDF upload (textbooks, papers, notes)
 • Paste raw text directly
 • Any public URL (articles, docs)
@@ -92,7 +92,7 @@ Also works:
 const FAQ_ITEMS = [
   {
     q: 'Is this actually free to self-host?',
-    a: 'Yes — completely. Clone the repo, deploy to Vercel (free tier), add your own LLM API key (OpenAI GPT-5 mini is fast and affordable), and you\'re running at zero cost. The only expense is your own API usage, which is typically a few cents per classroom generation.',
+    a: "Yes — completely. Clone the repo, deploy to Vercel (free tier), add your own LLM API key (OpenAI GPT-5 mini is fast and affordable), and you're running at zero cost. The only expense is your own API usage, which is typically a few cents per classroom generation.",
   },
   {
     q: 'What LLMs does it support?',
@@ -100,7 +100,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How is this different from ChatGPT asking me questions?',
-    a: 'Open Classroom runs multiple agents simultaneously — a professor, a TA, and a student peer who each have distinct personas. They interact with each other, not just with you. Combined with the whiteboard, interactive simulations, and structured scene types, it\'s a fundamentally different experience from a chat interface.',
+    a: "Open Classroom runs multiple agents simultaneously — a professor, a TA, and a student peer who each have distinct personas. They interact with each other, not just with you. Combined with the whiteboard, interactive simulations, and structured scene types, it's a fundamentally different experience from a chat interface.",
   },
   {
     q: 'Can I use my own study materials?',
@@ -118,7 +118,10 @@ const FAQ_ITEMS = [
 
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
-    if (typeof window.Razorpay !== 'undefined') { resolve(true); return; }
+    if (typeof window.Razorpay !== 'undefined') {
+      resolve(true);
+      return;
+    }
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.onload = () => resolve(true);
@@ -129,7 +132,10 @@ function loadRazorpayScript(): Promise<boolean> {
 
 async function startCheckout(plan: string, onSuccess: () => void) {
   const loaded = await loadRazorpayScript();
-  if (!loaded) { alert('Failed to load Razorpay. Check your connection.'); return; }
+  if (!loaded) {
+    alert('Failed to load Razorpay. Check your connection.');
+    return;
+  }
 
   const res = await fetch('/api/razorpay-checkout', {
     method: 'POST',
@@ -137,8 +143,14 @@ async function startCheckout(plan: string, onSuccess: () => void) {
     body: JSON.stringify({ plan }),
   });
   const data = await res.json();
-  if (res.status === 401) { window.location.href = '/login?next=/'; return; }
-  if (data.error) { alert(`Checkout error: ${data.error}`); return; }
+  if (res.status === 401) {
+    window.location.href = '/login?next=/';
+    return;
+  }
+  if (data.error) {
+    alert(`Checkout error: ${data.error}`);
+    return;
+  }
 
   const rzp = new window.Razorpay({
     key: data.keyId,
@@ -164,7 +176,11 @@ export default function LandingPage() {
 
   useEffect(() => setMounted(true), []);
 
-  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const isDark =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
@@ -202,7 +218,13 @@ export default function LandingPage() {
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
                 className="landing-cta-btn"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer' }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
                 <LogOut size={14} /> Sign out
               </button>
@@ -256,9 +278,20 @@ export default function LandingPage() {
                 {session.user?.name || session.user?.email || 'Dashboard'}
               </Link>
               <button
-                onClick={() => { signOut({ callbackUrl: '/login' }); setMobileMenuOpen(false); }}
+                onClick={() => {
+                  signOut({ callbackUrl: '/login' });
+                  setMobileMenuOpen(false);
+                }}
                 className="landing-cta-btn"
-                style={{ textAlign: 'center', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: 'none', cursor: 'pointer' }}
+                style={{
+                  textAlign: 'center',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
                 <LogOut size={14} /> Sign out
               </button>
@@ -280,12 +313,14 @@ export default function LandingPage() {
       <section className="landing-hero">
         <div className="landing-eyebrow">Multi-agent AI classroom</div>
         <h1 className="landing-h1">
-          Learn anything.<br />
+          Learn anything.
+          <br />
           <em>Actually</em> learn it.
         </h1>
         <p className="landing-hero-sub">
-          Open Classroom turns any topic — a textbook, a paper, a URL — into a full classroom with AI
-          teachers who lecture, debate, quiz, and draw on a whiteboard. In real time. In 60 seconds.
+          Open Classroom turns any topic — a textbook, a paper, a URL — into a full classroom with
+          AI teachers who lecture, debate, quiz, and draw on a whiteboard. In real time. In 60
+          seconds.
         </p>
         <div className="landing-hero-actions">
           <Link href="/signup" className="landing-btn-primary">
@@ -336,8 +371,8 @@ export default function LandingPage() {
                   <div className="landing-agent-name">Prof. Ada</div>
                   <div className="landing-agent-text">
                     &quot;Imagine two gloves in separate boxes, sent to opposite ends of the
-                    universe. The moment you open one and see it&apos;s a left glove — you
-                    instantly know the other is right. Entanglement is like that, except…&quot;
+                    universe. The moment you open one and see it&apos;s a left glove — you instantly
+                    know the other is right. Entanglement is like that, except…&quot;
                   </div>
                 </div>
               </div>
@@ -358,9 +393,7 @@ export default function LandingPage() {
               <div className="landing-demo-label" style={{ marginBottom: 16 }}>
                 Quick check — Quiz
               </div>
-              <div className="landing-quiz-q">
-                What does quantum entanglement NOT allow?
-              </div>
+              <div className="landing-quiz-q">What does quantum entanglement NOT allow?</div>
               <div className="landing-quiz-opt">Instant correlation between measurements</div>
               <div className="landing-quiz-opt landing-quiz-opt-correct">
                 Faster-than-light communication ✓
@@ -380,7 +413,8 @@ export default function LandingPage() {
       <section className="landing-section" id="features">
         <div className="landing-eyebrow">What you get</div>
         <h2 className="landing-section-title">
-          Not flashcards.<br />A real classroom.
+          Not flashcards.
+          <br />A real classroom.
         </h2>
         <p className="landing-section-sub">
           Every generation is a complete, interactive learning experience. Not a summary, not a quiz
@@ -432,7 +466,9 @@ export default function LandingPage() {
       <section className="landing-section landing-howto" id="how-to-use">
         <div className="landing-eyebrow">The guide people usually skip</div>
         <h2 className="landing-section-title">
-          How to get the<br />most out of it
+          How to get the
+          <br />
+          most out of it
         </h2>
         <p className="landing-section-sub">
           Most people type one word, get confused, and leave. Here&apos;s exactly how to get a
@@ -476,11 +512,13 @@ export default function LandingPage() {
       <section className="landing-section" id="pricing">
         <div className="landing-eyebrow">Pricing</div>
         <h2 className="landing-section-title">
-          1 credit = 1 activity.<br />Start with 1 free.
+          1 credit = 1 activity.
+          <br />
+          Start with 1 free.
         </h2>
         <p className="landing-section-sub">
-          Sign up and get 1 free activity credit to try it out — no card needed.
-          Buy a plan to unlock 30 credits a month.
+          Sign up and get 1 free activity credit to try it out — no card needed. Buy a plan to
+          unlock 30 credits a month.
         </p>
         <div className="landing-pricing-grid">
           {/* Free trial */}
@@ -494,11 +532,18 @@ export default function LandingPage() {
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
-              {['1 free activity credit', 'Full classroom experience', 'All AI features included', 'No credit card required'].map((f) => (
+              {[
+                '1 free activity credit',
+                'Full classroom experience',
+                'All AI features included',
+                'No credit card required',
+              ].map((f) => (
                 <li key={f}>{f}</li>
               ))}
               {['Credits do not renew', 'No priority queue'].map((f) => (
-                <li key={f} className="landing-plan-feature-muted">{f}</li>
+                <li key={f} className="landing-plan-feature-muted">
+                  {f}
+                </li>
               ))}
             </ul>
             <Link href="/signup" className="landing-plan-btn landing-plan-btn-ghost">
@@ -517,7 +562,16 @@ export default function LandingPage() {
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
-              {['30 credits/month (~30 classrooms)', 'No API key needed', 'GPT-5 powered generation', 'PDF & URL uploads', 'Export to PPTX + HTML', 'Voice narration (OpenAI TTS)', 'Quiz + interview modules', 'Credit refund if anything breaks'].map((f) => (
+              {[
+                '30 credits/month (~30 classrooms)',
+                'No API key needed',
+                'GPT-5 powered generation',
+                'PDF & URL uploads',
+                'Export to PPTX + HTML',
+                'Voice narration (OpenAI TTS)',
+                'Quiz + interview modules',
+                'Credit refund if anything breaks',
+              ].map((f) => (
                 <li key={f}>{f}</li>
               ))}
             </ul>
@@ -540,7 +594,15 @@ export default function LandingPage() {
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
-              {['Min. 5 users', '30 credits/user/month', 'Shared classroom library', 'Admin dashboard', 'All Individual features', 'Priority email support', 'Onboarding call included'].map((f) => (
+              {[
+                'Min. 5 users',
+                '30 credits/user/month',
+                'Shared classroom library',
+                'Admin dashboard',
+                'All Individual features',
+                'Priority email support',
+                'Onboarding call included',
+              ].map((f) => (
                 <li key={f}>{f}</li>
               ))}
             </ul>
@@ -555,9 +617,8 @@ export default function LandingPage() {
         <div className="landing-payment-note">
           <span style={{ fontSize: 20 }}>🔒</span>
           <div>
-            <strong>Secure payments via Razorpay.</strong> Cancel anytime.
-            If a generation fails or the AI misbehaves, your credit is automatically refunded
-            with an apology.
+            <strong>Secure payments via Razorpay.</strong> Cancel anytime. If a generation fails or
+            the AI misbehaves, your credit is automatically refunded with an apology.
           </div>
         </div>
       </section>
@@ -570,10 +631,7 @@ export default function LandingPage() {
         </h2>
         <div className="landing-faq-list">
           {FAQ_ITEMS.map((item, i) => (
-            <div
-              key={i}
-              className={`landing-faq-item${openFaq === i ? ' landing-faq-open' : ''}`}
-            >
+            <div key={i} className={`landing-faq-item${openFaq === i ? ' landing-faq-open' : ''}`}>
               <button
                 className="landing-faq-q"
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -589,10 +647,16 @@ export default function LandingPage() {
       {/* ── CTA BAND ── */}
       <section className="landing-cta-band">
         <h2>
-          What do you want<br />to <em>actually</em> learn today?
+          What do you want
+          <br />
+          to <em>actually</em> learn today?
         </h2>
         <p>Type a topic. 60 seconds later, you&apos;re in class.</p>
-        <Link href="/create" className="landing-btn-primary" style={{ fontSize: 16, padding: '16px 36px' }}>
+        <Link
+          href="/create"
+          className="landing-btn-primary"
+          style={{ fontSize: 16, padding: '16px 36px' }}
+        >
           Open the classroom →
         </Link>
       </section>

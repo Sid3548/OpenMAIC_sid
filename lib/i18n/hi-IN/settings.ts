@@ -64,7 +64,8 @@ export const settingsHiIN = {
     clearCacheDescription: 'लोकल में सेव डेटा, हिस्ट्री और कैश हटाएँ',
     clearCacheConfirmTitle: 'क्या आप वाकई सारा कैश साफ़ करना चाहते हैं?',
     clearCacheConfirmDescription: 'यह कार्रवाई नीचे दिया गया डेटा स्थायी रूप से हटा देगी:',
-    clearCacheConfirmItems: 'क्लासरूम और सीन डेटा, चैट हिस्ट्री, ऑडियो और इमेज कैश, ऐप सेटिंग्स और प्रेफ़रेंसेज़',
+    clearCacheConfirmItems:
+      'क्लासरूम और सीन डेटा, चैट हिस्ट्री, ऑडियो और इमेज कैश, ऐप सेटिंग्स और प्रेफ़रेंसेज़',
     clearCacheConfirmInput: 'जारी रखने के लिए "DELETE" लिखें',
     clearCacheConfirmPhrase: 'DELETE',
     clearCacheButton: 'सारा डेटा स्थायी रूप से हटाएँ',

@@ -18,24 +18,28 @@ const STEPS: Step[] = [
   {
     icon: <Sparkles className="size-5 text-lime-500" />,
     title: 'Welcome to Open Classroom',
-    description: 'Create interactive AI-powered classrooms in seconds. Let\'s show you how it works.',
+    description:
+      "Create interactive AI-powered classrooms in seconds. Let's show you how it works.",
   },
   {
     icon: <FileText className="size-5 text-blue-500" />,
     title: 'Describe your topic',
-    description: 'Type any subject you want to learn — or upload a PDF/paste a URL to build a classroom from your own materials.',
+    description:
+      'Type any subject you want to learn — or upload a PDF/paste a URL to build a classroom from your own materials.',
     highlight: 'textarea',
   },
   {
     icon: <Settings className="size-5 text-amber-500" />,
     title: 'Connect your API key',
-    description: 'Click the Settings gear to add your OpenAI API key (GPT-5 mini is recommended). Free shared quota available to start.',
+    description:
+      'Click the Settings gear to add your OpenAI API key (GPT-5 mini is recommended). Free shared quota available to start.',
     highlight: 'settings',
   },
   {
     icon: <Zap className="size-5 text-lime-500" />,
     title: 'Generate & learn',
-    description: 'Hit the Generate button and watch multiple AI agents build your classroom — professor, TA, and peer working together.',
+    description:
+      'Hit the Generate button and watch multiple AI agents build your classroom — professor, TA, and peer working together.',
     highlight: 'generate',
   },
 ];
