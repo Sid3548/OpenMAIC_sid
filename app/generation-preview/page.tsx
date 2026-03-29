@@ -647,60 +647,52 @@ function GenerationPreviewContent() {
         throw new Error(data.error || t('generation.sceneGenerateFailed'));
       }
 
-      // Generate TTS for first scene (part of actions step — blocking)
+      // Add scene to store and navigate — TTS runs in background (non-blocking)
+      // Assign audioIds eagerly so the classroom knows to expect them
       if (settings.ttsEnabled && settings.ttsProviderId !== 'browser-native-tts') {
-        const ttsProviderConfig = settings.ttsProvidersConfig?.[settings.ttsProviderId];
         const speechActions = (data.scene.actions || []).filter(
           (a: { type: string; text?: string }) => a.type === 'speech' && a.text,
         );
-
-        let ttsFailCount = 0;
         for (const action of speechActions) {
-          const audioId = `tts_${action.id}`;
-          action.audioId = audioId;
-          try {
+          action.audioId = `tts_${action.id}`;
+        }
+
+        // Fire TTS generation in background (parallel, non-blocking)
+        const ttsProviderConfig = settings.ttsProvidersConfig?.[settings.ttsProviderId];
+        Promise.allSettled(
+          speechActions.map(async (action: { id: string; text: string; audioId: string }) => {
             const resp = await fetch('/api/generate/tts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 text: action.text,
-                audioId,
+                audioId: action.audioId,
                 ttsProviderId: settings.ttsProviderId,
                 ttsVoice: settings.ttsVoice,
                 ttsSpeed: settings.ttsSpeed,
                 ttsApiKey: ttsProviderConfig?.apiKey || undefined,
                 ttsBaseUrl: ttsProviderConfig?.baseUrl || undefined,
               }),
-              signal,
             });
-            if (!resp.ok) {
-              ttsFailCount++;
-              continue;
-            }
+            if (!resp.ok) throw new Error(`TTS HTTP ${resp.status}`);
             const ttsData = await resp.json();
-            if (!ttsData.success) {
-              ttsFailCount++;
-              continue;
-            }
+            if (!ttsData.success) throw new Error('TTS response not successful');
             const binary = atob(ttsData.base64);
             const bytes = new Uint8Array(binary.length);
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
             const blob = new Blob([bytes], { type: `audio/${ttsData.format}` });
             await db.audioFiles.put({
-              id: audioId,
+              id: action.audioId,
               blob,
               format: ttsData.format,
               createdAt: Date.now(),
             });
-          } catch (err) {
-            log.warn(`[TTS] Failed for ${audioId}:`, err);
-            ttsFailCount++;
-          }
-        }
-
-        if (ttsFailCount > 0 && speechActions.length > 0) {
-          log.warn(`[TTS] ${ttsFailCount}/${speechActions.length} speech actions failed — continuing without audio`);
-        }
+          }),
+        ).then((results) => {
+          const failed = results.filter((r) => r.status === 'rejected').length;
+          if (failed > 0) log.warn(`[TTS] ${failed}/${speechActions.length} speech actions failed in background`);
+          else log.info(`[TTS] All ${speechActions.length} speech actions generated successfully`);
+        });
       }
 
       // Add scene to store and navigate
