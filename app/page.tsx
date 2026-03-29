@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from '@/lib/hooks/use-theme';
@@ -170,14 +170,13 @@ export default function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- mounted flag for SSR hydration
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const isDark =
     theme === 'dark' ||
