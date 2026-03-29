@@ -174,9 +174,8 @@ export default function LandingPage() {
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- mounted flag for SSR hydration
+  useEffect(() => { setMounted(true); }, []);
 
   const isDark =
     theme === 'dark' ||
