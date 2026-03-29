@@ -699,7 +699,7 @@ function GenerationPreviewContent() {
         }
 
         if (ttsFailCount > 0 && speechActions.length > 0) {
-          throw new Error(t('generation.speechFailed'));
+          log.warn(`[TTS] ${ttsFailCount}/${speechActions.length} speech actions failed — continuing without audio`);
         }
       }
 

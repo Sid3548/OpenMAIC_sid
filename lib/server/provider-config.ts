@@ -139,7 +139,7 @@ function loadEnvSection(
 
   // Then, apply env vars (env takes priority over YAML)
   for (const [prefix, providerId] of Object.entries(envMap)) {
-    const envApiKey = process.env[`${prefix}_API_KEY`] || undefined;
+    const envApiKey = process.env[`${prefix}_API_KEY`]?.trim() || undefined;
     const envBaseUrl = process.env[`${prefix}_BASE_URL`] || undefined;
     const envModelsStr = process.env[`${prefix}_MODELS`];
     const envModels = envModelsStr
@@ -269,7 +269,7 @@ export function resolveTTSApiKey(providerId: string, clientKey?: string): string
   const serverKey = getConfig().tts[providerId]?.apiKey;
   if (serverKey) return serverKey;
   if (providerId === 'openai-tts') {
-    return getConfig().providers['openai']?.apiKey || process.env.OPENAI_API_KEY || '';
+    return getConfig().providers['openai']?.apiKey || process.env.OPENAI_API_KEY?.trim() || '';
   }
   return '';
 }
@@ -298,7 +298,7 @@ export function resolveASRApiKey(providerId: string, clientKey?: string): string
   const serverKey = getConfig().asr[providerId]?.apiKey;
   if (serverKey) return serverKey;
   if (providerId === 'openai-whisper') {
-    return getConfig().providers['openai']?.apiKey || process.env.OPENAI_API_KEY || '';
+    return getConfig().providers['openai']?.apiKey || process.env.OPENAI_API_KEY?.trim() || '';
   }
   return '';
 }
