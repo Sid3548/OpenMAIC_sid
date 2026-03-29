@@ -11,30 +11,30 @@ import { persist } from 'zustand/middleware';
 // Sources: provider docs as of 2026. Update as pricing changes.
 export const PROVIDER_PRICING = {
   // LLM — per 1M tokens
-  'google:gemini-2.5-pro':          { input: 1.25,   output: 10.00 }, // text-only tasks only
-  'google:gemini-2.5-flash':        { input: 0.15,   output: 0.60  }, // Fast + cheap
-  'google:gemini-2.5-flash-lite':   { input: 0.075,  output: 0.30  }, // Ultra-cheap
-  'google:gemini-2.0-flash':        { input: 0.075,  output: 0.30  },
-  'google:gemini-2.5-flash-preview':{ input: 0.15,   output: 0.60  },
-  'google:gemini-1.5-pro':          { input: 1.25,   output: 5.00  },
-  'openai:gpt-4o':                  { input: 2.50,   output: 10.00 }, // Default — recommended
-  'openai:gpt-4o-mini':             { input: 0.15,   output: 0.60  },
-  'anthropic:claude-sonnet-4-6':    { input: 3.00,   output: 15.00 }, // Claude latest
-  'anthropic:claude-sonnet-4-5':    { input: 3.00,   output: 15.00 },
-  'anthropic:claude-haiku-4-5':     { input: 0.80,   output: 4.00  },
-  'anthropic:claude-3-5-haiku':     { input: 0.80,   output: 4.00  },
-  'anthropic:claude-3-5-sonnet':    { input: 3.00,   output: 15.00 },
-  'deepseek:deepseek-chat':         { input: 0.014,  output: 0.28  },
+  'google:gemini-2.5-pro': { input: 1.25, output: 10.0 }, // text-only tasks only
+  'google:gemini-2.5-flash': { input: 0.15, output: 0.6 }, // Fast + cheap
+  'google:gemini-2.5-flash-lite': { input: 0.075, output: 0.3 }, // Ultra-cheap
+  'google:gemini-2.0-flash': { input: 0.075, output: 0.3 },
+  'google:gemini-2.5-flash-preview': { input: 0.15, output: 0.6 },
+  'google:gemini-1.5-pro': { input: 1.25, output: 5.0 },
+  'openai:gpt-4o': { input: 2.5, output: 10.0 }, // Default — recommended
+  'openai:gpt-4o-mini': { input: 0.15, output: 0.6 },
+  'anthropic:claude-sonnet-4-6': { input: 3.0, output: 15.0 }, // Claude latest
+  'anthropic:claude-sonnet-4-5': { input: 3.0, output: 15.0 },
+  'anthropic:claude-haiku-4-5': { input: 0.8, output: 4.0 },
+  'anthropic:claude-3-5-haiku': { input: 0.8, output: 4.0 },
+  'anthropic:claude-3-5-sonnet': { input: 3.0, output: 15.0 },
+  'deepseek:deepseek-chat': { input: 0.014, output: 0.28 },
 
   // TTS — per 1M characters
-  'tts:openai-tts':                 { chars: 15.00  },
-  'tts:google-tts':                 { chars: 4.00   }, // WaveNet; standard is $4, neural $16
-  'tts:azure-tts':                  { chars: 16.00  },
-  'tts:browser-native-tts':         { chars: 0      }, // free
+  'tts:openai-tts': { chars: 15.0 },
+  'tts:google-tts': { chars: 4.0 }, // WaveNet; standard is $4, neural $16
+  'tts:azure-tts': { chars: 16.0 },
+  'tts:browser-native-tts': { chars: 0 }, // free
 
   // ASR — per minute
-  'asr:openai-whisper':             { minutes: 0.006 },
-  'asr:browser-native':             { minutes: 0     },
+  'asr:openai-whisper': { minutes: 0.006 },
+  'asr:browser-native': { minutes: 0 },
 } as const;
 
 export type ProviderPricingKey = keyof typeof PROVIDER_PRICING;
@@ -50,15 +50,15 @@ export interface CostEntry {
 }
 
 export interface DailyUsage {
-  date: string;          // YYYY-MM-DD
+  date: string; // YYYY-MM-DD
   totalUsd: number;
   entries: CostEntry[];
 }
 
 export interface CostTrackerState {
   // Settings
-  dailyLimitUsd: number;       // 0 = no limit
-  alertThresholdPct: number;   // warn when this % of limit is reached (default 80)
+  dailyLimitUsd: number; // 0 = no limit
+  alertThresholdPct: number; // warn when this % of limit is reached (default 80)
   trackingEnabled: boolean;
 
   // Today's usage
@@ -94,7 +94,7 @@ function freshDay(): DailyUsage {
 export const useCostTrackerStore = create<CostTrackerState>()(
   persist(
     (set, get) => ({
-      dailyLimitUsd: 5.00,       // $5/day default
+      dailyLimitUsd: 5.0, // $5/day default
       alertThresholdPct: 80,
       trackingEnabled: true,
 
@@ -172,8 +172,7 @@ export function estimateLLMCost(
 ): number {
   const pricing = PROVIDER_PRICING[modelKey as ProviderPricingKey];
   if (!pricing || !('input' in pricing)) return 0;
-  return (inputTokens / 1_000_000) * pricing.input +
-         (outputTokens / 1_000_000) * pricing.output;
+  return (inputTokens / 1_000_000) * pricing.input + (outputTokens / 1_000_000) * pricing.output;
 }
 
 /** Estimate cost for a TTS call given character count */

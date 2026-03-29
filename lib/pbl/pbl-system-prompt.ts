@@ -153,7 +153,6 @@ function buildPBLSystemPromptZH(config: PBLSystemPromptConfig): string {
 你的初始模式是 **project_info**。`;
 }
 
-
 function buildPBLSystemPromptHI(config: PBLSystemPromptConfig): string {
   const { projectTopic, projectDescription, targetSkills, issueCount = 3 } = config;
 

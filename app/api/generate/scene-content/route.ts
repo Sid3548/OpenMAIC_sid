@@ -42,23 +42,38 @@ function validateInteractiveHtml(content: unknown): string | null {
   if (html.length < 500) return `too short (${html.length} chars)`;
 
   // Must have basic HTML structure
-  if (!html.includes('<html') || !html.includes('</html>'))
-    return 'missing <html> structure';
+  if (!html.includes('<html') || !html.includes('</html>')) return 'missing <html> structure';
 
   // Must have a <script> tag with actual code
   const scriptMatch = html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
-  if (!scriptMatch || scriptMatch[1].trim().length < 50)
-    return 'missing or empty <script> tag';
+  if (!scriptMatch || scriptMatch[1].trim().length < 50) return 'missing or empty <script> tag';
 
   // Must have at least one interactive element or API
   const interactiveSignals = [
-    'addEventListener', 'onclick', 'oninput', 'onchange', 'onmousemove',
-    'onmousedown', 'ontouchstart', 'ondrag',
-    '<input', '<button', '<select', '<range', '<canvas', '<svg',
-    'requestAnimationFrame', 'setInterval', 'getContext',
-    'slider', 'drag', 'click',
+    'addEventListener',
+    'onclick',
+    'oninput',
+    'onchange',
+    'onmousemove',
+    'onmousedown',
+    'ontouchstart',
+    'ondrag',
+    '<input',
+    '<button',
+    '<select',
+    '<range',
+    '<canvas',
+    '<svg',
+    'requestAnimationFrame',
+    'setInterval',
+    'getContext',
+    'slider',
+    'drag',
+    'click',
   ];
-  const hasInteractive = interactiveSignals.some((s) => html.toLowerCase().includes(s.toLowerCase()));
+  const hasInteractive = interactiveSignals.some((s) =>
+    html.toLowerCase().includes(s.toLowerCase()),
+  );
   if (!hasInteractive) return 'no interactive elements found';
 
   return null; // valid
@@ -115,7 +130,8 @@ export async function POST(req: NextRequest) {
     // Ensure outline has language from stageInfo (fallback for older outlines)
     const outline: SceneOutline = {
       ...rawOutline,
-      language: rawOutline.language || (stageInfo?.language as 'zh-CN' | 'en-US' | 'hi-IN') || 'zh-CN',
+      language:
+        rawOutline.language || (stageInfo?.language as 'zh-CN' | 'en-US' | 'hi-IN') || 'zh-CN',
     };
 
     // ── Model resolution ──
@@ -123,7 +139,10 @@ export async function POST(req: NextRequest) {
     const interactiveModelsEnv = process.env.DEFAULT_INTERACTIVE_MODEL;
     const isInteractive = outline.type === 'interactive' && interactiveModelsEnv;
     const interactiveModelChain = isInteractive
-      ? interactiveModelsEnv.split(',').map((s) => s.trim()).filter(Boolean)
+      ? interactiveModelsEnv
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
       : [];
 
     // Helper: build aiCall + generate for a given resolved model
@@ -149,7 +168,12 @@ export async function POST(req: NextRequest) {
           return result.text;
         }
         const result = await callLLM(
-          { model: lm.model, system: systemPrompt, prompt: userPrompt, maxOutputTokens: lm.modelInfo?.outputWindow },
+          {
+            model: lm.model,
+            system: systemPrompt,
+            prompt: userPrompt,
+            maxOutputTokens: lm.modelInfo?.outputWindow,
+          },
           'scene-content',
         );
         return result.text;
@@ -189,12 +213,19 @@ export async function POST(req: NextRequest) {
           try {
             const resolved = resolveModel({ modelString: ms });
             const { aiCall, hasVision, modelString: mStr } = buildAiCall(resolved);
-            log.info(`Interactive scene — ${ms} attempt ${attempt}/${MAX_RETRIES} (model ${i + 1}/${interactiveModelChain.length})`);
+            log.info(
+              `Interactive scene — ${ms} attempt ${attempt}/${MAX_RETRIES} (model ${i + 1}/${interactiveModelChain.length})`,
+            );
 
             const result = await generateSceneContent(
-              effectiveOutline, aiCall, assignedImages, imageMapping,
+              effectiveOutline,
+              aiCall,
+              assignedImages,
+              imageMapping,
               effectiveOutline.type === 'pbl' ? resolved.model : undefined,
-              hasVision, generatedMediaMapping, agents,
+              hasVision,
+              generatedMediaMapping,
+              agents,
             );
 
             if (!result) {
@@ -215,7 +246,9 @@ export async function POST(req: NextRequest) {
             log.info(`Interactive scene validated OK with ${ms} (attempt ${attempt})`);
             break;
           } catch (err) {
-            log.warn(`Interactive ${ms} attempt ${attempt}: error — ${err instanceof Error ? err.message : err}`);
+            log.warn(
+              `Interactive ${ms} attempt ${attempt}: error — ${err instanceof Error ? err.message : err}`,
+            );
           }
         }
 
@@ -228,9 +261,14 @@ export async function POST(req: NextRequest) {
         const { aiCall, hasVision } = buildAiCall(defaultResolved);
         usedModelString = defaultResolved.modelString;
         content = await generateSceneContent(
-          effectiveOutline, aiCall, assignedImages, imageMapping,
+          effectiveOutline,
+          aiCall,
+          assignedImages,
+          imageMapping,
           effectiveOutline.type === 'pbl' ? defaultResolved.model : undefined,
-          hasVision, generatedMediaMapping, agents,
+          hasVision,
+          generatedMediaMapping,
+          agents,
         );
       }
     } else {
@@ -241,21 +279,29 @@ export async function POST(req: NextRequest) {
         `Generating content: "${effectiveOutline.title}" (${effectiveOutline.type}) [model=${usedModelString}]`,
       );
       content = await generateSceneContent(
-        effectiveOutline, aiCall, assignedImages, imageMapping,
+        effectiveOutline,
+        aiCall,
+        assignedImages,
+        imageMapping,
         effectiveOutline.type === 'pbl' ? defaultResolved.model : undefined,
-        hasVision, generatedMediaMapping, agents,
+        hasVision,
+        generatedMediaMapping,
+        agents,
       );
     }
 
     if (!content) {
       log.error(`Failed to generate content for: "${effectiveOutline.title}"`);
       return apiError(
-        'GENERATION_FAILED', 500,
+        'GENERATION_FAILED',
+        500,
         `Failed to generate content: ${effectiveOutline.title}`,
       );
     }
 
-    log.info(`Content generated successfully: "${effectiveOutline.title}" [model=${usedModelString!}]`);
+    log.info(
+      `Content generated successfully: "${effectiveOutline.title}" [model=${usedModelString!}]`,
+    );
 
     return apiSuccess({ content, effectiveOutline });
   } catch (error) {

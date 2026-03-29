@@ -64,20 +64,52 @@ function LoginForm() {
 
   return (
     <main
-      style={{ background: isDark ? '#0a0a0a' : '#f8f8f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', position: 'relative' }}
+      style={{
+        background: isDark ? '#0a0a0a' : '#f8f8f5',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        position: 'relative',
+      }}
     >
       <button
         onClick={() => setTheme(isDark ? 'light' : 'dark')}
-        style={{ position: 'absolute', top: 20, right: 20, background: isDark ? '#1a1a1a' : '#e8e8e0', border: 'none', borderRadius: 8, padding: '8px', cursor: 'pointer', color: isDark ? '#ccc' : '#555', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          background: isDark ? '#1a1a1a' : '#e8e8e0',
+          border: 'none',
+          borderRadius: 8,
+          padding: '8px',
+          cursor: 'pointer',
+          color: isDark ? '#ccc' : '#555',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
         aria-label="Toggle theme"
       >
         {isDark ? <Sun size={16} /> : <Moon size={16} />}
       </button>
       <div style={{ width: '100%', maxWidth: 380 }}>
-        <h1 style={{ color: isDark ? '#fff' : '#111', fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Sign in</h1>
+        <h1
+          style={{
+            color: isDark ? '#fff' : '#111',
+            fontSize: 28,
+            fontWeight: 700,
+            marginBottom: 8,
+          }}
+        >
+          Sign in
+        </h1>
         <p style={{ color: isDark ? '#888' : '#666', marginBottom: 28, fontSize: 14 }}>
-          <Link href="/signup" style={{ color: '#c8f53a' }}>Create an account</Link>
-          {' '}to get 1 free credit.
+          <Link href="/signup" style={{ color: '#c8f53a' }}>
+            Create an account
+          </Link>{' '}
+          to get 1 free credit.
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -100,9 +132,7 @@ function LoginForm() {
             style={inputStyle}
           />
 
-          {error && (
-            <p style={{ color: '#ff6b6b', fontSize: 13, margin: 0 }}>{error}</p>
-          )}
+          {error && <p style={{ color: '#ff6b6b', fontSize: 13, margin: 0 }}>{error}</p>}
 
           <button
             type="submit"
@@ -127,4 +157,3 @@ function LoginForm() {
     </main>
   );
 }
-

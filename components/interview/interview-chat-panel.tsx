@@ -9,9 +9,15 @@ export function InterviewChatPanel({ turns }: { turns: InterviewTurn[] }) {
       <div className="mt-4 space-y-4">
         {turns.map((turn, index) => (
           <div key={turn.id} className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Question {index + 1}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+              Question {index + 1}
+            </p>
             <p className="mt-1 text-sm font-medium">{turn.question}</p>
-            {turn.answer ? <p className="mt-3 text-sm text-gray-700 dark:text-gray-300"><strong>Your answer:</strong> {turn.answer}</p> : null}
+            {turn.answer ? (
+              <p className="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                <strong>Your answer:</strong> {turn.answer}
+              </p>
+            ) : null}
           </div>
         ))}
       </div>

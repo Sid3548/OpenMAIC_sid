@@ -62,7 +62,10 @@ export async function checkRateLimit(
  */
 export function rateLimitResponse(result: RateLimitResult): Response {
   return new Response(
-    JSON.stringify({ error: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' }),
+    JSON.stringify({
+      error: 'RATE_LIMITED',
+      message: 'Too many requests. Please try again later.',
+    }),
     {
       status: 429,
       headers: {

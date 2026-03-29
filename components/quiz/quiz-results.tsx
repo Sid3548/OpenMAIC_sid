@@ -23,7 +23,9 @@ export function QuizResults({
           <span className="text-xl text-white/70">/ {total}</span>
         </div>
         <p className="mt-2 text-sm text-white/80">{percentage}%</p>
-        {debrief?.percentileEstimate ? <p className="mt-1 text-sm text-white/80">{debrief.percentileEstimate}</p> : null}
+        {debrief?.percentileEstimate ? (
+          <p className="mt-1 text-sm text-white/80">{debrief.percentileEstimate}</p>
+        ) : null}
       </div>
       {debrief?.summary ? (
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-800 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200">

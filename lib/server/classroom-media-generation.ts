@@ -229,7 +229,8 @@ export async function generateTTSForClassroom(
   const format = TTS_PROVIDERS[providerId]?.supportedFormats?.[0] || 'mp3';
 
   // Collect all speech actions across all scenes, then generate TTS in parallel
-  const ttsJobs: Array<{ scene: typeof scenes[number]; action: SpeechAction; audioId: string }> = [];
+  const ttsJobs: Array<{ scene: (typeof scenes)[number]; action: SpeechAction; audioId: string }> =
+    [];
 
   for (const scene of scenes) {
     if (!scene.actions) continue;

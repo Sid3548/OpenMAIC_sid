@@ -22,7 +22,9 @@ function clampHundredPointScore(value: unknown) {
 
 function normalizeInterviewDebriefResult(input: Record<string, unknown>) {
   const topImprovements = Array.isArray(input.topImprovements)
-    ? input.topImprovements.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    ? input.topImprovements.filter(
+        (item): item is string => typeof item === 'string' && item.trim().length > 0,
+      )
     : [];
   const summary = typeof input.summary === 'string' ? input.summary.trim() : '';
 
@@ -61,7 +63,9 @@ export async function POST(req: NextRequest) {
       },
       'interview-debrief',
     );
-    return apiSuccess(normalizeInterviewDebriefResult(parseFirstJsonObject<Record<string, unknown>>(result.text)));
+    return apiSuccess(
+      normalizeInterviewDebriefResult(parseFirstJsonObject<Record<string, unknown>>(result.text)),
+    );
   } catch (error) {
     return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : 'Failed');
   }

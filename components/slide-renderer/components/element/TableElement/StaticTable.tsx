@@ -110,8 +110,7 @@ export function StaticTable({
                 textStyle.color = headerColor;
               }
 
-              const isEditing =
-                editingCell?.rowIdx === rowIdx && editingCell?.colIdx === colIdx;
+              const isEditing = editingCell?.rowIdx === rowIdx && editingCell?.colIdx === colIdx;
 
               return (
                 <td
@@ -127,9 +126,7 @@ export function StaticTable({
                     position: 'relative',
                     ...textStyle,
                   }}
-                  onDoubleClick={
-                    onCellDblClick ? () => onCellDblClick(rowIdx, colIdx) : undefined
-                  }
+                  onDoubleClick={onCellDblClick ? () => onCellDblClick(rowIdx, colIdx) : undefined}
                 >
                   {isEditing ? (
                     <textarea

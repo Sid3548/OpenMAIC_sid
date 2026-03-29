@@ -33,5 +33,8 @@ export async function POST(req: NextRequest) {
     note || 'Activity failed — credit refunded. Sorry for the inconvenience.',
   );
 
-  return apiSuccess({ refunded: true, message: 'Sorry for the inconvenience! Your credit has been returned.' });
+  return apiSuccess({
+    refunded: true,
+    message: 'Sorry for the inconvenience! Your credit has been returned.',
+  });
 }

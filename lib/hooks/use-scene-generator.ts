@@ -189,9 +189,7 @@ async function generateTTSForScene(
 
   // Generate all TTS in parallel
   const results = await Promise.allSettled(
-    speechActions.map((action) =>
-      generateAndStoreTTS(action.audioId!, action.text, signal),
-    ),
+    speechActions.map((action) => generateAndStoreTTS(action.audioId!, action.text, signal)),
   );
 
   let failedCount = 0;
@@ -199,7 +197,10 @@ async function generateTTSForScene(
   results.forEach((r, i) => {
     if (r.status === 'rejected') {
       failedCount++;
-      lastError = r.reason instanceof Error ? r.reason.message : `TTS failed for action ${speechActions[i].id}`;
+      lastError =
+        r.reason instanceof Error
+          ? r.reason.message
+          : `TTS failed for action ${speechActions[i].id}`;
       log.warn('TTS generation failed:', {
         providerId,
         actionId: speechActions[i].id,
@@ -314,8 +315,11 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         try {
           const genParamsStr = sessionStorage.getItem('generationParams');
           const genParams = genParamsStr ? JSON.parse(genParamsStr) : {};
-          if (genParams.prefetchedContent && pending.length > 0 &&
-              genParams.prefetchedContent.forOutlineId === pending[0].id) {
+          if (
+            genParams.prefetchedContent &&
+            pending.length > 0 &&
+            genParams.prefetchedContent.forOutlineId === pending[0].id
+          ) {
             prefetchedContent = {
               success: true,
               content: genParams.prefetchedContent.content,
@@ -323,7 +327,9 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             };
             log.info(`Using pre-fetched content for "${pending[0].title}"`);
           }
-        } catch { /* ignore parsing errors */ }
+        } catch {
+          /* ignore parsing errors */
+        }
 
         for (let i = 0; i < pending.length; i++) {
           const outline = pending[i];
@@ -337,18 +343,20 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
 
           // Step 1: Generate content (use prefetched if available)
           options.onPhaseChange?.('content', outline);
-          const contentResult = prefetchedContent ?? await fetchSceneContent(
-            {
-              outline,
-              allOutlines: outlines,
-              stageId: stage.id,
-              pdfImages: params.pdfImages,
-              imageMapping: params.imageMapping,
-              stageInfo: params.stageInfo,
-              agents: params.agents,
-            },
-            signal,
-          );
+          const contentResult =
+            prefetchedContent ??
+            (await fetchSceneContent(
+              {
+                outline,
+                allOutlines: outlines,
+                stageId: stage.id,
+                pdfImages: params.pdfImages,
+                imageMapping: params.imageMapping,
+                stageInfo: params.stageInfo,
+                agents: params.agents,
+              },
+              signal,
+            ));
           prefetchedContent = null; // consumed
 
           if (!contentResult.success || !contentResult.content) {
@@ -413,7 +421,9 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             if (settings.ttsEnabled && settings.ttsProviderId !== 'browser-native-tts') {
               const ttsResult = await generateTTSForScene(scene, signal);
               if (!ttsResult.success) {
-                log.warn(`[TTS] ${ttsResult.failedCount} actions failed for "${outline.title}" — continuing without audio`);
+                log.warn(
+                  `[TTS] ${ttsResult.failedCount} actions failed for "${outline.title}" — continuing without audio`,
+                );
               }
             }
 

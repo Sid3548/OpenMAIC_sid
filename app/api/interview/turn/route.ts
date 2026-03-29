@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     const coachPersona = [
       `You are a professional interview coach reviewing a ${config.role} interview answer.`,
       `Difficulty: ${config.difficulty}. Interview type: ${config.interviewType}.`,
-      'Analyse the candidate\'s answer and output ONLY a JSON object (no markdown, no prose):',
+      "Analyse the candidate's answer and output ONLY a JSON object (no markdown, no prose):",
       '{"good":["..."],"missing":["..."],"strongAnswer":"..."}',
       'Each array should contain 1-3 concise bullet points. strongAnswer is one sentence.',
     ].join(' ');
@@ -143,7 +143,9 @@ export async function POST(req: NextRequest) {
     };
 
     log.info(`Coach turn — role: ${config.role}, difficulty: ${config.difficulty}`);
-    const coachText = await collectText(statelessGenerate(coachRequest, signal, languageModel, thinking));
+    const coachText = await collectText(
+      statelessGenerate(coachRequest, signal, languageModel, thinking),
+    );
     const feedback = extractJson(coachText);
 
     // ── Interviewer turn ──────────────────────────────────────────────────────
@@ -189,10 +191,6 @@ export async function POST(req: NextRequest) {
     return apiSuccess({ feedback, nextQuestion });
   } catch (error) {
     log.error('Error:', error);
-    return apiError(
-      'INTERNAL_ERROR',
-      500,
-      error instanceof Error ? error.message : String(error),
-    );
+    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
   }
 }

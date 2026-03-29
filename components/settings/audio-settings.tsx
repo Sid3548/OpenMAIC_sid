@@ -305,8 +305,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
   }
 
   // Fetch available voices from provider API
-  const canFetchVoices =
-    ttsProviderId !== 'browser-native-tts' && ttsProviderId !== 'azure-tts';
+  const canFetchVoices = ttsProviderId !== 'browser-native-tts' && ttsProviderId !== 'azure-tts';
 
   const handleFetchVoices = async () => {
     setFetchingVoices(true);

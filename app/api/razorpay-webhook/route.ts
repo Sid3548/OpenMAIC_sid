@@ -33,10 +33,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Verify HMAC signature
-  const expected = crypto
-    .createHmac('sha256', webhookSecret)
-    .update(rawBody)
-    .digest('hex');
+  const expected = crypto.createHmac('sha256', webhookSecret).update(rawBody).digest('hex');
 
   if (expected !== signature) {
     return NextResponse.json({ error: 'Signature mismatch' }, { status: 400 });
@@ -47,7 +44,10 @@ export async function POST(req: NextRequest) {
 
   switch (event) {
     case 'payment.captured': {
-      const payment = (payload?.payment as Record<string, unknown>)?.entity as Record<string, unknown>;
+      const payment = (payload?.payment as Record<string, unknown>)?.entity as Record<
+        string,
+        unknown
+      >;
       const notes = payment?.notes as Record<string, string> | undefined;
       const userId = notes?.userId;
       const plan = notes?.plan || 'individual';
@@ -56,7 +56,12 @@ export async function POST(req: NextRequest) {
 
       if (userId) {
         const creditsToGrant = CREDITS_PER_PLAN[plan] ?? 30;
-        await grantCredits(userId, creditsToGrant, 'purchase', `Plan: ${plan}, payment: ${paymentId}`);
+        await grantCredits(
+          userId,
+          creditsToGrant,
+          'purchase',
+          `Plan: ${plan}, payment: ${paymentId}`,
+        );
         await prisma.subscription.upsert({
           where: { userId },
           create: {
@@ -83,13 +88,19 @@ export async function POST(req: NextRequest) {
       break;
     }
     case 'payment.failed': {
-      const payment = (payload?.payment as Record<string, unknown>)?.entity as Record<string, unknown>;
+      const payment = (payload?.payment as Record<string, unknown>)?.entity as Record<
+        string,
+        unknown
+      >;
       console.log('[Razorpay] Payment failed:', payment?.id);
       // No action needed — user keeps existing credits
       break;
     }
     case 'subscription.cancelled': {
-      const sub = (payload?.subscription as Record<string, unknown>)?.entity as Record<string, unknown>;
+      const sub = (payload?.subscription as Record<string, unknown>)?.entity as Record<
+        string,
+        unknown
+      >;
       const notes = sub?.notes as Record<string, string> | undefined;
       const userId = notes?.userId;
       if (userId) {

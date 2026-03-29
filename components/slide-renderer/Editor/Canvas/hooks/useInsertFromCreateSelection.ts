@@ -5,7 +5,12 @@ import { useSceneSelector } from '@/lib/contexts/scene-context';
 import { useCanvasOperations } from '@/lib/hooks/use-canvas-operations';
 import { useHistorySnapshot } from '@/lib/hooks/use-history-snapshot';
 import type { SlideContent } from '@/lib/types/stage';
-import type { SlideTheme, PPTTextElement, PPTShapeElement, PPTLineElement } from '@/lib/types/slides';
+import type {
+  SlideTheme,
+  PPTTextElement,
+  PPTShapeElement,
+  PPTLineElement,
+} from '@/lib/types/slides';
 import type { CreateElementSelectionData } from '@/lib/types/edit';
 
 export function useInsertFromCreateSelection(viewportRef: RefObject<HTMLElement | null>) {

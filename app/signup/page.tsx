@@ -79,20 +79,52 @@ export default function SignupPage() {
 
   return (
     <main
-      style={{ background: isDark ? '#0a0a0a' : '#f8f8f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', position: 'relative' }}
+      style={{
+        background: isDark ? '#0a0a0a' : '#f8f8f5',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        position: 'relative',
+      }}
     >
       <button
         onClick={() => setTheme(isDark ? 'light' : 'dark')}
-        style={{ position: 'absolute', top: 20, right: 20, background: isDark ? '#1a1a1a' : '#e8e8e0', border: 'none', borderRadius: 8, padding: '8px', cursor: 'pointer', color: isDark ? '#ccc' : '#555', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          background: isDark ? '#1a1a1a' : '#e8e8e0',
+          border: 'none',
+          borderRadius: 8,
+          padding: '8px',
+          cursor: 'pointer',
+          color: isDark ? '#ccc' : '#555',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
         aria-label="Toggle theme"
       >
         {isDark ? <Sun size={16} /> : <Moon size={16} />}
       </button>
       <div style={{ width: '100%', maxWidth: 420 }}>
-        <h1 style={{ color: isDark ? '#fff' : '#111', fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Create account</h1>
+        <h1
+          style={{
+            color: isDark ? '#fff' : '#111',
+            fontSize: 28,
+            fontWeight: 700,
+            marginBottom: 8,
+          }}
+        >
+          Create account
+        </h1>
         <p style={{ color: isDark ? '#888' : '#666', marginBottom: 28, fontSize: 14 }}>
           1 free activity credit on signup.{' '}
-          <Link href="/login" style={{ color: '#c8f53a' }}>Already have an account?</Link>
+          <Link href="/login" style={{ color: '#c8f53a' }}>
+            Already have an account?
+          </Link>
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -143,9 +175,7 @@ export default function SignupPage() {
             style={inputStyle}
           />
 
-          {error && (
-            <p style={{ color: '#ff6b6b', fontSize: 13, margin: 0 }}>{error}</p>
-          )}
+          {error && <p style={{ color: '#ff6b6b', fontSize: 13, margin: 0 }}>{error}</p>}
 
           <button
             type="submit"
@@ -167,11 +197,17 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p style={{ color: isDark ? '#555' : '#888', fontSize: 12, marginTop: 20, textAlign: 'center' }}>
+        <p
+          style={{
+            color: isDark ? '#555' : '#888',
+            fontSize: 12,
+            marginTop: 20,
+            textAlign: 'center',
+          }}
+        >
           By signing up you agree to our terms of service.
         </p>
       </div>
     </main>
   );
 }
-

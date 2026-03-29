@@ -432,8 +432,7 @@ function ModelSelectorPopover({
               className={cn(
                 'inline-flex items-center justify-center size-7 rounded-full transition-all cursor-pointer select-none',
                 'ring-1 ring-border/60 hover:ring-border hover:bg-muted/60',
-                currentModelId &&
-                  'ring-sky-300 dark:ring-sky-700 bg-sky-50 dark:bg-sky-950/20',
+                currentModelId && 'ring-sky-300 dark:ring-sky-700 bg-sky-50 dark:bg-sky-950/20',
               )}
             >
               {currentProviderConfig?.icon ? (

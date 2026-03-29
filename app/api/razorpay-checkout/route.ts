@@ -14,8 +14,16 @@ function getRazorpay() {
 // Map plan slugs → amount in paise (INR) and plan label
 // individual: ₹499/month → 30 credits
 // batch: ₹399/user/month (min 5 users, contact-based) — not available via self-serve checkout
-const PLANS: Record<string, { amount: number; currency: string; name: string; credits: number } | undefined> = {
-  individual: { amount: 49900, currency: 'INR', name: 'Open Classroom Individual — ₹499/mo', credits: 30 },
+const PLANS: Record<
+  string,
+  { amount: number; currency: string; name: string; credits: number } | undefined
+> = {
+  individual: {
+    amount: 49900,
+    currency: 'INR',
+    name: 'Open Classroom Individual — ₹499/mo',
+    credits: 30,
+  },
 };
 
 export async function POST(req: NextRequest) {
@@ -29,10 +37,7 @@ export async function POST(req: NextRequest) {
 
     const planConfig = PLANS[plan];
     if (!planConfig) {
-      return NextResponse.json(
-        { error: `Unknown plan "${plan}"` },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: `Unknown plan "${plan}"` }, { status: 400 });
     }
 
     const razorpay = getRazorpay();
@@ -41,7 +46,12 @@ export async function POST(req: NextRequest) {
       amount: planConfig.amount,
       currency: planConfig.currency,
       receipt: `rcpt_${plan}_${Date.now()}`,
-      notes: { plan, name: planConfig.name, userId: session.user.id, credits: String(planConfig.credits) },
+      notes: {
+        plan,
+        name: planConfig.name,
+        userId: session.user.id,
+        credits: String(planConfig.credits),
+      },
     });
 
     return NextResponse.json({

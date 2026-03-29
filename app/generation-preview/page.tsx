@@ -624,22 +624,25 @@ function GenerationPreviewContent() {
 
       // Pre-fetch scene 2 content in parallel with scene 1 actions
       // This overlaps the two LLM calls, saving ~10-20s
-      const scene2ContentPromise = outlines.length > 1
-        ? fetch('/api/generate/scene-content', {
-            method: 'POST',
-            headers: getApiHeaders(),
-            body: JSON.stringify({
-              outline: outlines[1],
-              allOutlines: outlines,
-              pdfImages: currentSession.pdfImages,
-              imageMapping,
-              stageInfo,
-              stageId: stage.id,
-              agents,
-            }),
-            signal,
-          }).then((r) => r.ok ? r.json() : null).catch(() => null)
-        : null;
+      const scene2ContentPromise =
+        outlines.length > 1
+          ? fetch('/api/generate/scene-content', {
+              method: 'POST',
+              headers: getApiHeaders(),
+              body: JSON.stringify({
+                outline: outlines[1],
+                allOutlines: outlines,
+                pdfImages: currentSession.pdfImages,
+                imageMapping,
+                stageInfo,
+                stageId: stage.id,
+                agents,
+              }),
+              signal,
+            })
+              .then((r) => (r.ok ? r.json() : null))
+              .catch(() => null)
+          : null;
 
       const actionsResp = await fetch('/api/generate/scene-actions', {
         method: 'POST',
@@ -709,7 +712,8 @@ function GenerationPreviewContent() {
           }),
         ).then((results) => {
           const failed = results.filter((r) => r.status === 'rejected').length;
-          if (failed > 0) log.warn(`[TTS] ${failed}/${speechActions.length} speech actions failed in background`);
+          if (failed > 0)
+            log.warn(`[TTS] ${failed}/${speechActions.length} speech actions failed in background`);
           else log.info(`[TTS] All ${speechActions.length} speech actions generated successfully`);
         });
       }
@@ -733,11 +737,13 @@ function GenerationPreviewContent() {
           agents,
           userProfile,
           // Pass pre-fetched scene 2 content so classroom skips that LLM call
-          prefetchedContent: scene2Content?.success ? {
-            content: scene2Content.content,
-            effectiveOutline: scene2Content.effectiveOutline,
-            forOutlineId: outlines[1]?.id,
-          } : undefined,
+          prefetchedContent: scene2Content?.success
+            ? {
+                content: scene2Content.content,
+                effectiveOutline: scene2Content.effectiveOutline,
+                forOutlineId: outlines[1]?.id,
+              }
+            : undefined,
         }),
       );
 

@@ -20,7 +20,11 @@ export async function POST(req: NextRequest) {
     };
 
     if (!email || !password || !name || !mobile) {
-      return apiError('MISSING_REQUIRED_FIELD', 400, 'name, email, mobile and password are required');
+      return apiError(
+        'MISSING_REQUIRED_FIELD',
+        400,
+        'name, email, mobile and password are required',
+      );
     }
 
     // Basic mobile validation (10 digits, optional +91 prefix)
@@ -37,32 +41,43 @@ export async function POST(req: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Create user + grant 1 signup credit in a transaction
-    const user = await prisma.$transaction(async (tx: Omit<typeof prisma, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => {
-      const newUser = await tx.user.create({
-        data: {
-          name,
-          email,
-          mobile,
-          passwordHash,
-          credits: 1,
-        },
-      });
+    const user = await prisma.$transaction(
+      async (
+        tx: Omit<
+          typeof prisma,
+          '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+        >,
+      ) => {
+        const newUser = await tx.user.create({
+          data: {
+            name,
+            email,
+            mobile,
+            passwordHash,
+            credits: 1,
+          },
+        });
 
-      await tx.creditLedger.create({
-        data: {
-          userId: newUser.id,
-          delta: 1,
-          balance: 1,
-          reason: 'signup_bonus',
-          note: 'Free trial credit on signup',
-        },
-      });
+        await tx.creditLedger.create({
+          data: {
+            userId: newUser.id,
+            delta: 1,
+            balance: 1,
+            reason: 'signup_bonus',
+            note: 'Free trial credit on signup',
+          },
+        });
 
-      return newUser;
-    });
+        return newUser;
+      },
+    );
 
     return apiSuccess({ id: user.id, email: user.email, credits: user.credits });
   } catch (error) {
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : 'Signup failed');
+    return apiError(
+      'INTERNAL_ERROR',
+      500,
+      error instanceof Error ? error.message : 'Signup failed',
+    );
   }
 }

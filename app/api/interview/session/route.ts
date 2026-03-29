@@ -35,7 +35,9 @@ export async function POST(req: NextRequest) {
       },
       'interview-session',
     );
-    return apiSuccess(normalizeInterviewSessionResult(parseFirstJsonObject<Record<string, unknown>>(result.text)));
+    return apiSuccess(
+      normalizeInterviewSessionResult(parseFirstJsonObject<Record<string, unknown>>(result.text)),
+    );
   } catch (error) {
     return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : 'Failed');
   }

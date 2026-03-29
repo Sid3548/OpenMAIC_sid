@@ -47,7 +47,8 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
           const { useSettingsStore } = await import('@/lib/store/settings');
           const { getEffectiveASRApiKey } = await import('@/lib/utils/model-config');
           const { asrProviderId, asrLanguage, asrProvidersConfig } = useSettingsStore.getState();
-          const effectiveProviderId = asrProviderId === 'browser-native' ? 'openai-whisper' : asrProviderId;
+          const effectiveProviderId =
+            asrProviderId === 'browser-native' ? 'openai-whisper' : asrProviderId;
           const effectiveLanguage =
             asrProviderId === 'browser-native'
               ? getAsrLanguageForLocale(asrLanguage || 'en-US', 'openai-whisper')
@@ -61,7 +62,8 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
           if (effectiveApiKey) {
             formData.append('apiKey', effectiveApiKey);
           }
-          const providerConfig = asrProvidersConfig?.[effectiveProviderId] || asrProvidersConfig?.[asrProviderId];
+          const providerConfig =
+            asrProvidersConfig?.[effectiveProviderId] || asrProvidersConfig?.[asrProviderId];
           if (providerConfig?.baseUrl?.trim()) {
             formData.append('baseUrl', providerConfig.baseUrl);
           }

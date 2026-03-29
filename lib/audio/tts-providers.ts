@@ -324,30 +324,31 @@ async function generateQwenTTS(config: TTSModelConfig, text: string): Promise<TT
   };
 }
 
-
-
 async function generateGoogleTTS(
   config: TTSModelConfig,
   text: string,
 ): Promise<TTSGenerationResult> {
   const baseUrl = config.baseUrl || TTS_PROVIDERS['google-tts'].defaultBaseUrl;
-  const response = await fetch(`${baseUrl}/text:synthesize?key=${encodeURIComponent(config.apiKey!)}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
+  const response = await fetch(
+    `${baseUrl}/text:synthesize?key=${encodeURIComponent(config.apiKey!)}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify({
+        input: { text },
+        voice: {
+          languageCode: inferVoiceLocale(config.voice),
+          name: config.voice,
+        },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate: config.speed || 1.0,
+        },
+      }),
     },
-    body: JSON.stringify({
-      input: { text },
-      voice: {
-        languageCode: inferVoiceLocale(config.voice),
-        name: config.voice,
-      },
-      audioConfig: {
-        audioEncoding: 'MP3',
-        speakingRate: config.speed || 1.0,
-      },
-    }),
-  });
+  );
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => response.statusText);
