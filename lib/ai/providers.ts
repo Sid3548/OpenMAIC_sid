@@ -138,10 +138,26 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         },
       },
       {
+        id: 'gpt-5.4-mini',
+        name: 'GPT-5.4 Mini',
+        contextWindow: 128000,
+        outputWindow: 32768,
+        capabilities: {
+          streaming: true,
+          tools: true,
+          vision: true,
+          thinking: {
+            toggleable: false,
+            budgetAdjustable: true,
+            defaultEnabled: true,
+          },
+        },
+      },
+      {
         id: 'gpt-5-mini',
         name: 'GPT-5-mini',
         contextWindow: 128000,
-        outputWindow: 4096,
+        outputWindow: 32768,
         capabilities: {
           streaming: true,
           tools: true,
@@ -173,7 +189,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         id: 'gpt-4o',
         name: 'GPT-4o',
         contextWindow: 128000,
-        outputWindow: 4096,
+        outputWindow: 16384,
         capabilities: { streaming: true, tools: true, vision: true },
       },
       {
@@ -1061,8 +1077,13 @@ export function getModel(config: ModelConfig): ModelWithInfo {
       throw new Error(`Unsupported provider type: ${providerType}`);
   }
 
-  // Look up model info from the provider registry
-  const modelInfo = provider?.models.find((m) => m.id === config.modelId) || null;
+  // Look up model info from the provider registry.
+  // Exact match first, then try prefix match for date-suffixed model IDs
+  // (e.g. "gpt-5.4-mini-2026-03-17" should match registered "gpt-5.4-mini")
+  const modelInfo =
+    provider?.models.find((m) => m.id === config.modelId) ||
+    provider?.models.find((m) => config.modelId.startsWith(m.id)) ||
+    null;
 
   return { model, modelInfo };
 }

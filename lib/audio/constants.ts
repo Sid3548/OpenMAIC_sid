@@ -564,6 +564,22 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
     icon: '/logos/gemini.svg',
     voices: [
       {
+        id: 'en-US-Neural2-A',
+        name: 'English Neural2-A',
+        language: 'en-US',
+        localeName: 'English (US)',
+        gender: 'male',
+        description: 'voiceGoogleEnglishNeural2A',
+      },
+      {
+        id: 'en-US-Neural2-C',
+        name: 'English Neural2-C',
+        language: 'en-US',
+        localeName: 'English (US)',
+        gender: 'female',
+        description: 'voiceGoogleEnglishNeural2C',
+      },
+      {
         id: 'hi-IN-Neural2-A',
         name: 'Hindi Neural2-A',
         language: 'hi-IN',
@@ -572,12 +588,20 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
         description: 'voiceGoogleHindiNeural2A',
       },
       {
-        id: 'hi-IN-Wavenet-A',
-        name: 'Hindi Wavenet-A',
+        id: 'hi-IN-Neural2-B',
+        name: 'Hindi Neural2-B',
         language: 'hi-IN',
         localeName: 'हिन्दी (भारत)',
+        gender: 'male',
+        description: 'voiceGoogleHindiNeural2B',
+      },
+      {
+        id: 'zh-CN-Neural2-A',
+        name: 'Chinese Neural2-A',
+        language: 'zh-CN',
+        localeName: '中文 (中国)',
         gender: 'female',
-        description: 'voiceGoogleHindiWavenetA',
+        description: 'voiceGoogleChineseNeural2A',
       },
     ],
     supportedFormats: ['mp3'],
@@ -811,7 +835,7 @@ export const DEFAULT_TTS_VOICES: Record<TTSProviderId, string> = {
   'azure-tts': 'zh-CN-XiaoxiaoNeural',
   'glm-tts': 'tongtong',
   'qwen-tts': 'Cherry',
-  'google-tts': 'hi-IN-Neural2-A',
+  'google-tts': 'en-US-Neural2-C',
   'browser-native-tts': 'default',
 };
 

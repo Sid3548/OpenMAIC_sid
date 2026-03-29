@@ -1,10 +1,11 @@
 /**
  * Credit system helpers.
  *
- * 1 credit = 1 activity (classroom generation, quiz session, interview session).
- * Users get 1 free credit on signup and earn more via subscription payments.
+ * 1 credit = 1 activity (classroom generation).
+ * Free users get 2 credits/week (auto-refreshed). Paid users get more.
  *
- * Individual plan (₹499/mo)  → 30 credits/month
+ * Free plan                   → 2 credits/week (auto)
+ * Individual plan (₹99/mo)   → 30 credits/month
  * Batch plan    (₹399/user)  → 30 credits/user/month (min 5 users)
  */
 
@@ -109,6 +110,58 @@ export async function refundCredit(
       },
     });
   });
+}
+
+/**
+ * Weekly free credit refresh for free-tier users.
+ * Grants 2 credits per week if the user hasn't received free credits in the last 7 days.
+ * Only applies to users without an active subscription (credits < 5 as heuristic).
+ * Returns true if credits were granted.
+ */
+export const FREE_WEEKLY_CREDITS = 2;
+
+export async function refreshWeeklyCredits(userId: string): Promise<boolean> {
+  const lastGrant = await prisma.creditLedger.findFirst({
+    where: {
+      userId,
+      reason: 'weekly_free',
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  // Check if 7 days have passed since last weekly grant
+  if (lastGrant) {
+    const daysSince = (Date.now() - lastGrant.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (daysSince < 7) return false;
+  }
+
+  // Grant weekly credits
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { credits: true },
+    });
+    if (!user) return;
+
+    const newBalance = user.credits + FREE_WEEKLY_CREDITS;
+
+    await tx.user.update({
+      where: { id: userId },
+      data: { credits: newBalance },
+    });
+
+    await tx.creditLedger.create({
+      data: {
+        userId,
+        delta: FREE_WEEKLY_CREDITS,
+        balance: newBalance,
+        reason: 'weekly_free',
+        note: `Weekly free credits (${FREE_WEEKLY_CREDITS})`,
+      },
+    });
+  });
+
+  return true;
 }
 
 /**
