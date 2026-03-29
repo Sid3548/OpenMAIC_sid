@@ -622,6 +622,25 @@ function GenerationPreviewContent() {
       const actionsStepIdx = activeSteps.findIndex((s) => s.id === 'actions');
       setCurrentStepIndex(actionsStepIdx >= 0 ? actionsStepIdx : currentStepIndex + 1);
 
+      // Pre-fetch scene 2 content in parallel with scene 1 actions
+      // This overlaps the two LLM calls, saving ~10-20s
+      const scene2ContentPromise = outlines.length > 1
+        ? fetch('/api/generate/scene-content', {
+            method: 'POST',
+            headers: getApiHeaders(),
+            body: JSON.stringify({
+              outline: outlines[1],
+              allOutlines: outlines,
+              pdfImages: currentSession.pdfImages,
+              imageMapping,
+              stageInfo,
+              stageId: stage.id,
+              agents,
+            }),
+            signal,
+          }).then((r) => r.ok ? r.json() : null).catch(() => null)
+        : null;
+
       const actionsResp = await fetch('/api/generate/scene-actions', {
         method: 'POST',
         headers: getApiHeaders(),
@@ -703,6 +722,9 @@ function GenerationPreviewContent() {
       const remaining = outlines.filter((o) => o.order !== data.scene.order);
       store.setGeneratingOutlines(remaining);
 
+      // Resolve pre-fetched scene 2 content (if available)
+      const scene2Content = scene2ContentPromise ? await scene2ContentPromise : null;
+
       // Store generation params for classroom to continue generation
       sessionStorage.setItem(
         'generationParams',
@@ -710,6 +732,12 @@ function GenerationPreviewContent() {
           pdfImages: currentSession.pdfImages,
           agents,
           userProfile,
+          // Pass pre-fetched scene 2 content so classroom skips that LLM call
+          prefetchedContent: scene2Content?.success ? {
+            content: scene2Content.content,
+            effectiveOutline: scene2Content.effectiveOutline,
+            forOutlineId: outlines[1]?.id,
+          } : undefined,
         }),
       );
 
