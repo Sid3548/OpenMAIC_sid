@@ -54,17 +54,17 @@ export async function POST(req: NextRequest) {
             email,
             mobile,
             passwordHash,
-            credits: 1,
+            credits: 2,
           },
         });
 
         await tx.creditLedger.create({
           data: {
             userId: newUser.id,
-            delta: 1,
-            balance: 1,
+            delta: 2,
+            balance: 2,
             reason: 'signup_bonus',
-            note: 'Free trial credit on signup',
+            note: 'Free weekly credits on signup',
           },
         });
 

@@ -121,7 +121,7 @@ export default function SignupPage() {
           Create account
         </h1>
         <p style={{ color: isDark ? '#888' : '#666', marginBottom: 28, fontSize: 14 }}>
-          1 free activity credit on signup.{' '}
+          2 free credits every week.{' '}
           <Link href="/login" style={{ color: '#c8f53a' }}>
             Already have an account?
           </Link>
@@ -193,7 +193,7 @@ export default function SignupPage() {
               marginTop: 4,
             }}
           >
-            {loading ? 'Creating account…' : 'Sign up — get 1 free credit'}
+            {loading ? 'Creating account…' : 'Sign up — 2 free credits/week'}
           </button>
         </form>
 

@@ -109,7 +109,7 @@ function LoginForm() {
           <Link href="/signup" style={{ color: '#c8f53a' }}>
             Create an account
           </Link>{' '}
-          to get 1 free credit.
+          for 2 free credits/week.
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
