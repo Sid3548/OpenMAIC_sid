@@ -26,6 +26,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Prettier
         run: pnpm check
 
