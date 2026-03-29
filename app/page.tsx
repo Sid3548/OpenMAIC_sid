@@ -174,7 +174,9 @@ export default function LandingPage() {
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isDark =
     theme === 'dark' ||

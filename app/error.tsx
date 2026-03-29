@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Error({
   error,
@@ -48,7 +49,7 @@ export default function Error({
         >
           Try again
         </button>
-        <a
+        <Link
           href="/"
           style={{
             padding: '10px 24px',
@@ -63,7 +64,7 @@ export default function Error({
           }}
         >
           Go home
-        </a>
+        </Link>
       </div>
       {error.digest && (
         <p style={{ fontSize: '12px', color: '#555', marginTop: '8px' }}>
