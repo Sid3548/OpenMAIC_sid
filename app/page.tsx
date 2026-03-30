@@ -516,11 +516,11 @@ export default function LandingPage() {
         <h2 className="landing-section-title">
           1 credit = 1 activity.
           <br />
-          Start with 1 free.
+          Start with 2 free every week.
         </h2>
         <p className="landing-section-sub">
-          Sign up and get 1 free activity credit to try it out — no card needed. Buy a plan to
-          unlock 30 credits a month.
+          Sign up and get 2 free credits every week — no card needed. Upgrade to unlock 20 credits a
+          month at an affordable price.
         </p>
         <div className="landing-pricing-grid">
           {/* Free trial */}
@@ -530,19 +530,19 @@ export default function LandingPage() {
               <sup>₹</sup>0
             </div>
             <div className="landing-plan-tagline">
-              Sign up and get 1 free credit to explore the platform at no cost.
+              2 free credits every week — explore the full platform at no cost.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
-                '1 free activity credit',
+                '2 free credits/week (auto-refresh)',
                 'Full classroom experience',
                 'All AI features included',
                 'No credit card required',
               ].map((f) => (
                 <li key={f}>{f}</li>
               ))}
-              {['Credits do not renew', 'No priority queue'].map((f) => (
+              {['Up to 2 credits/week', 'No priority queue'].map((f) => (
                 <li key={f} className="landing-plan-feature-muted">
                   {f}
                 </li>
@@ -557,20 +557,20 @@ export default function LandingPage() {
             <div className="landing-plan-badge">Most popular</div>
             <div className="landing-plan-name">Individual</div>
             <div className="landing-plan-price">
-              <sup>₹</sup>499<span>/mo</span>
+              <sup>₹</sup>99<span>/mo</span>
             </div>
             <div className="landing-plan-tagline">
-              30 activity credits every month. We handle infrastructure and AI costs.
+              20 activity credits every month. We handle infrastructure and AI costs.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
-                '30 credits/month (~30 classrooms)',
+                '20 credits/month (~20 classrooms)',
                 'No API key needed',
-                'GPT-5 powered generation',
+                'GPT-5 + Gemini Pro interactive',
                 'PDF & URL uploads',
                 'Export to PPTX + HTML',
-                'Voice narration (OpenAI TTS)',
+                'Voice narration included',
                 'Quiz + interview modules',
                 'Credit refund if anything breaks',
               ].map((f) => (
@@ -589,7 +589,7 @@ export default function LandingPage() {
           <div className="landing-plan">
             <div className="landing-plan-name">Batch / Teacher</div>
             <div className="landing-plan-price">
-              <sup>₹</sup>399<span>/user/mo</span>
+              <sup>₹</sup>79<span>/user/mo</span>
             </div>
             <div className="landing-plan-tagline">
               For educators managing multiple students. Minimum 5 users. Contact us to set up.
@@ -598,7 +598,7 @@ export default function LandingPage() {
             <ul className="landing-plan-features">
               {[
                 'Min. 5 users',
-                '30 credits/user/month',
+                '20 credits/user/month',
                 'Shared classroom library',
                 'Admin dashboard',
                 'All Individual features',
