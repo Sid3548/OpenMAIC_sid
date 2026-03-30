@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       >;
       const notes = payment?.notes as Record<string, string> | undefined;
       const userId = notes?.userId;
-      const plan = notes?.plan || 'individual';
+      const plan = notes?.plan || 'pro';
       const orderId = payment?.order_id as string | undefined;
       const paymentId = payment?.id as string;
 

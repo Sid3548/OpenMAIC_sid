@@ -71,8 +71,8 @@ export default function PaymentSuccessPage() {
             marginBottom: 40,
           }}
         >
-          Your subscription is active and 20 credits have been added to your account. Start
-          generating AI classrooms now.
+          Your subscription is active and your credits have been added. Start generating
+          AI classrooms now.
         </p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
           <Link

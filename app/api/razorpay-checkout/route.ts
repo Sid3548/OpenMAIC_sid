@@ -12,17 +12,24 @@ function getRazorpay() {
 }
 
 // Map plan slugs → amount in paise (INR) and plan label
-// individual: ₹99/month → 20 credits
-// batch: ₹79/user/month (min 5 users, contact-based) — not available via self-serve checkout
+// starter: ₹299/month → 15 credits
+// pro: ₹499/month → 30 credits
+// team: ₹399/user/month (min 5 users, contact-based) — not available via self-serve checkout
 const PLANS: Record<
   string,
   { amount: number; currency: string; name: string; credits: number } | undefined
 > = {
-  individual: {
-    amount: 9900,
+  starter: {
+    amount: 29900,
     currency: 'INR',
-    name: 'Open Classroom Individual — ₹99/mo',
-    credits: 20,
+    name: 'Open Classroom Starter — ₹299/mo',
+    credits: 15,
+  },
+  pro: {
+    amount: 49900,
+    currency: 'INR',
+    name: 'Open Classroom Pro — ₹499/mo',
+    credits: 30,
   },
 };
 

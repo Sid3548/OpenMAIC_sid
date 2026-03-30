@@ -5,22 +5,28 @@
  * Free users get 2 credits/week (auto-refreshed). Paid users get more.
  *
  * Free plan                   → 2 credits/week (auto)
- * Individual plan (₹99/mo)   → 20 credits/month
- * Batch plan    (₹399/user)  → 20 credits/user/month (min 5 users)
+ * Starter plan (₹299/mo)     → 15 credits/month
+ * Pro plan     (₹499/mo)     → 30 credits/month
+ * Team plan    (₹399/user)   → 30 credits/user/month (min 5 users)
  *
  * Cost breakdown per credit (March 2026):
  *   DeepSeek V3.2 (text gen + chat): ~$0.019
  *   Interactive (GPT-5 / Gemini 3.1 Pro): ~$0.052–0.063
  *   Google TTS Standard: ~$0.014
  *   Total: ~$0.085–0.096 per credit
+ *
+ * Revenue per credit:
+ *   Starter (₹299/15): ₹19.9/credit (~$0.24) → ~60% margin
+ *   Pro     (₹499/30): ₹16.6/credit (~$0.20) → ~53% margin
  */
 
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 export const CREDITS_PER_PLAN: Record<string, number> = {
-  individual: 20,
-  batch: 20,
+  starter: 15,
+  pro: 30,
+  team: 30,
 };
 
 /**
