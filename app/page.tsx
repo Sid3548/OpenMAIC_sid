@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from '@/lib/hooks/use-theme';
@@ -167,6 +168,7 @@ async function startCheckout(plan: string, onSuccess: () => void) {
 
 export default function LandingPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -177,6 +179,13 @@ export default function LandingPage() {
   );
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Redirect logged-in users to the create page
+  useEffect(() => {
+    if (session?.user) {
+      router.replace('/create');
+    }
+  }, [session, router]);
 
   const isDark =
     theme === 'dark' ||
@@ -194,6 +203,9 @@ export default function LandingPage() {
     });
     setCheckingOut(null);
   }, []);
+
+  // Don't render marketing page for logged-in users (redirecting to /create)
+  if (session?.user) return null;
 
   return (
     <div className="landing-page">
@@ -514,63 +526,33 @@ export default function LandingPage() {
       <section className="landing-section" id="pricing">
         <div className="landing-eyebrow">Pricing</div>
         <h2 className="landing-section-title">
-          1 credit = 1 activity.
+          1 credit = 1 classroom.
           <br />
           Start with 2 free every week.
         </h2>
         <p className="landing-section-sub">
-          Sign up and get 2 free credits every week — no card needed. Upgrade to unlock 20 credits a
-          month at an affordable price.
+          Sign up and get 2 free credits every week — no card needed. Upgrade for more classrooms
+          powered by the best AI models.
         </p>
         <div className="landing-pricing-grid">
-          {/* Free trial */}
+          {/* Starter */}
           <div className="landing-plan">
-            <div className="landing-plan-name">Free Trial</div>
+            <div className="landing-plan-name">Starter</div>
             <div className="landing-plan-price">
-              <sup>₹</sup>0
+              <sup>₹</sup>299<span>/mo</span>
             </div>
+            <div className="landing-plan-price-usd">$4.99/mo</div>
             <div className="landing-plan-tagline">
-              2 free credits every week — explore the full platform at no cost.
+              15 classrooms a month. Perfect for individual learners getting started.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
-                '2 free credits/week (auto-refresh)',
-                'Full classroom experience',
-                'All AI features included',
-                'No credit card required',
-              ].map((f) => (
-                <li key={f}>{f}</li>
-              ))}
-              {['Up to 2 credits/week', 'No priority queue'].map((f) => (
-                <li key={f} className="landing-plan-feature-muted">
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link href="/signup" className="landing-plan-btn landing-plan-btn-ghost">
-              Sign up free →
-            </Link>
-          </div>
-          {/* Individual */}
-          <div className="landing-plan landing-plan-featured">
-            <div className="landing-plan-badge">Most popular</div>
-            <div className="landing-plan-name">Individual</div>
-            <div className="landing-plan-price">
-              <sup>₹</sup>99<span>/mo</span>
-            </div>
-            <div className="landing-plan-tagline">
-              20 activity credits every month. We handle infrastructure and AI costs.
-            </div>
-            <hr className="landing-plan-divider" />
-            <ul className="landing-plan-features">
-              {[
-                '20 credits/month (~20 classrooms)',
-                'No API key needed',
-                'GPT-5 + Gemini Pro interactive',
+                '15 credits/month',
+                'GPT-5 + Gemini Pro models',
+                'Voice narration included',
                 'PDF & URL uploads',
                 'Export to PPTX + HTML',
-                'Voice narration included',
                 'Quiz + interview modules',
                 'Credit refund if anything breaks',
               ].map((f) => (
@@ -578,30 +560,65 @@ export default function LandingPage() {
               ))}
             </ul>
             <button
-              className="landing-plan-btn landing-plan-btn-accent"
-              onClick={() => handleCheckout('individual')}
-              disabled={checkingOut === 'individual'}
+              className="landing-plan-btn landing-plan-btn-ghost"
+              onClick={() => handleCheckout('starter')}
+              disabled={checkingOut === 'starter'}
             >
-              {checkingOut === 'individual' ? 'Redirecting…' : 'Get started →'}
+              {checkingOut === 'starter' ? 'Redirecting…' : 'Get started →'}
             </button>
           </div>
-          {/* Batch / Teacher */}
-          <div className="landing-plan">
-            <div className="landing-plan-name">Batch / Teacher</div>
+          {/* Pro */}
+          <div className="landing-plan landing-plan-featured">
+            <div className="landing-plan-badge">Best value</div>
+            <div className="landing-plan-name">Pro</div>
             <div className="landing-plan-price">
-              <sup>₹</sup>79<span>/user/mo</span>
+              <sup>₹</sup>499<span>/mo</span>
             </div>
+            <div className="landing-plan-price-usd">$9.99/mo</div>
             <div className="landing-plan-tagline">
-              For educators managing multiple students. Minimum 5 users. Contact us to set up.
+              30 classrooms a month. Best models, best value per credit.
+            </div>
+            <hr className="landing-plan-divider" />
+            <ul className="landing-plan-features">
+              {[
+                '30 credits/month',
+                'GPT-5 + Gemini Pro models',
+                'Voice narration included',
+                'PDF & URL uploads',
+                'Export to PPTX + HTML',
+                'Quiz + interview modules',
+                'Priority generation queue',
+                'Credit refund if anything breaks',
+              ].map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <button
+              className="landing-plan-btn landing-plan-btn-accent"
+              onClick={() => handleCheckout('pro')}
+              disabled={checkingOut === 'pro'}
+            >
+              {checkingOut === 'pro' ? 'Redirecting…' : 'Get started →'}
+            </button>
+          </div>
+          {/* Team */}
+          <div className="landing-plan">
+            <div className="landing-plan-name">Team</div>
+            <div className="landing-plan-price">
+              <sup>₹</sup>399<span>/user/mo</span>
+            </div>
+            <div className="landing-plan-price-usd">$7.99/user/mo</div>
+            <div className="landing-plan-tagline">
+              For educators and teams. Minimum 5 users. Contact us to set up.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
                 'Min. 5 users',
-                '20 credits/user/month',
+                '30 credits/user/month',
                 'Shared classroom library',
                 'Admin dashboard',
-                'All Individual features',
+                'All Pro features',
                 'Priority email support',
                 'Onboarding call included',
               ].map((f) => (
@@ -609,7 +626,7 @@ export default function LandingPage() {
               ))}
             </ul>
             <a
-              href="mailto:contact@openclassroom.online?subject=Batch%20Plan%20Inquiry"
+              href="mailto:contact@openclassroom.online?subject=Team%20Plan%20Inquiry"
               className="landing-plan-btn landing-plan-btn-ghost"
             >
               Contact us →
@@ -621,6 +638,21 @@ export default function LandingPage() {
           <div>
             <strong>Secure payments via Razorpay.</strong> Cancel anytime. If a generation fails or
             the AI misbehaves, your credit is automatically refunded with an apology.
+          </div>
+        </div>
+        <div className="landing-payment-note" style={{ marginTop: 12 }}>
+          <span style={{ fontSize: 20 }}>🌍</span>
+          <div>
+            <strong>Paying from outside India?</strong> We&apos;re setting up international
+            payments. Sign up for free now and{' '}
+            <a
+              href="mailto:contact@openclassroom.online?subject=International%20Subscription&body=Hi%2C%20I'd%20like%20to%20subscribe%20from%20outside%20India.%20Please%20let%20me%20know%20when%20USD%20payments%20are%20available."
+              style={{ color: 'var(--l-accent)', textDecoration: 'underline' }}
+            >
+              drop us an email
+            </a>
+            &nbsp;— we&apos;ll set up your subscription personally and notify you when USD
+            payments go live.
           </div>
         </div>
       </section>

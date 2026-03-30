@@ -997,11 +997,19 @@ html:not(.dark) .landing-page {
   font-size: 22px;
   vertical-align: top;
   margin-top: 10px;
+  margin-right: 4px;
 }
 .landing-plan-price span {
   font-size: 16px;
   color: var(--l-muted);
   letter-spacing: 0;
+  font-family: var(--font-sans, sans-serif);
+}
+
+.landing-plan-price-usd {
+  font-size: 14px;
+  color: var(--l-muted);
+  margin-bottom: 4px;
   font-family: var(--font-sans, sans-serif);
 }
 
