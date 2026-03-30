@@ -526,26 +526,14 @@ export default function LandingPage() {
         </p>
 
         {/* What's in a class */}
-        <div className="landing-class-includes" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 16,
-          maxWidth: 700,
-          margin: '0 auto 48px',
-          textAlign: 'center',
-        }}>
+        <div className="landing-class-includes">
           {[
             { label: 'Teaching', detail: 'Step-by-step explanations with diagrams' },
             { label: 'Quizzes', detail: 'Test your understanding, get instant feedback' },
             { label: 'Simulations', detail: 'Interactive experiments you control' },
             { label: 'Voice', detail: 'Narrated so you can listen and follow' },
           ].map((item) => (
-            <div key={item.label} style={{
-              padding: '16px 12px',
-              borderRadius: 10,
-              background: 'var(--l-bg2)',
-              border: '1px solid var(--l-border)',
-            }}>
+            <div key={item.label}>
               <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--l-text)', marginBottom: 4 }}>
                 {item.label}
               </div>
