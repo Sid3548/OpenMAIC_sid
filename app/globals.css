@@ -1019,6 +1019,21 @@ html:not(.dark) .landing-page {
   font-family: var(--font-sans, sans-serif);
 }
 
+.landing-class-includes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 700px;
+  margin: 0 auto 48px;
+  text-align: center;
+}
+.landing-class-includes > div {
+  padding: 16px 12px;
+  border-radius: 10px;
+  background: var(--l-bg2);
+  border: 1px solid var(--l-border);
+}
+
 .landing-plan-tagline {
   font-size: 13px;
   color: var(--l-muted);
@@ -1295,5 +1310,8 @@ html:not(.dark) .landing-page {
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
+  }
+  .landing-class-includes {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
