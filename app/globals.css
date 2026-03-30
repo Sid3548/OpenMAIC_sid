@@ -507,6 +507,12 @@ html:not(.dark) .landing-page {
   flex-wrap: wrap;
 }
 
+.landing-hero-note {
+  font-size: 14px;
+  color: var(--l-muted);
+  margin-top: 12px;
+}
+
 .landing-btn-primary {
   background: var(--l-accent);
   color: #0a0a0a !important;
@@ -560,10 +566,10 @@ html:not(.dark) .landing-page {
 }
 .landing-stat-val {
   font-family: var(--font-serif, serif);
-  font-size: 36px;
+  font-size: clamp(22px, 4vw, 32px);
   color: var(--l-text);
   display: block;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
 }
 .landing-stat-label {
   font-size: 13px;

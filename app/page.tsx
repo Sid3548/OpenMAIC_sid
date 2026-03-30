@@ -15,105 +15,91 @@ declare global {
   }
 }
 
-// ── Step data for "How to use" section ──────────────────────────
+// ── Step data for "How it works" section ──────────────────────────
 const HOW_TO_STEPS = [
   {
     num: '01',
-    title: 'Write a real prompt',
-    desc: 'Not "quantum physics." Tell it what level you\'re at and what confused you.',
-    heading: 'The prompt is everything',
-    body: 'Vague prompts create generic classrooms. The more context you give, the more specific and useful the class becomes.',
-    code: `// Bad
+    title: 'Tell it what you need to learn',
+    desc: 'Be specific — say what confuses you, not just the topic name.',
+    heading: 'The more specific, the better',
+    body: 'A good prompt creates a class tailored to exactly where you are. Mention your level, what confuses you, and what you want to walk away understanding.',
+    code: `// Generic (produces a shallow class)
 quantum physics
 
-// Good
+// Specific (produces a class that actually helps)
 Explain quantum entanglement to someone who
 understands classical physics but has never
 done quantum mechanics. Focus on Bell's
 theorem and why it matters. Skip the math.`,
-    tip: 'Add "I\'m confused about X" at the end. The agents will specifically address your confusion in the discussion segments.',
+    tip: 'Add "I\'m confused about X" — the class will specifically tackle your confusion, not just give a textbook overview.',
   },
   {
     num: '02',
-    title: 'Upload your own material',
-    desc: 'Paste a PDF, URL, or text. It reads your actual source, not Wikipedia.',
-    heading: 'Upload your actual source material',
-    body: "If you're studying from a textbook, research paper, or lecture notes — paste the content directly. Open Classroom builds the class around your material, not a generic summary of the topic.",
-    code: `• PDF upload (textbooks, papers, notes)
+    title: 'Use your own study material',
+    desc: 'Upload a PDF, paste a URL, or drop in text from your actual textbook.',
+    heading: 'Learn from YOUR material, not generic content',
+    body: "Studying from a textbook, research paper, or lecture notes? Paste the content directly. Open Classroom builds the class around your actual material — so the quizzes, explanations, and simulations are about what you're actually studying.",
+    code: `Works with:
+• PDF upload (textbooks, papers, notes)
 • Paste raw text directly
 • Any public URL (articles, docs)
 • YouTube video URL (auto-transcribed)`,
-    tip: 'For dense papers, paste just the abstract + one specific section. Trying to teach a 40-page paper at once produces shallower classes.',
+    tip: 'For dense papers, paste just the abstract + one key section. You get a deeper, more focused class than trying to cover everything.',
   },
   {
     num: '03',
-    title: 'Talk back during the class',
-    desc: 'The agents go off-script when you respond. Ask "wait, explain that again."',
-    heading: 'The class responds to you',
-    body: 'Most people watch passively. That wastes 80% of what Open Classroom can do. The agents are listening — they change course based on your responses.',
-    code: `• "Can you slow down and explain [X] again?"
-• "I don't buy that explanation — why?"
-• "Give me a real-world example of this"
-• "What's the most common mistake here?"
-• "Quiz me harder"`,
-    tip: 'If you answer a quiz question wrong, ask "explain why I was wrong." The agent gives a targeted explanation for your specific misconception.',
+    title: 'Participate — don\'t just watch',
+    desc: 'Answer quizzes, ask questions mid-class, interact with simulations.',
+    heading: 'You learn by doing, not watching',
+    body: 'Every class includes quizzes that test your understanding, simulations you can interact with, and moments where the teacher asks YOU questions. If you answer wrong, you get a targeted explanation of your specific mistake — not a generic correction.',
+    code: `During a class, you can:
+• Answer quiz questions (get instant feedback)
+• "Wait, explain that part again"
+• "Give me a real-world example"
+• Drag sliders in interactive simulations
+• "Quiz me harder on this"`,
+    tip: 'Wrong answers are the most valuable part. Ask "explain why I was wrong" — you get a personalized explanation that sticks.',
   },
   {
     num: '04',
-    title: 'Use the roundtable for hard topics',
-    desc: 'Pick "Debate mode" to see multiple agents argue both sides of a concept.',
-    heading: 'Roundtable = best for nuanced topics',
-    body: 'For topics with multiple valid perspectives — ethical debates, design decisions, historical interpretations — pick the Roundtable mode. Multiple agents take different positions and debate. You can jump in and argue with them.',
-    code: `Best topics for roundtable:
-• React vs Vue vs Svelte
-• Was Napoleon good or bad for Europe?
-• Tabs vs spaces (genuinely, try it)
-• Should you learn Rust before C?
-• Microservices vs monolith for your use case`,
-    tip: 'In roundtable mode, take a side at the start. The agents will directly challenge your position. This forces deeper engagement.',
-  },
-  {
-    num: '05',
-    title: 'Set up your own API key',
-    desc: 'Free tier uses shared quota. Your own key = no limits, faster generation.',
-    heading: 'Bring your own API key',
-    body: 'The hosted version uses shared quota. For heavy use or if you hit rate limits, connect your own API key in Settings → Providers.',
-    code: `Recommended: GPT-5 mini
-• Best speed/quality balance
-• Set: OPENAI_API_KEY=your_key
-
-Also works:
-• Anthropic (Claude)
-• Google (Gemini)
-• DeepSeek (cheapest)`,
-    tip: 'Self-host via Vercel for free — click Deploy on GitHub, add your API key in env vars, done. Zero monthly cost under the Vercel free tier.',
+    title: 'Explore different perspectives',
+    desc: 'Use Roundtable mode for topics with multiple valid viewpoints.',
+    heading: 'Hear both sides, then decide',
+    body: 'For nuanced topics — ethical debates, design trade-offs, historical interpretations — Roundtable mode presents multiple perspectives that challenge each other. You can jump in and argue. This builds deeper understanding than any single explanation.',
+    code: `Great for:
+• Should I use React or Vue for this project?
+• Was the French Revolution justified?
+• Microservices vs monolith — for MY use case
+• Nature vs nurture in language development
+• Active vs passive investing`,
+    tip: 'Pick a side at the start. The class will challenge your position directly — that\'s where the real learning happens.',
   },
 ];
 
 const FAQ_ITEMS = [
   {
-    q: 'Is this actually free to self-host?',
-    a: "Yes — completely. Clone the repo, deploy to Vercel (free tier), add your own LLM API key (OpenAI GPT-5 mini is fast and affordable), and you're running at zero cost. The only expense is your own API usage, which is typically a few cents per classroom generation.",
+    q: 'How is this different from watching YouTube or asking ChatGPT?',
+    a: "YouTube is passive — you watch, maybe zone out, maybe rewind 10 times. ChatGPT gives you text walls you skim. Open Classroom is structured like a real class: a teacher explains with diagrams, quizzes check if you actually understood, and interactive simulations let you experiment. You participate, not just consume.",
   },
   {
-    q: 'What LLMs does it support?',
-    a: 'OpenAI (GPT-5 mini, GPT-5, GPT-5.4), Anthropic (Claude 3.5+), Google Gemini (all models), DeepSeek, and any OpenAI-compatible API. We recommend GPT-5 mini for the best speed/quality/cost balance.',
+    q: 'Do I just watch, or do I actually participate?',
+    a: "You actively participate. Every class includes quizzes where you answer questions and get instant feedback, interactive simulations where you drag sliders and see results change, and moments where the teacher asks you directly. If you get something wrong, you get a targeted explanation of your specific mistake.",
   },
   {
-    q: 'How is this different from ChatGPT asking me questions?',
-    a: "Open Classroom runs multiple agents simultaneously — a professor, a TA, and a student peer who each have distinct personas. They interact with each other, not just with you. Combined with the whiteboard, interactive simulations, and structured scene types, it's a fundamentally different experience from a chat interface.",
+    q: 'Can I use my own textbook or study material?',
+    a: "Yes — upload a PDF, paste a URL, or drop in text from your actual course material. The class is built around YOUR content, not generic knowledge. So the quizzes, examples, and explanations are directly relevant to what you're studying.",
   },
   {
-    q: 'Can I use my own study materials?',
-    a: 'Yes — this is one of the most powerful features. Upload a PDF, paste a URL, or drop in raw text. Open Classroom will build the entire classroom around your source material rather than pulling from general knowledge.',
+    q: 'What subjects work best?',
+    a: "Anything conceptual — physics, chemistry, biology, math, computer science, history, economics, philosophy, law, medicine. It works especially well for topics where understanding WHY matters more than memorizing facts. If a good teacher could explain it better than a textbook, Open Classroom can help.",
   },
   {
-    q: "What's the AGPL license mean for me as a user?",
-    a: "If you're just using Open Classroom to learn — absolutely nothing. The AGPL license only applies to developers who modify and redistribute the software.",
+    q: 'What do I get in the 2 free classes?',
+    a: "The exact same experience as paid classes — full teaching with visual diagrams, interactive quizzes, simulations, voice narration, and the ability to ask questions mid-class. No features are locked behind payment. The free classes refresh every week.",
   },
   {
-    q: 'How long does a classroom take to generate?',
-    a: 'Typically 45–90 seconds for a full 6–8 scene classroom. Generation is async — you can leave the page and come back. The live classroom runs in real time, with agent speech and whiteboard drawing happening at natural pace.',
+    q: 'How long does each class take?',
+    a: "A class generates in about 60 seconds. The class itself runs at a natural pace — typically 10–20 minutes depending on the topic depth. You control the speed: pause, skip ahead, go back, or ask the teacher to slow down and explain something again.",
   },
 ];
 
@@ -325,64 +311,70 @@ export default function LandingPage() {
 
       {/* ── HERO ── */}
       <section className="landing-hero">
-        <div className="landing-eyebrow">Multi-agent AI classroom</div>
+        <div className="landing-eyebrow">Stop watching. Start understanding.</div>
         <h1 className="landing-h1">
-          Learn anything.
+          Understand anything.
           <br />
-          <em>Actually</em> learn it.
+          <em>Faster.</em>
         </h1>
         <p className="landing-hero-sub">
-          Open Classroom turns any topic — a textbook, a paper, a URL — into a full classroom with
-          AI teachers who lecture, debate, quiz, and draw on a whiteboard. In real time. In 60
-          seconds.
+          Open Classroom replaces scattered YouTube videos and ChatGPT walls of text with
+          structured, interactive classes — complete with teaching, quizzes, and simulations.
+          You don&apos;t just read. You participate, answer, and actually learn.
         </p>
         <div className="landing-hero-actions">
           <Link href="/signup" className="landing-btn-primary">
-            Try it free — sign up →
+            Try 2 full classes free →
           </Link>
           <a href="#how-to-use" className="landing-btn-ghost">
             See how it works
           </a>
         </div>
+        <p className="landing-hero-note">
+          No credit card required. 2 free classes every week.
+        </p>
         <div className="landing-hero-stats">
           <div>
-            <span className="landing-stat-val">4</span>
-            <span className="landing-stat-label">AI agents per classroom</span>
-          </div>
-          <div>
             <span className="landing-stat-val">60s</span>
-            <span className="landing-stat-label">Avg classroom generation</span>
+            <span className="landing-stat-label">to generate a full class</span>
           </div>
           <div>
-            <span className="landing-stat-val">28+</span>
-            <span className="landing-stat-label">Action types (speech, draw, quiz…)</span>
+            <span className="landing-stat-val">Quizzes</span>
+            <span className="landing-stat-label">that test real understanding</span>
           </div>
           <div>
-            <span className="landing-stat-val">∞</span>
-            <span className="landing-stat-label">Topics you can teach it</span>
+            <span className="landing-stat-val">Simulations</span>
+            <span className="landing-stat-label">you interact with, not watch</span>
+          </div>
+          <div>
+            <span className="landing-stat-val">Any topic</span>
+            <span className="landing-stat-label">from your textbook or curiosity</span>
           </div>
         </div>
       </section>
 
       {/* ── DEMO WINDOW ── */}
       <section className="landing-demo-section">
+        <p className="landing-section-sub" style={{ textAlign: 'center', marginBottom: 24, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
+          Here&apos;s what a class actually looks like — teaching, questions, and quizzes that test your understanding:
+        </p>
         <div className="landing-demo-window">
           <div className="landing-demo-titlebar">
             <span className="landing-dot landing-dot-r" />
             <span className="landing-dot landing-dot-y" />
             <span className="landing-dot landing-dot-g" />
-            <span className="landing-demo-url">openclassroom/classroom/quantum-entanglement</span>
+            <span className="landing-demo-url">openclassroom / quantum-entanglement / slide 3 of 8</span>
           </div>
           <div className="landing-demo-body">
             <div className="landing-demo-scene">
-              <span className="landing-demo-label">Slide 3 / 8 — Quantum Entanglement</span>
+              <span className="landing-demo-label">Teaching — Quantum Entanglement</span>
               <div className="landing-demo-scene-title">
                 Why Einstein called it &quot;spooky action at a distance&quot;
               </div>
               <div className="landing-demo-agent landing-demo-agent-prof">
-                <div className="landing-agent-avatar">P</div>
+                <div className="landing-agent-avatar">T</div>
                 <div>
-                  <div className="landing-agent-name">Prof. Ada</div>
+                  <div className="landing-agent-name">Teacher</div>
                   <div className="landing-agent-text">
                     &quot;Imagine two gloves in separate boxes, sent to opposite ends of the
                     universe. The moment you open one and see it&apos;s a left glove — you instantly
@@ -391,10 +383,10 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="landing-demo-agent landing-demo-agent-student">
-                <div className="landing-agent-avatar landing-agent-avatar-green">S</div>
+                <div className="landing-agent-avatar landing-agent-avatar-green">You</div>
                 <div>
                   <div className="landing-agent-name" style={{ color: 'var(--l-accent2)' }}>
-                    Student Alex
+                    Your question
                   </div>
                   <div className="landing-agent-text">
                     &quot;Wait — but the gloves always had a handedness. Quantum particles
@@ -405,7 +397,7 @@ export default function LandingPage() {
             </div>
             <div className="landing-demo-quiz">
               <div className="landing-demo-label" style={{ marginBottom: 16 }}>
-                Quick check — Quiz
+                Quiz — Do you actually understand?
               </div>
               <div className="landing-quiz-q">What does quantum entanglement NOT allow?</div>
               <div className="landing-quiz-opt">Instant correlation between measurements</div>
@@ -416,7 +408,7 @@ export default function LandingPage() {
               <div className="landing-quiz-opt">Shared quantum state between particles</div>
               <div className="landing-quiz-feedback">
                 Correct! The no-communication theorem prevents FTL signalling despite the
-                correlations.
+                correlations. You got this because the glove analogy made it click.
               </div>
             </div>
           </div>
@@ -425,46 +417,45 @@ export default function LandingPage() {
 
       {/* ── FEATURES ── */}
       <section className="landing-section" id="features">
-        <div className="landing-eyebrow">What you get</div>
+        <div className="landing-eyebrow">Why it works</div>
         <h2 className="landing-section-title">
-          Not flashcards.
-          <br />A real classroom.
+          You participate.
+          <br />That&apos;s why you remember.
         </h2>
         <p className="landing-section-sub">
-          Every generation is a complete, interactive learning experience. Not a summary, not a quiz
-          bank — an actual class.
+          Every class is structured to make you think, answer, and interact — not passively scroll.
         </p>
         <div className="landing-features-grid">
           {[
             {
-              icon: '🎓',
-              title: 'AI teachers that actually teach',
-              desc: 'Multiple agents with distinct personas — professor, TA, fellow student. They lecture, debate each other, ask you questions, and call you out if you go quiet.',
+              icon: '✋',
+              title: 'You answer, not just read',
+              desc: 'Quizzes throughout every class test whether you actually understood — not whether you can copy-paste. Get wrong? You get a targeted explanation of YOUR specific mistake.',
+            },
+            {
+              icon: '🔬',
+              title: 'Touch it, not just hear about it',
+              desc: 'Drag a slider to change gravity. Adjust variables in a chemical reaction. Watch a sorting algorithm run. Interactive simulations make abstract concepts concrete and intuitive.',
             },
             {
               icon: '🖊️',
-              title: 'Live whiteboard drawing',
-              desc: 'Agents draw diagrams, equations, and flowcharts in real time as they explain. Physics problems get drawn out step by step. Circuits get diagrammed.',
-            },
-            {
-              icon: '🧪',
-              title: 'Interactive simulations',
-              desc: 'HTML-based experiments built on the fly. Drag a slider to change gravity. Watch a neural network train. Simulate gas molecules in a box.',
+              title: 'See it drawn out, step by step',
+              desc: 'Diagrams, equations, and flowcharts are drawn in real time as concepts are explained. You see how the pieces connect — not just the final answer.',
             },
             {
               icon: '📄',
-              title: 'Teach from your own docs',
-              desc: 'Upload a PDF, paste a URL, or drop in text. Open Classroom reads your material and builds a class around it — not generic Wikipedia content.',
+              title: 'Learn from YOUR textbook',
+              desc: 'Upload your actual PDF, paste a URL, or drop in your course notes. The class is built around what you need to study — not generic internet content.',
             },
             {
               icon: '🏗️',
-              title: 'Project-based learning',
-              desc: 'For complex topics, Open Classroom creates a structured project with milestones and AI collaborators. Build something, not just memorize something.',
+              title: 'Build something, don\'t just memorize',
+              desc: 'For complex topics, structured projects guide you through building real understanding. Milestones keep you on track. You walk away knowing how to apply what you learned.',
             },
             {
               icon: '📤',
-              title: 'Export everything',
-              desc: 'Download the slides as an editable .pptx. Export interactive content as a standalone HTML file. Share with classmates or embed anywhere.',
+              title: 'Take it with you',
+              desc: 'Download slides as an editable .pptx for revision. Export interactive content as a standalone file. Share with classmates or review before an exam.',
             },
           ].map((f) => (
             <div key={f.title} className="landing-feature">
@@ -478,15 +469,14 @@ export default function LandingPage() {
 
       {/* ── HOW TO USE ── */}
       <section className="landing-section landing-howto" id="how-to-use">
-        <div className="landing-eyebrow">The guide people usually skip</div>
+        <div className="landing-eyebrow">How it works</div>
         <h2 className="landing-section-title">
-          How to get the
+          Four steps to
           <br />
-          most out of it
+          actually understanding
         </h2>
         <p className="landing-section-sub">
-          Most people type one word, get confused, and leave. Here&apos;s exactly how to get a
-          classroom that blows your mind.
+          Each class is structured around active learning — you don&apos;t just sit and watch.
         </p>
         <div className="landing-howto-grid">
           <div className="landing-howto-steps">
@@ -526,14 +516,46 @@ export default function LandingPage() {
       <section className="landing-section" id="pricing">
         <div className="landing-eyebrow">Pricing</div>
         <h2 className="landing-section-title">
-          1 credit = 1 classroom.
+          Try 2 full classes free.
           <br />
-          Start with 2 free every week.
+          Every week. No card needed.
         </h2>
         <p className="landing-section-sub">
-          Sign up and get 2 free credits every week — no card needed. Upgrade for more classrooms
-          powered by the best AI models.
+          Each class includes structured teaching with visual diagrams, interactive quizzes,
+          hands-on simulations, and voice narration. Upload your own material or pick any topic.
         </p>
+
+        {/* What's in a class */}
+        <div className="landing-class-includes" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 16,
+          maxWidth: 700,
+          margin: '0 auto 48px',
+          textAlign: 'center',
+        }}>
+          {[
+            { label: 'Teaching', detail: 'Step-by-step explanations with diagrams' },
+            { label: 'Quizzes', detail: 'Test your understanding, get instant feedback' },
+            { label: 'Simulations', detail: 'Interactive experiments you control' },
+            { label: 'Voice', detail: 'Narrated so you can listen and follow' },
+          ].map((item) => (
+            <div key={item.label} style={{
+              padding: '16px 12px',
+              borderRadius: 10,
+              background: 'var(--l-bg2)',
+              border: '1px solid var(--l-border)',
+            }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--l-text)', marginBottom: 4 }}>
+                {item.label}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--l-muted)', lineHeight: 1.4 }}>
+                {item.detail}
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="landing-pricing-grid">
           {/* Starter */}
           <div className="landing-plan">
@@ -543,18 +565,17 @@ export default function LandingPage() {
             </div>
             <div className="landing-plan-price-usd">$4.99/mo</div>
             <div className="landing-plan-tagline">
-              15 classrooms a month. Perfect for individual learners getting started.
+              15 classes a month — enough for regular study sessions.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
-                '15 credits/month',
-                'GPT-5 + Gemini Pro models',
-                'Voice narration included',
-                'PDF & URL uploads',
-                'Export to PPTX + HTML',
-                'Quiz + interview modules',
-                'Credit refund if anything breaks',
+                '15 full classes/month',
+                'Teaching + quizzes + simulations',
+                'Voice narration in every class',
+                'Upload your own study material',
+                'Export slides and interactive content',
+                'Refund if a class doesn\u2019t generate properly',
               ].map((f) => (
                 <li key={f}>{f}</li>
               ))}
@@ -576,19 +597,18 @@ export default function LandingPage() {
             </div>
             <div className="landing-plan-price-usd">$9.99/mo</div>
             <div className="landing-plan-tagline">
-              30 classrooms a month. Best models, best value per credit.
+              30 classes a month — for serious learners and exam prep.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
-                '30 credits/month',
-                'GPT-5 + Gemini Pro models',
-                'Voice narration included',
-                'PDF & URL uploads',
-                'Export to PPTX + HTML',
-                'Quiz + interview modules',
-                'Priority generation queue',
-                'Credit refund if anything breaks',
+                '30 full classes/month',
+                'Teaching + quizzes + simulations',
+                'Voice narration in every class',
+                'Upload your own study material',
+                'Export slides and interactive content',
+                'Priority — your classes generate first',
+                'Refund if a class doesn\u2019t generate properly',
               ].map((f) => (
                 <li key={f}>{f}</li>
               ))}
@@ -609,16 +629,15 @@ export default function LandingPage() {
             </div>
             <div className="landing-plan-price-usd">$7.99/user/mo</div>
             <div className="landing-plan-tagline">
-              For educators and teams. Minimum 5 users. Contact us to set up.
+              For educators and teams. Minimum 5 users.
             </div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
-                'Min. 5 users',
-                '30 credits/user/month',
+                '30 classes/user/month',
+                'Everything in Pro',
                 'Shared classroom library',
                 'Admin dashboard',
-                'All Pro features',
                 'Priority email support',
                 'Onboarding call included',
               ].map((f) => (
@@ -633,11 +652,19 @@ export default function LandingPage() {
             </a>
           </div>
         </div>
+        <div style={{ textAlign: 'center', marginTop: 32, marginBottom: 8 }}>
+          <Link href="/signup" className="landing-btn-primary" style={{ fontSize: 15, padding: '14px 32px' }}>
+            Try 2 full classes free →
+          </Link>
+          <p style={{ fontSize: 13, color: 'var(--l-muted)', marginTop: 10 }}>
+            No credit card. 2 free classes every week. Same quality as paid plans.
+          </p>
+        </div>
         <div className="landing-payment-note">
           <span style={{ fontSize: 20 }}>🔒</span>
           <div>
-            <strong>Secure payments via Razorpay.</strong> Cancel anytime. If a generation fails or
-            the AI misbehaves, your credit is automatically refunded with an apology.
+            <strong>Secure payments via Razorpay.</strong> Cancel anytime. If a class fails to
+            generate or something goes wrong, your credit is automatically refunded.
           </div>
         </div>
         <div className="landing-payment-note" style={{ marginTop: 12 }}>
@@ -681,18 +708,21 @@ export default function LandingPage() {
       {/* ── CTA BAND ── */}
       <section className="landing-cta-band">
         <h2>
-          What do you want
+          What do you need
           <br />
-          to <em>actually</em> learn today?
+          to <em>understand</em> today?
         </h2>
-        <p>Type a topic. 60 seconds later, you&apos;re in class.</p>
+        <p>Pick a topic. 60 seconds later, you&apos;re learning — with quizzes, diagrams, and simulations.</p>
         <Link
-          href="/create"
+          href="/signup"
           className="landing-btn-primary"
           style={{ fontSize: 16, padding: '16px 36px' }}
         >
-          Open the classroom →
+          Try 2 classes free →
         </Link>
+        <p style={{ fontSize: 13, color: 'var(--l-muted)', marginTop: 12 }}>
+          No credit card required.
+        </p>
       </section>
 
       {/* ── FOOTER ── */}
