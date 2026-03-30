@@ -28,6 +28,7 @@ import { AgentRevealModal } from '@/components/agent/agent-reveal-modal';
 import { createLogger } from '@/lib/logger';
 import { type GenerationSessionState, ALL_STEPS, getActiveSteps } from './types';
 import { StepVisualizer } from './components/visualizers';
+import { VoicePicker } from './components/voice-picker';
 
 const log = createLogger('GenerationPreview');
 
@@ -818,7 +819,7 @@ function GenerationPreviewContent() {
           style={{ animationDuration: '4s' }}
         />
         <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse"
           style={{ animationDuration: '6s' }}
         />
       </div>
@@ -990,6 +991,9 @@ function GenerationPreviewContent() {
           </Card>
         </motion.div>
 
+        {/* Voice Picker — shown while generating */}
+        {!error && !isComplete && <VoicePicker />}
+
         {/* Footer Action */}
         <div className="h-16 flex items-center justify-center w-full">
           <AnimatePresence>
@@ -1014,7 +1018,7 @@ function GenerationPreviewContent() {
                 {generatedAgents.length > 0 && !showAgentReveal && (
                   <button
                     onClick={() => setShowAgentReveal(true)}
-                    className="ml-2 flex items-center gap-1.5 rounded-full border border-purple-300/30 bg-purple-500/10 px-3 py-1 text-xs font-medium normal-case tracking-normal text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-purple-300"
+                    className="ml-2 flex items-center gap-1.5 rounded-full border border-teal-300/30 bg-teal-500/10 px-3 py-1 text-xs font-medium normal-case tracking-normal text-teal-400 transition-colors hover:bg-teal-500/20 hover:text-teal-300"
                   >
                     <Bot className="size-3" />
                     {t('generation.viewAgents')}

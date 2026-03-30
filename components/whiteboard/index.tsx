@@ -123,12 +123,12 @@ export function Whiteboard({ isOpen, onClose }: WhiteboardProps) {
                   type="button"
                   onClick={() => setHistoryOpen(!historyOpen)}
                   whileTap={{ scale: 0.9 }}
-                  className="relative p-2 text-gray-400 dark:text-gray-500 hover:text-purple-500 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                  className="relative p-2 text-gray-400 dark:text-gray-500 hover:text-teal-500 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
                   title={t('whiteboard.history')}
                 >
                   <History className="w-4 h-4" />
                   {snapshotCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-purple-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-teal-500 text-white text-[10px] font-bold flex items-center justify-center">
                       {snapshotCount}
                     </span>
                   )}

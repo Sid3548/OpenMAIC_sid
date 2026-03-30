@@ -8,29 +8,32 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // ── Pricing table (USD per unit) ────────────────────────────────────────────
-// Sources: provider docs as of 2026. Update as pricing changes.
+// Sources: provider docs as of March 2026. Update as pricing changes.
 export const PROVIDER_PRICING = {
   // LLM — per 1M tokens
-  'google:gemini-2.5-pro': { input: 1.25, output: 10.0 }, // text-only tasks only
-  'google:gemini-2.5-flash': { input: 0.15, output: 0.6 }, // Fast + cheap
-  'google:gemini-2.5-flash-lite': { input: 0.075, output: 0.3 }, // Ultra-cheap
-  'google:gemini-2.0-flash': { input: 0.075, output: 0.3 },
-  'google:gemini-2.5-flash-preview': { input: 0.15, output: 0.6 },
-  'google:gemini-1.5-pro': { input: 1.25, output: 5.0 },
-  'openai:gpt-4o': { input: 2.5, output: 10.0 }, // Default — recommended
+  'google:gemini-3.1-pro-preview': { input: 2.0, output: 12.0 },
+  'google:gemini-3-flash-preview': { input: 0.5, output: 3.0 },
+  'google:gemini-2.5-pro': { input: 1.25, output: 10.0 },
+  'google:gemini-2.5-flash': { input: 0.15, output: 0.6 }, // $3.50 output with thinking
+  'google:gemini-2.5-flash-lite': { input: 0.1, output: 0.4 },
+  'google:gemini-2.0-flash': { input: 0.1, output: 0.4 },
+  'openai:gpt-5': { input: 1.25, output: 10.0 },
+  'openai:gpt-5.1': { input: 0.63, output: 5.0 },
+  'openai:gpt-5.2': { input: 0.88, output: 7.0 },
+  'openai:gpt-5-mini': { input: 0.125, output: 1.0 },
+  'openai:gpt-5-nano': { input: 0.05, output: 0.4 },
+  'openai:gpt-4o': { input: 2.5, output: 10.0 },
   'openai:gpt-4o-mini': { input: 0.15, output: 0.6 },
-  'anthropic:claude-sonnet-4-6': { input: 3.0, output: 15.0 }, // Claude latest
+  'anthropic:claude-sonnet-4-6': { input: 3.0, output: 15.0 },
   'anthropic:claude-sonnet-4-5': { input: 3.0, output: 15.0 },
   'anthropic:claude-haiku-4-5': { input: 0.8, output: 4.0 },
-  'anthropic:claude-3-5-haiku': { input: 0.8, output: 4.0 },
-  'anthropic:claude-3-5-sonnet': { input: 3.0, output: 15.0 },
-  'deepseek:deepseek-chat': { input: 0.014, output: 0.28 },
+  'deepseek:deepseek-chat': { input: 0.28, output: 0.42 }, // V3.2
 
   // TTS — per 1M characters
   'tts:openai-tts': { chars: 15.0 },
-  'tts:google-tts': { chars: 4.0 }, // WaveNet; standard is $4, neural $16
+  'tts:google-tts': { chars: 4.0 }, // Standard voices; Neural2 = $16
   'tts:azure-tts': { chars: 16.0 },
-  'tts:browser-native-tts': { chars: 0 }, // free
+  'tts:browser-native-tts': { chars: 0 },
 
   // ASR — per minute
   'asr:openai-whisper': { minutes: 0.006 },
