@@ -242,31 +242,32 @@
 
 /* Landing colour tokens — dark by default, light overrides via :root/.light */
 :root {
-  --l-bg: #0a0a0a;
-  --l-bg2: #111111;
-  --l-bg3: #1a1a1a;
-  --l-border: rgba(255, 255, 255, 0.08);
-  --l-border2: rgba(255, 255, 255, 0.16);
-  --l-text: #f0ede8;
-  --l-muted: #888888;
-  --l-accent: #c8f53a;
-  --l-accent2: #8affb0;
-  --l-accent3: #f5a623;
-  --l-red: #ff5f57;
+  --l-bg: #FAFAF9;
+  --l-bg2: #FFFFFF;
+  --l-bg3: #F5F5F4;
+  --l-border: #E7E5E4;
+  --l-border2: #D6D3D1;
+  --l-text: #1C1917;
+  --l-muted: #78716C;
+  --l-accent: #D97706;
+  --l-accent2: #16A34A;
+  --l-accent3: #F59E0B;
+  --l-red: #DC2626;
 }
 
-/* Light-mode overrides for landing page tokens */
-.light .landing-page,
-html:not(.dark) .landing-page {
-  --l-bg: #f8f8f5;
-  --l-bg2: #ffffff;
-  --l-bg3: #efefeb;
-  --l-border: rgba(0, 0, 0, 0.08);
-  --l-border2: rgba(0, 0, 0, 0.16);
-  --l-text: #111111;
-  --l-muted: #666666;
-  --l-accent: #5a8a00;
-  --l-accent2: #1a7a40;
+/* Dark-mode overrides for landing page */
+.dark .landing-page {
+  --l-bg: #1C1917;
+  --l-bg2: #292524;
+  --l-bg3: #1C1917;
+  --l-border: #44403C;
+  --l-border2: #57534E;
+  --l-text: #F5F5F4;
+  --l-muted: #A8A29E;
+  --l-accent: #D97706;
+  --l-accent2: #22C55E;
+  --l-accent3: #F59E0B;
+  --l-red: #EF4444;
 }
 
 /* ── Page wrapper ── */
@@ -325,7 +326,7 @@ html:not(.dark) .landing-page {
 
 .landing-cta-btn {
   background: var(--l-accent);
-  color: #0a0a0a !important;
+  color: #FFFFFF !important;
   padding: 9px 20px;
   border-radius: 6px;
   font-size: 14px;
@@ -515,7 +516,7 @@ html:not(.dark) .landing-page {
 
 .landing-btn-primary {
   background: var(--l-accent);
-  color: #0a0a0a !important;
+  color: #FFFFFF !important;
   padding: 14px 28px;
   border-radius: 8px;
   font-size: 15px;
@@ -588,7 +589,7 @@ html:not(.dark) .landing-page {
   overflow: hidden;
   max-width: 960px;
   margin: 0 auto;
-  box-shadow: 0 40px 80px color-mix(in srgb, #000 50%, transparent);
+  box-shadow: 0 40px 80px rgba(28, 25, 23, 0.1);
 }
 
 .landing-demo-titlebar {
@@ -685,7 +686,7 @@ html:not(.dark) .landing-page {
   justify-content: center;
   font-size: 14px;
   font-weight: 600;
-  color: #0a0a0a;
+  color: #FFFFFF;
   flex-shrink: 0;
 }
 .landing-agent-avatar-green {
@@ -847,7 +848,7 @@ html:not(.dark) .landing-page {
 }
 .landing-step-active .landing-step-num {
   background: var(--l-accent);
-  color: #0a0a0a;
+  color: #FFFFFF;
   border-color: var(--l-accent);
 }
 .landing-step-title {
