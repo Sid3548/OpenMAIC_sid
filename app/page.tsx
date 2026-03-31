@@ -48,7 +48,7 @@ theorem and why it matters. Skip the math.`,
   },
   {
     num: '03',
-    title: 'Participate — don\'t just watch',
+    title: "Participate — don't just watch",
     desc: 'Answer quizzes, ask questions mid-class, interact with simulations.',
     heading: 'You learn by doing, not watching',
     body: 'Every class includes quizzes that test your understanding, simulations you can interact with, and moments where the teacher asks YOU questions. If you answer wrong, you get a targeted explanation of your specific mistake — not a generic correction.',
@@ -72,18 +72,18 @@ theorem and why it matters. Skip the math.`,
 • Microservices vs monolith — for MY use case
 • Nature vs nurture in language development
 • Active vs passive investing`,
-    tip: 'Pick a side at the start. The class will challenge your position directly — that\'s where the real learning happens.',
+    tip: "Pick a side at the start. The class will challenge your position directly — that's where the real learning happens.",
   },
 ];
 
 const FAQ_ITEMS = [
   {
     q: 'How is this different from watching YouTube or asking ChatGPT?',
-    a: "YouTube is passive — you watch, maybe zone out, maybe rewind 10 times. ChatGPT gives you text walls you skim. Open Classroom is structured like a real class: a teacher explains with diagrams, quizzes check if you actually understood, and interactive simulations let you experiment. You participate, not just consume.",
+    a: 'YouTube is passive — you watch, maybe zone out, maybe rewind 10 times. ChatGPT gives you text walls you skim. Open Classroom is structured like a real class: a teacher explains with diagrams, quizzes check if you actually understood, and interactive simulations let you experiment. You participate, not just consume.',
   },
   {
     q: 'Do I just watch, or do I actually participate?',
-    a: "You actively participate. Every class includes quizzes where you answer questions and get instant feedback, interactive simulations where you drag sliders and see results change, and moments where the teacher asks you directly. If you get something wrong, you get a targeted explanation of your specific mistake.",
+    a: 'You actively participate. Every class includes quizzes where you answer questions and get instant feedback, interactive simulations where you drag sliders and see results change, and moments where the teacher asks you directly. If you get something wrong, you get a targeted explanation of your specific mistake.',
   },
   {
     q: 'Can I use my own textbook or study material?',
@@ -91,15 +91,15 @@ const FAQ_ITEMS = [
   },
   {
     q: 'What subjects work best?',
-    a: "Anything conceptual — physics, chemistry, biology, math, computer science, history, economics, philosophy, law, medicine. It works especially well for topics where understanding WHY matters more than memorizing facts. If a good teacher could explain it better than a textbook, Open Classroom can help.",
+    a: 'Anything conceptual — physics, chemistry, biology, math, computer science, history, economics, philosophy, law, medicine. It works especially well for topics where understanding WHY matters more than memorizing facts. If a good teacher could explain it better than a textbook, Open Classroom can help.',
   },
   {
     q: 'What do I get in the 2 free classes?',
-    a: "The exact same experience as paid classes — full teaching with visual diagrams, interactive quizzes, simulations, voice narration, and the ability to ask questions mid-class. No features are locked behind payment. The free classes refresh every week.",
+    a: 'The exact same experience as paid classes — full teaching with visual diagrams, interactive quizzes, simulations, voice narration, and the ability to ask questions mid-class. No features are locked behind payment. The free classes refresh every week.',
   },
   {
     q: 'How long does each class take?',
-    a: "A class generates in about 60 seconds. The class itself runs at a natural pace — typically 10–20 minutes depending on the topic depth. You control the speed: pause, skip ahead, go back, or ask the teacher to slow down and explain something again.",
+    a: 'A class generates in about 60 seconds. The class itself runs at a natural pace — typically 10–20 minutes depending on the topic depth. You control the speed: pause, skip ahead, go back, or ask the teacher to slow down and explain something again.',
   },
 ];
 
@@ -319,8 +319,8 @@ export default function LandingPage() {
         </h1>
         <p className="landing-hero-sub">
           Open Classroom replaces scattered YouTube videos and ChatGPT walls of text with
-          structured, interactive classes — complete with teaching, quizzes, and simulations.
-          You don&apos;t just read. You participate, answer, and actually learn.
+          structured, interactive classes — complete with teaching, quizzes, and simulations. You
+          don&apos;t just read. You participate, answer, and actually learn.
         </p>
         <div className="landing-hero-actions">
           <Link href="/signup" className="landing-btn-primary">
@@ -330,9 +330,7 @@ export default function LandingPage() {
             See how it works
           </a>
         </div>
-        <p className="landing-hero-note">
-          No credit card required. 2 free classes every week.
-        </p>
+        <p className="landing-hero-note">No credit card required. 2 free classes every week.</p>
         <div className="landing-hero-stats">
           <div>
             <span className="landing-stat-val">60s</span>
@@ -355,15 +353,27 @@ export default function LandingPage() {
 
       {/* ── DEMO WINDOW ── */}
       <section className="landing-demo-section">
-        <p className="landing-section-sub" style={{ textAlign: 'center', marginBottom: 24, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-          Here&apos;s what a class actually looks like — teaching, questions, and quizzes that test your understanding:
+        <p
+          className="landing-section-sub"
+          style={{
+            textAlign: 'center',
+            marginBottom: 24,
+            maxWidth: 560,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        >
+          Here&apos;s what a class actually looks like — teaching, questions, and quizzes that test
+          your understanding:
         </p>
         <div className="landing-demo-window">
           <div className="landing-demo-titlebar">
             <span className="landing-dot landing-dot-r" />
             <span className="landing-dot landing-dot-y" />
             <span className="landing-dot landing-dot-g" />
-            <span className="landing-demo-url">openclassroom / quantum-entanglement / slide 3 of 8</span>
+            <span className="landing-demo-url">
+              openclassroom / quantum-entanglement / slide 3 of 8
+            </span>
           </div>
           <div className="landing-demo-body">
             <div className="landing-demo-scene">
@@ -420,7 +430,8 @@ export default function LandingPage() {
         <div className="landing-eyebrow">Why it works</div>
         <h2 className="landing-section-title">
           You participate.
-          <br />That&apos;s why you remember.
+          <br />
+          That&apos;s why you remember.
         </h2>
         <p className="landing-section-sub">
           Every class is structured to make you think, answer, and interact — not passively scroll.
@@ -449,7 +460,7 @@ export default function LandingPage() {
             },
             {
               icon: '🏗️',
-              title: 'Build something, don\'t just memorize',
+              title: "Build something, don't just memorize",
               desc: 'For complex topics, structured projects guide you through building real understanding. Milestones keep you on track. You walk away knowing how to apply what you learned.',
             },
             {
@@ -527,7 +538,6 @@ export default function LandingPage() {
 
         {/* What's in a class — live preview tiles */}
         <div className="landing-class-includes">
-
           {/* TEACHING tile */}
           <div className="landing-class-tile">
             <div className="landing-tile-header">
@@ -539,10 +549,15 @@ export default function LandingPage() {
             </div>
             <div className="landing-tile-preview landing-tile-preview-teach">
               <div className="landing-preview-agent">
-                <div className="landing-preview-avatar" style={{ background: '#4F46E5' }}>T</div>
+                <div className="landing-preview-avatar" style={{ background: '#4F46E5' }}>
+                  T
+                </div>
                 <div className="landing-preview-bubble">
                   <div className="landing-preview-name">Teacher</div>
-                  <div className="landing-preview-text">&quot;Imagine a leaf as a tiny solar panel — it captures sunlight and converts it into sugar the plant uses as food...&quot;</div>
+                  <div className="landing-preview-text">
+                    &quot;Imagine a leaf as a tiny solar panel — it captures sunlight and converts
+                    it into sugar the plant uses as food...&quot;
+                  </div>
                 </div>
               </div>
               <div className="landing-preview-whiteboard">
@@ -565,19 +580,26 @@ export default function LandingPage() {
               <span className="landing-tile-emoji">🧩</span>
               <div>
                 <div className="landing-tile-label">Quizzes</div>
-                <div className="landing-tile-sublabel">Test real understanding, get instant feedback</div>
+                <div className="landing-tile-sublabel">
+                  Test real understanding, get instant feedback
+                </div>
               </div>
             </div>
             <div className="landing-tile-preview landing-tile-preview-quiz">
-              <div className="landing-preview-question">What do plants release during photosynthesis?</div>
+              <div className="landing-preview-question">
+                What do plants release during photosynthesis?
+              </div>
               <div className="landing-preview-options">
-                <div className="landing-preview-opt landing-preview-opt-wrong">Carbon dioxide ✗</div>
+                <div className="landing-preview-opt landing-preview-opt-wrong">
+                  Carbon dioxide ✗
+                </div>
                 <div className="landing-preview-opt landing-preview-opt-correct">Oxygen ✓</div>
                 <div className="landing-preview-opt">Nitrogen</div>
                 <div className="landing-preview-opt">Water vapour</div>
               </div>
               <div className="landing-preview-feedback">
-                💡 Correct! Plants absorb CO₂ and release O₂ — which is why forests are called the lungs of the Earth.
+                💡 Correct! Plants absorb CO₂ and release O₂ — which is why forests are called the
+                lungs of the Earth.
               </div>
             </div>
           </div>
@@ -602,13 +624,17 @@ export default function LandingPage() {
                   <span className="landing-preview-sim-item">🔌</span>
                 </div>
                 <div className="landing-preview-sim-slider">
-                  <div className="landing-preview-sim-slider-label">Voltage <strong>9V</strong></div>
+                  <div className="landing-preview-sim-slider-label">
+                    Voltage <strong>9V</strong>
+                  </div>
                   <div className="landing-preview-sim-track">
                     <div className="landing-preview-sim-fill" style={{ width: '65%' }} />
                     <div className="landing-preview-sim-thumb" style={{ left: '65%' }} />
                   </div>
                 </div>
-                <div className="landing-preview-sim-result">Brightness: <strong style={{ color: '#F59E0B' }}>████░░</strong></div>
+                <div className="landing-preview-sim-result">
+                  Brightness: <strong style={{ color: '#F59E0B' }}>████░░</strong>
+                </div>
               </div>
               <div className="landing-preview-sim-hint">← drag to change voltage</div>
             </div>
@@ -652,7 +678,6 @@ export default function LandingPage() {
               <div className="landing-preview-voice-time">1:24 / 3:10</div>
             </div>
           </div>
-
         </div>
 
         <div className="landing-pricing-grid">
@@ -727,9 +752,7 @@ export default function LandingPage() {
               <sup>₹</sup>399<span>/user/mo</span>
             </div>
             <div className="landing-plan-price-usd">$7.99/user/mo</div>
-            <div className="landing-plan-tagline">
-              For educators and teams. Minimum 5 users.
-            </div>
+            <div className="landing-plan-tagline">For educators and teams. Minimum 5 users.</div>
             <hr className="landing-plan-divider" />
             <ul className="landing-plan-features">
               {[
@@ -752,7 +775,11 @@ export default function LandingPage() {
           </div>
         </div>
         <div style={{ textAlign: 'center', marginTop: 32, marginBottom: 8 }}>
-          <Link href="/signup" className="landing-btn-primary" style={{ fontSize: 15, padding: '14px 32px' }}>
+          <Link
+            href="/signup"
+            className="landing-btn-primary"
+            style={{ fontSize: 15, padding: '14px 32px' }}
+          >
             Try 2 full classes free →
           </Link>
           <p style={{ fontSize: 13, color: 'var(--l-muted)', marginTop: 10 }}>
@@ -777,8 +804,8 @@ export default function LandingPage() {
             >
               drop us an email
             </a>
-            &nbsp;— we&apos;ll set up your subscription personally and notify you when USD
-            payments go live.
+            &nbsp;— we&apos;ll set up your subscription personally and notify you when USD payments
+            go live.
           </div>
         </div>
       </section>
@@ -811,7 +838,10 @@ export default function LandingPage() {
           <br />
           to <em>understand</em> today?
         </h2>
-        <p>Pick a topic. 60 seconds later, you&apos;re learning — with quizzes, diagrams, and simulations.</p>
+        <p>
+          Pick a topic. 60 seconds later, you&apos;re learning — with quizzes, diagrams, and
+          simulations.
+        </p>
         <Link
           href="/signup"
           className="landing-btn-primary"
