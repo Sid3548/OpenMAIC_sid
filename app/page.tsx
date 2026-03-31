@@ -528,16 +528,17 @@ export default function LandingPage() {
         {/* What's in a class */}
         <div className="landing-class-includes">
           {[
-            { label: 'Teaching', detail: 'Step-by-step explanations with diagrams' },
-            { label: 'Quizzes', detail: 'Test your understanding, get instant feedback' },
-            { label: 'Simulations', detail: 'Interactive experiments you control' },
-            { label: 'Voice', detail: 'Narrated so you can listen and follow' },
+            { emoji: '🎓', label: 'Teaching', detail: 'Step-by-step explanations with diagrams' },
+            { emoji: '🧩', label: 'Quizzes', detail: 'Test your understanding, get instant feedback' },
+            { emoji: '🔬', label: 'Simulations', detail: 'Interactive experiments you control' },
+            { emoji: '🔊', label: 'Voice', detail: 'Narrated so you can listen and follow' },
           ].map((item) => (
             <div key={item.label}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--l-text)', marginBottom: 4 }}>
+              <div style={{ fontSize: 36, marginBottom: 10 }}>{item.emoji}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#1C1917', marginBottom: 6 }}>
                 {item.label}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--l-muted)', lineHeight: 1.4 }}>
+              <div style={{ fontSize: 12, color: '#78716C', lineHeight: 1.5 }}>
                 {item.detail}
               </div>
             </div>

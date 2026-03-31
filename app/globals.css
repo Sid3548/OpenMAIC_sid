@@ -940,135 +940,155 @@ html:not(.dark) .landing-page {
 }
 
 .landing-plan {
-  background: var(--l-bg2);
-  border: 1px solid var(--l-border);
-  border-radius: 16px;
-  padding: 36px 32px;
+  background: #FFFFFF;
+  border: 1.5px solid #E7E5E4;
+  border-radius: 24px;
+  padding: 40px 32px;
   display: flex;
   flex-direction: column;
-  transition:
-    border-color 0.2s,
-    transform 0.2s,
-    box-shadow 0.2s;
   position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #1C1917;
 }
 .landing-plan:hover {
-  border-color: var(--l-border2);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
 }
 .landing-plan-featured {
-  border-color: color-mix(in srgb, var(--l-accent) 45%, transparent);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--l-accent) 5%, transparent),
-    var(--l-bg2)
-  );
+  border-color: #D97706;
+  box-shadow: 0 8px 32px rgba(217, 119, 6, 0.15);
 }
 
 .landing-plan-badge {
   position: absolute;
-  top: -12px;
+  top: -14px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--l-accent);
-  color: #0a0a0a;
+  background: #D97706;
+  color: white;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  padding: 4px 14px;
-  border-radius: 20px;
+  padding: 5px 16px;
+  border-radius: 100px;
   white-space: nowrap;
 }
 
 .landing-plan-name {
-  font-family: var(--font-mono-dm, monospace);
-  font-size: 12px;
-  color: var(--l-muted);
-  letter-spacing: 0.1em;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #78716C;
   margin-bottom: 16px;
 }
 
 .landing-plan-price {
-  font-family: var(--font-serif, serif);
   font-size: 52px;
-  letter-spacing: -2px;
+  font-weight: 800;
+  color: #1C1917;
   line-height: 1;
-  margin-bottom: 6px;
-  color: var(--l-text);
+  margin-bottom: 4px;
 }
 .landing-plan-price sup {
-  font-size: 22px;
-  vertical-align: top;
-  margin-top: 10px;
-  margin-right: 4px;
+  font-size: 24px;
+  vertical-align: super;
 }
 .landing-plan-price span {
-  font-size: 16px;
-  color: var(--l-muted);
-  letter-spacing: 0;
-  font-family: var(--font-sans, sans-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: #78716C;
 }
 
 .landing-plan-price-usd {
-  font-size: 14px;
-  color: var(--l-muted);
-  margin-bottom: 4px;
-  font-family: var(--font-sans, sans-serif);
+  font-size: 13px;
+  color: #A8A29E;
+  margin-bottom: 16px;
+}
+
+/* Dark mode pricing */
+.dark .landing-plan {
+  background: #1C1917;
+  border-color: #44403C;
+  color: #F5F5F4;
+}
+.dark .landing-plan-featured {
+  border-color: #D97706;
+}
+.dark .landing-plan-price,
+.dark .landing-plan-name { color: #F5F5F4; }
+.dark .landing-plan-features li { color: #D6D3D1; }
+.dark .landing-plan-tagline { color: #A8A29E; }
+.dark .landing-plan-divider { border-color: #44403C; }
+.dark .landing-plan-btn-ghost {
+  background: #292524;
+  color: #F5F5F4;
+  border-color: #44403C;
 }
 
 .landing-class-includes {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  max-width: 700px;
-  margin: 0 auto 48px;
-  text-align: center;
+  margin: 40px 0 56px;
 }
 .landing-class-includes > div {
-  padding: 16px 12px;
-  border-radius: 10px;
-  background: var(--l-bg2);
-  border: 1px solid var(--l-border);
+  background: #FFFBEB;
+  border: 2px solid #FDE68A;
+  border-radius: 20px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.landing-class-includes > div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.15);
+  border-color: #D97706;
+}
+.dark .landing-class-includes > div {
+  background: #1C1917;
+  border-color: #44403C;
+  color: #F5F5F4;
+}
+.dark .landing-class-includes > div:hover {
+  border-color: #D97706;
 }
 
 .landing-plan-tagline {
-  font-size: 13px;
-  color: var(--l-muted);
-  margin-bottom: 28px;
-  line-height: 1.5;
+  font-size: 14px;
+  color: #57534E;
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 .landing-plan-divider {
   border: none;
-  border-top: 1px solid var(--l-border);
-  margin: 20px 0;
+  border-top: 1px solid #E7E5E4;
+  margin-bottom: 24px;
 }
 
 .landing-plan-features {
   list-style: none;
-  flex: 1;
+  padding: 0;
+  margin: 0 0 32px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 28px;
-  padding: 0;
+  gap: 10px;
+  flex: 1;
 }
 .landing-plan-features li {
   font-size: 14px;
-  color: var(--l-muted);
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  line-height: 1.4;
+  color: #44403C;
+  padding-left: 22px;
+  position: relative;
+  line-height: 1.5;
 }
 .landing-plan-features li::before {
   content: '✓';
-  color: var(--l-accent2);
-  font-size: 13px;
-  flex-shrink: 0;
-  margin-top: 1px;
+  position: absolute;
+  left: 0;
+  color: #D97706;
+  font-weight: 700;
 }
 .landing-plan-feature-muted::before {
   color: #555 !important;
@@ -1078,30 +1098,43 @@ html:not(.dark) .landing-page {
 }
 
 .landing-plan-btn {
-  display: block;
-  text-align: center;
-  padding: 13px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-align: center;
+  display: block;
+  text-decoration: none;
 }
 .landing-plan-btn-accent {
-  background: var(--l-accent);
-  color: #0a0a0a !important;
+  background: #D97706;
+  color: white !important;
 }
 .landing-plan-btn-accent:hover {
-  opacity: 0.85;
+  background: #B45309;
+  transform: translateY(-1px);
 }
 .landing-plan-btn-ghost {
-  border: 1px solid var(--l-border2);
-  color: var(--l-text) !important;
+  background: #F5F5F4;
+  color: #1C1917 !important;
+  border: 1.5px solid #E7E5E4;
 }
 .landing-plan-btn-ghost:hover {
-  border-color: color-mix(in srgb, var(--l-text) 30%, transparent);
-  background: color-mix(in srgb, var(--l-text) 4%, transparent);
+  border-color: #D97706;
+  color: #D97706 !important;
+}
+.dark .landing-plan-btn-ghost {
+  background: #292524;
+  color: #F5F5F4 !important;
+  border-color: #44403C;
+}
+.dark .landing-plan-btn-ghost:hover {
+  border-color: #D97706;
+  color: #D97706 !important;
 }
 
 .landing-payment-note {
@@ -1273,6 +1306,9 @@ html:not(.dark) .landing-page {
   }
   .landing-pricing-grid {
     grid-template-columns: 1fr;
+  }
+  .landing-class-includes {
+    grid-template-columns: repeat(2, 1fr);
   }
   .landing-demo-body {
     grid-template-columns: 1fr;
