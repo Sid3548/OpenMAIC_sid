@@ -727,7 +727,7 @@ export default function LandingPage() {
             GitHub
           </a>
           <Link href="/create">Live demo</Link>
-          <a href="mailto:hello@openclassroom.online">Contact</a>
+          <a href="mailto:support@openclassroom.online">Contact</a>
         </div>
       </footer>
     </div>
