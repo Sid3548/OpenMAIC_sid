@@ -525,24 +525,134 @@ export default function LandingPage() {
           hands-on simulations, and voice narration. Upload your own material or pick any topic.
         </p>
 
-        {/* What's in a class */}
+        {/* What's in a class — live preview tiles */}
         <div className="landing-class-includes">
-          {[
-            { emoji: '🎓', label: 'Teaching', detail: 'Step-by-step explanations with diagrams' },
-            { emoji: '🧩', label: 'Quizzes', detail: 'Test your understanding, get instant feedback' },
-            { emoji: '🔬', label: 'Simulations', detail: 'Interactive experiments you control' },
-            { emoji: '🔊', label: 'Voice', detail: 'Narrated so you can listen and follow' },
-          ].map((item) => (
-            <div key={item.label}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>{item.emoji}</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#1C1917', marginBottom: 6 }}>
-                {item.label}
-              </div>
-              <div style={{ fontSize: 12, color: '#78716C', lineHeight: 1.5 }}>
-                {item.detail}
+
+          {/* TEACHING tile */}
+          <div className="landing-class-tile">
+            <div className="landing-tile-header">
+              <span className="landing-tile-emoji">🎓</span>
+              <div>
+                <div className="landing-tile-label">Teaching</div>
+                <div className="landing-tile-sublabel">AI teacher explains with live diagrams</div>
               </div>
             </div>
-          ))}
+            <div className="landing-tile-preview landing-tile-preview-teach">
+              <div className="landing-preview-agent">
+                <div className="landing-preview-avatar" style={{ background: '#4F46E5' }}>T</div>
+                <div className="landing-preview-bubble">
+                  <div className="landing-preview-name">Teacher</div>
+                  <div className="landing-preview-text">&quot;Imagine a leaf as a tiny solar panel — it captures sunlight and converts it into sugar the plant uses as food...&quot;</div>
+                </div>
+              </div>
+              <div className="landing-preview-whiteboard">
+                <div className="landing-preview-wb-label">☀️ Sunlight</div>
+                <div className="landing-preview-wb-arrow">↓</div>
+                <div className="landing-preview-wb-box">🌿 Leaf (Chloroplast)</div>
+                <div className="landing-preview-wb-arrow">↓</div>
+                <div className="landing-preview-wb-row">
+                  <span>🍬 Glucose</span>
+                  <span>+</span>
+                  <span>💨 O₂</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* QUIZZES tile */}
+          <div className="landing-class-tile">
+            <div className="landing-tile-header">
+              <span className="landing-tile-emoji">🧩</span>
+              <div>
+                <div className="landing-tile-label">Quizzes</div>
+                <div className="landing-tile-sublabel">Test real understanding, get instant feedback</div>
+              </div>
+            </div>
+            <div className="landing-tile-preview landing-tile-preview-quiz">
+              <div className="landing-preview-question">What do plants release during photosynthesis?</div>
+              <div className="landing-preview-options">
+                <div className="landing-preview-opt landing-preview-opt-wrong">Carbon dioxide ✗</div>
+                <div className="landing-preview-opt landing-preview-opt-correct">Oxygen ✓</div>
+                <div className="landing-preview-opt">Nitrogen</div>
+                <div className="landing-preview-opt">Water vapour</div>
+              </div>
+              <div className="landing-preview-feedback">
+                💡 Correct! Plants absorb CO₂ and release O₂ — which is why forests are called the lungs of the Earth.
+              </div>
+            </div>
+          </div>
+
+          {/* SIMULATIONS tile */}
+          <div className="landing-class-tile">
+            <div className="landing-tile-header">
+              <span className="landing-tile-emoji">🔬</span>
+              <div>
+                <div className="landing-tile-label">Simulations</div>
+                <div className="landing-tile-sublabel">Interact with live experiments</div>
+              </div>
+            </div>
+            <div className="landing-tile-preview landing-tile-preview-sim">
+              <div className="landing-preview-sim-label">💡 Circuit Simulator</div>
+              <div className="landing-preview-sim-body">
+                <div className="landing-preview-sim-row">
+                  <span className="landing-preview-sim-item landing-preview-sim-battery">🔋</span>
+                  <div className="landing-preview-sim-wire" />
+                  <span className="landing-preview-sim-item landing-preview-sim-bulb">💡</span>
+                  <div className="landing-preview-sim-wire" />
+                  <span className="landing-preview-sim-item">🔌</span>
+                </div>
+                <div className="landing-preview-sim-slider">
+                  <div className="landing-preview-sim-slider-label">Voltage <strong>9V</strong></div>
+                  <div className="landing-preview-sim-track">
+                    <div className="landing-preview-sim-fill" style={{ width: '65%' }} />
+                    <div className="landing-preview-sim-thumb" style={{ left: '65%' }} />
+                  </div>
+                </div>
+                <div className="landing-preview-sim-result">Brightness: <strong style={{ color: '#F59E0B' }}>████░░</strong></div>
+              </div>
+              <div className="landing-preview-sim-hint">← drag to change voltage</div>
+            </div>
+          </div>
+
+          {/* VOICE tile */}
+          <div className="landing-class-tile">
+            <div className="landing-tile-header">
+              <span className="landing-tile-emoji">🔊</span>
+              <div>
+                <div className="landing-tile-label">Voice</div>
+                <div className="landing-tile-sublabel">Listen to your AI teacher speak</div>
+              </div>
+            </div>
+            <div className="landing-tile-preview landing-tile-preview-voice">
+              <div className="landing-preview-voice-player">
+                <div className="landing-preview-voice-avatar">T</div>
+                <div className="landing-preview-voice-info">
+                  <div className="landing-preview-voice-name">Teacher — Slide 3 of 8</div>
+                  <div className="landing-preview-voice-topic">Photosynthesis explained</div>
+                </div>
+              </div>
+              <div className="landing-preview-voice-wave">
+                {[3, 6, 9, 12, 8, 5, 10, 14, 7, 4, 11, 6, 9, 3, 8, 12, 5, 10].map((h, i) => (
+                  <div
+                    key={i}
+                    className="landing-preview-voice-bar"
+                    style={{
+                      height: `${h * 2}px`,
+                      animationDelay: `${i * 0.08}s`,
+                      opacity: i < 10 ? 1 : 0.3,
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="landing-preview-voice-controls">
+                <span>◀◀</span>
+                <span className="landing-preview-voice-play">▶</span>
+                <span>▶▶</span>
+              </div>
+              <div className="landing-preview-voice-time">1:24 / 3:10</div>
+            </div>
+          </div>
+
         </div>
 
         <div className="landing-pricing-grid">
