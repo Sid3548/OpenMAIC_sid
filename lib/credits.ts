@@ -22,6 +22,9 @@
 
 import { prisma } from '@/lib/prisma';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TxClient = any;
+
 export const CREDITS_PER_PLAN: Record<string, number> = {
   starter: 15,
   pro: 30,
@@ -50,7 +53,7 @@ export async function deductCredit(
   reason: string = 'activity_use',
 ): Promise<{ ok: boolean; balance: number }> {
   try {
-    const result = await prisma.$transaction(async (tx: any) => {
+    const result = await prisma.$transaction(async (tx: TxClient) => {
       // Lock the user row and read current balance
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -96,7 +99,7 @@ export async function refundCredit(
   activityId: string,
   note: string = 'Activity failed — credit refunded',
 ): Promise<void> {
-  await prisma.$transaction(async (tx: any) => {
+  await prisma.$transaction(async (tx: TxClient) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
       select: { credits: true },
@@ -147,7 +150,7 @@ export async function refreshWeeklyCredits(userId: string): Promise<boolean> {
   }
 
   // Grant weekly credits
-  await prisma.$transaction(async (tx: any) => {
+  await prisma.$transaction(async (tx: TxClient) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
       select: { credits: true },
@@ -184,7 +187,7 @@ export async function grantCredits(
   reason: string,
   note?: string,
 ): Promise<void> {
-  await prisma.$transaction(async (tx: any) => {
+  await prisma.$transaction(async (tx: TxClient) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
       select: { credits: true },
