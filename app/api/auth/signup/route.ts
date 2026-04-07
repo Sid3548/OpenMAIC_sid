@@ -1,7 +1,7 @@
 /**
  * POST /api/auth/signup
  *
- * Creates a new user with email, password, name, and mobile number.
+ * Creates a new user with email, password, name, and optional mobile number.
  * Grants 1 free trial credit on signup.
  */
 
@@ -9,9 +9,14 @@ import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rl = await checkRateLimit('signup', ip, 5, 300);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const { name, email, mobile, password } = (await req.json()) as {
       name?: string;
       email?: string;
@@ -19,21 +24,23 @@ export async function POST(req: NextRequest) {
       password?: string;
     };
 
-    if (!email || !password || !name || !mobile) {
-      return apiError(
-        'MISSING_REQUIRED_FIELD',
-        400,
-        'name, email, mobile and password are required',
-      );
+    const normalizedName = name?.trim();
+    const normalizedEmail = email?.trim().toLowerCase();
+
+    if (!normalizedEmail || !password || !normalizedName) {
+      return apiError('MISSING_REQUIRED_FIELD', 400, 'name, email and password are required');
     }
 
-    // Basic mobile validation (10 digits, optional +91 prefix)
-    const mobileClean = mobile.replace(/\D/g, '');
-    if (mobileClean.length < 10) {
-      return apiError('INVALID_REQUEST', 400, 'Enter a valid mobile number');
+    const normalizedMobile = mobile?.trim();
+    if (normalizedMobile) {
+      // Basic mobile validation (10 digits, optional +91 prefix)
+      const mobileClean = normalizedMobile.replace(/\D/g, '');
+      if (mobileClean.length < 10) {
+        return apiError('INVALID_REQUEST', 400, 'Enter a valid mobile number');
+      }
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
       return apiError('INVALID_REQUEST', 409, 'An account with this email already exists');
     }
@@ -50,9 +57,9 @@ export async function POST(req: NextRequest) {
       ) => {
         const newUser = await tx.user.create({
           data: {
-            name,
-            email,
-            mobile,
+            name: normalizedName,
+            email: normalizedEmail,
+            mobile: normalizedMobile || null,
             passwordHash,
             credits: 2,
           },

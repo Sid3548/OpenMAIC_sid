@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     const effectiveProviderId = providerId || ('unpdf' as PDFProviderId);
 
     const clientBaseUrl = baseUrl || undefined;
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);

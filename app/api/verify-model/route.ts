@@ -3,10 +3,20 @@ import { generateText } from 'ai';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModel } from '@/lib/server/resolve-model';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 const log = createLogger('Verify Model');
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('verify-model', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const { apiKey, baseUrl, model, providerType, requiresApiKey } = await req.json();
 
     if (!model) {

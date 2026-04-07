@@ -3,11 +3,21 @@ import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolvePDFApiKey, resolvePDFBaseUrl } from '@/lib/server/provider-config';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('Verify PDF Provider');
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('verify-provider', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const { providerId, apiKey, baseUrl } = await req.json();
 
     if (!providerId) {
@@ -15,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const clientBaseUrl = (baseUrl as string | undefined) || undefined;
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);

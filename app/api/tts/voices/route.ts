@@ -16,6 +16,8 @@ import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveTTSApiKey, resolveTTSBaseUrl } from '@/lib/server/provider-config';
 import { TTS_PROVIDERS } from '@/lib/audio/constants';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('TTS Voices');
 
@@ -61,13 +63,21 @@ const OPENAI_TTS_MODEL_VOICES: Record<string, { id: string; name: string }[]> = 
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('tts-voices', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const { providerId, apiKey: clientApiKey, baseUrl: clientBaseUrl } = await req.json();
 
     if (!providerId) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'providerId is required');
     }
 
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);

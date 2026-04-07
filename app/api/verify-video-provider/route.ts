@@ -21,17 +21,27 @@ import type { VideoProviderId } from '@/lib/media/types';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('VerifyVideoProvider');
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('verify-provider', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const providerId = (request.headers.get('x-video-provider') || 'seedance') as VideoProviderId;
     const model = request.headers.get('x-video-model') || undefined;
     const clientApiKey = request.headers.get('x-api-key') || undefined;
     const clientBaseUrl = request.headers.get('x-base-url') || undefined;
 
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);

@@ -7,9 +7,19 @@ import {
   persistClassroom,
   readClassroom,
 } from '@/lib/server/classroom-storage';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('classroom-persist', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = await request.json();
     const { stage, scenes } = body;
 

@@ -15,6 +15,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 
 const log = createLogger('ProxyMedia');
 
@@ -22,6 +24,14 @@ export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('proxy-media', session.user.id, 60, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const { url } = await request.json();
 
     if (!url || typeof url !== 'string') {

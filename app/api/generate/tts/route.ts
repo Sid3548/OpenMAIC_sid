@@ -15,6 +15,7 @@ import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
+import { auth } from '@/auth';
 
 const log = createLogger('TTS API');
 
@@ -22,8 +23,12 @@ export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    const rl = await checkRateLimit('tts', ip, 30, 60);
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('tts', session.user.id, 30, 60);
     if (!rl.allowed) return rateLimitResponse(rl);
 
     const body = await req.json();
@@ -50,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     const clientBaseUrl = ttsBaseUrl || undefined;
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);

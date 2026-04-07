@@ -11,6 +11,8 @@ import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromHeaders } from '@/lib/server/resolve-model';
 import { parseFirstJsonObject } from '@/lib/server/json-parser';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 const log = createLogger('Quiz Grade');
 
 interface GradeRequest {
@@ -28,6 +30,14 @@ interface GradeResponse {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('quiz-grade', session.user.id, 20, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const body = (await req.json()) as GradeRequest;
     const { question, userAnswer, points, commentPrompt, language } = body;
 

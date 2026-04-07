@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { auth } from '@/auth';
+import { checkRateLimit, rateLimitResponse } from '@/lib/server/rate-limit';
 const log = createLogger('Azure Voices');
 
 export const maxDuration = 30;
@@ -12,6 +14,14 @@ export const maxDuration = 30;
  */
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return apiError('UNAUTHORIZED', 401, 'Sign in required');
+    }
+
+    const rl = await checkRateLimit('azure-voices', session.user.id, 10, 60);
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const { apiKey, baseUrl } = await req.json();
 
     if (!apiKey) {
