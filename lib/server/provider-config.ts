@@ -271,6 +271,9 @@ export function resolveTTSApiKey(providerId: string, clientKey?: string): string
   if (providerId === 'openai-tts') {
     return getConfig().providers['openai']?.apiKey || process.env.OPENAI_API_KEY?.trim() || '';
   }
+  if (providerId === 'google-tts') {
+    return getConfig().providers['google']?.apiKey || process.env.GOOGLE_API_KEY?.trim() || '';
+  }
   return '';
 }
 

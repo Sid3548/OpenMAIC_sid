@@ -204,6 +204,33 @@ export async function generateClassroom(
     return result.text;
   };
 
+  // Build interactive model chain from DEFAULT_INTERACTIVE_MODEL env
+  const interactiveModelsEnv = process.env.DEFAULT_INTERACTIVE_MODEL;
+  const interactiveModelChain = interactiveModelsEnv
+    ? interactiveModelsEnv
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const buildInteractiveAiCall = (ms: string): AICallFn => {
+    const resolved = resolveModel({ modelString: ms });
+    return async (systemPrompt, userPrompt, _images) => {
+      const result = await callLLM(
+        {
+          model: resolved.model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          maxOutputTokens: resolved.modelInfo?.outputWindow,
+        },
+        'generate-classroom-interactive',
+      );
+      return result.text;
+    };
+  };
+
   const lang = normalizeLanguage(input.language);
   const requirements: UserRequirements = {
     requirement,
@@ -321,16 +348,59 @@ export async function generateClassroom(
       totalScenes: outlines.length,
     });
 
-    const content = await generateSceneContent(
-      safeOutline,
-      aiCall,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      agents,
-    );
+    // Use interactive model chain for interactive scenes, default model for others
+    let content;
+    if (safeOutline.type === 'interactive' && interactiveModelChain.length > 0) {
+      for (const ms of interactiveModelChain) {
+        try {
+          log.info(`Interactive scene "${safeOutline.title}" — trying ${ms}`);
+          const interactiveAiCall = buildInteractiveAiCall(ms);
+          content = await generateSceneContent(
+            safeOutline,
+            interactiveAiCall,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            agents,
+          );
+          if (content) {
+            log.info(`Interactive scene "${safeOutline.title}" — succeeded with ${ms}`);
+            break;
+          }
+        } catch (err) {
+          log.warn(
+            `Interactive ${ms} failed for "${safeOutline.title}": ${err instanceof Error ? err.message : err}`,
+          );
+        }
+      }
+      // Final fallback: use default model
+      if (!content) {
+        log.info(`Interactive fallback chain exhausted for "${safeOutline.title}", using default`);
+        content = await generateSceneContent(
+          safeOutline,
+          aiCall,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          agents,
+        );
+      }
+    } else {
+      content = await generateSceneContent(
+        safeOutline,
+        aiCall,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        agents,
+      );
+    }
     if (!content) {
       log.warn(`Skipping scene "${safeOutline.title}" — content generation failed`);
       continue;
